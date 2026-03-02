@@ -1,0 +1,367 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        /* Deep Space Black/Blue Theme */
+        --background: 222 47% 4%;
+        /* #050a14 */
+        --foreground: 210 40% 98%;
+        /* #f8fafc */
+
+        --card: 222 47% 6%;
+        --card-foreground: 210 40% 98%;
+
+        --popover: 222 47% 6%;
+        --popover-foreground: 210 40% 98%;
+
+        /* Vibrant Emerald & Electric Sky */
+        --primary: 158 64% 52%;
+        /* #34d399 (Emerald 400) */
+        --primary-foreground: 150 100% 6%;
+        /* Dark Green Black */
+
+        --secondary: 199 89% 48%;
+        /* #0ea5e9 (Sky 500) */
+        --secondary-foreground: 210 40% 98%;
+
+        --muted: 217 33% 12%;
+        --muted-foreground: 215 20% 65%;
+
+        --accent: 158 64% 52%;
+        --accent-foreground: 150 100% 6%;
+
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 210 40% 98%;
+
+        --border: 217 33% 12%;
+        --input: 217 33% 12%;
+        --ring: 158 64% 52%;
+
+        --radius: 0.75rem;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+        /* Hide scrollbar for cleaner look if desired, or keep custom */
+    }
+}
+
+/* --- Custom Scrollbar --- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #34d399;
+    /* Emerald hover */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(52, 211, 153, 0.3);
+}
+
+/* --- Utilities & effects --- */
+
+/* Gradient Text: Emerald to Sky */
+.gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-400 to-sky-400;
+}
+
+/* Glass Card with subtle Emerald tint border */
+.glass-card {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl transition-all duration-300;
+}
+
+.glass-card:hover {
+    @apply border-emerald-500/30 bg-white/[0.05];
+    box-shadow: 0 0 30px -10px rgba(52, 211, 153, 0.3);
+}
+
+/* Input Field */
+.input-field {
+    @apply w-full p-4 bg-black/40 border border-white/10 rounded-xl text-sm text-white placeholder:text-muted-foreground focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all;
+}
+
+/* Cyber Grid Background */
+.cyber-grid {
+    background-size: 50px 50px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
+
+/* Radar Pulse / Blip Animation */
+@keyframes radar-ping {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    75% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.animate-radar {
+    position: relative;
+}
+
+.animate-radar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: hsl(var(--primary));
+    opacity: 0.3;
+    z-index: -1;
+    animation: radar-ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Floating Animation */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+    animation: float 6s ease-in-out 3s infinite;
+}
+
+/* Fade In Up */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Glow Pulse */
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 0 5px hsl(var(--primary) / 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 20px hsl(var(--primary) / 0.6);
+    }
+
+    100% {
+        box-shadow: 0 0 5px hsl(var(--primary) / 0.2);
+    }
+}
+
+.glow-strong {
+    animation: glowPulse 3s infinite;
+}
+
+@keyframes toast-progress {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+.animate-toast-progress {
+    animation: toast-progress 5s linear forwards;
+}
+
+/* No Scrollbar Utility */
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Mobile touch scroll */
+@media (max-width: 768px) {
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* --- Custom Save Button Design --- */
+.custom-save-button {
+    font-family: inherit;
+    font-size: 14px;
+    background: #212121;
+    color: white;
+    fill: rgb(155, 153, 153);
+    padding: 0.5em 1.2em;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border: 1px border-white/10;
+    border-radius: 12px;
+    font-weight: 800;
+    transition: all 0.3s ease;
+    width: fit-content;
+}
+
+.custom-save-button span {
+    display: block;
+    margin-left: 0.3em;
+    transition: all 0.3s ease-in-out;
+}
+
+.custom-save-button svg {
+    display: block;
+    transform-origin: center center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.custom-save-button:hover {
+    background: #000;
+    border-color: #34d399;
+}
+
+.custom-save-button:hover .svg-wrapper {
+    transform: scale(1.25);
+    transition: 0.5s linear;
+}
+
+.custom-save-button:hover svg {
+    transform: translateX(1.2em) scale(1.1);
+    fill: #fff;
+}
+
+.custom-save-button:hover span {
+    opacity: 0;
+    transition: 0.5s linear;
+}
+
+.custom-save-button:active {
+    transform: scale(0.95);
+}
+
+.custom-save-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* --- Custom Delete Button Design --- */
+.custom-delete-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgb(20, 20, 20);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.164);
+    cursor: pointer;
+    transition-duration: 0.3s;
+    overflow: hidden;
+    position: relative;
+    gap: 2px;
+    margin: 0 auto;
+}
+
+.bin-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    gap: 1px;
+}
+
+.bin-top {
+    width: 100%;
+    transition-duration: 0.3s;
+    transform-origin: bottom right;
+}
+
+.bin-bottom {
+    width: 15px;
+    transition-duration: 0.3s;
+}
+
+.custom-delete-button:hover {
+    background-color: rgb(255, 69, 69);
+    border-color: rgb(255, 69, 69);
+}
+
+.custom-delete-button:hover .bin-top {
+    transform: rotate(45deg) translateY(-2px) translateX(2px);
+}
+
+.custom-delete-button:active {
+    transform: scale(0.9);
+}
+
+.custom-delete-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
