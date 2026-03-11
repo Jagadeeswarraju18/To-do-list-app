@@ -17,6 +17,8 @@ export async function getPublicProducts() {
                 target_audience,
                 website_url,
                 created_at,
+                upvotes_count,
+                category,
                 profiles:user_id (
                     full_name,
                     avatar_url

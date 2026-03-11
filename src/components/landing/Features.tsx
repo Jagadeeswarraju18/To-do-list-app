@@ -28,7 +28,7 @@ export function Features() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-6xl lg:text-7xl font-semibold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 mb-6 tracking-tight"
+                        className="text-2xl md:text-6xl lg:text-7xl font-semibold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 mb-6 tracking-tight"
                     >
                         Find customers <br className="hidden md:block" />
                         before your competition.
@@ -39,7 +39,7 @@ export function Features() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.2 }}
-                        className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto"
+                        className="text-gray-400 text-[10px] md:text-xl max-w-2xl mx-auto"
                     >
                         We built a custom reasoning engine that surfaces high-intent buyers hiding in plain sight.
                     </motion.p>
@@ -65,8 +65,8 @@ export function Features() {
                                 <Search className="w-7 h-7 text-primary" />
                             </div>
                             <div className="max-w-md">
-                                <h3 className="text-2xl font-semibold text-white mb-3">Intelligent Semantic Search</h3>
-                                <p className="text-gray-400 text-lg leading-relaxed">
+                                <h3 className="text-base md:text-2xl font-semibold text-white mb-3">Intelligent Semantic Search</h3>
+                                <p className="text-gray-400 text-[10px] md:text-lg leading-relaxed">
                                     Stop manually scrolling. Our AI reads between the lines to find founders explicitly asking for exactly what you build, filtering out the noise in real-time.
                                 </p>
                             </div>
@@ -86,8 +86,8 @@ export function Features() {
                             <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center border border-secondary/20 mb-6">
                                 <Target className="w-6 h-6 text-slate-400" />
                             </div>
-                            <h3 className="text-xl font-semibold text-white mb-3">Intent Grading</h3>
-                            <p className="text-gray-400 leading-relaxed">
+                            <h3 className="text-base md:text-xl font-semibold text-white mb-3">Intent Grading</h3>
+                            <p className="text-gray-400 text-[10px] leading-relaxed">
                                 Automatically filter out generic posts. We grade every signal from 'Curious' to 'Urgent Problem'.
                             </p>
                             <div className="mt-auto pt-6 flex gap-2">
@@ -111,8 +111,8 @@ export function Features() {
                             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 mb-6">
                                 <Zap className="w-6 h-6 text-primary" />
                             </div>
-                            <h3 className="text-xl font-semibold text-white mb-3">AI Personalization</h3>
-                            <p className="text-gray-400 leading-relaxed">
+                            <h3 className="text-base md:text-xl font-semibold text-white mb-3">AI Personalization</h3>
+                            <p className="text-gray-400 text-[10px] leading-relaxed">
                                 Generate hyper-relevant, non-spammy DMs referencing specific pain points.
                             </p>
                         </div>
@@ -141,8 +141,8 @@ export function Features() {
                                 <MessageSquare className="w-7 h-7 text-slate-400" />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-semibold text-white mb-3">Omnichannel Radar</h3>
-                                <p className="text-gray-400 text-lg leading-relaxed">
+                                <h3 className="text-base md:text-2xl font-semibold text-white mb-3">Omnichannel Radar</h3>
+                                <p className="text-gray-400 text-[10px] md:text-lg leading-relaxed">
                                     Track signals on X, Reddit, and LinkedIn from a single, unified command center. Never miss a buyer, wherever they speak.
                                 </p>
                             </div>
@@ -162,8 +162,8 @@ export function Features() {
                             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 mb-6">
                                 <BarChart className="w-6 h-6 text-primary" />
                             </div>
-                            <h3 className="text-xl font-semibold text-white mb-3">Analytics Dashboard</h3>
-                            <p className="text-gray-400 leading-relaxed">
+                            <h3 className="text-base md:text-xl font-semibold text-white mb-3">Analytics Dashboard</h3>
+                            <p className="text-gray-400 text-[10px] leading-relaxed">
                                 Monitor conversion rates and top-performing keywords to refine your strategy continuously.
                             </p>
 
@@ -191,8 +191,8 @@ export function Features() {
                             <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center border border-secondary/20 mb-6">
                                 <Shield className="w-6 h-6 text-slate-400" />
                             </div>
-                            <h3 className="text-xl font-semibold text-white mb-3">Brand Safety</h3>
-                            <p className="text-gray-400 leading-relaxed">
+                            <h3 className="text-base md:text-xl font-semibold text-white mb-3">Brand Safety</h3>
+                            <p className="text-gray-400 text-[10px] leading-relaxed">
                                 Never look like a bot. Human-in-the-loop ensures every interaction is authentic and safe for your brand's reputation.
                             </p>
                         </div>

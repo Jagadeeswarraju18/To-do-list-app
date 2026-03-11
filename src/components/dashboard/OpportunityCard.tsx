@@ -2,33 +2,38 @@
 
 import { useState } from "react";
 import {
-    ExternalLink, MessageCircle, CheckCircle, Flame, Meh, Ban,
-    Lightbulb, Pencil, RefreshCw, Check, Loader2, Swords, Sparkles, Target, DollarSign
+    ExternalLink, MessageCircle, CheckCircle, Flame, Ban,
+    Lightbulb, Pencil, RefreshCw, Check, Loader2, Swords, Sparkles, Target, DollarSign,
+    Circle, Archive, CheckCircle2, ChevronRight, X as CloseIcon
 } from "lucide-react";
 import { toast } from "sonner";
-import { regenerateSingleDM, updateDMText, fetchLeadBio } from "@/app/actions/discover-opportunities";
+import { regenerateSingleDM, updateDMText, fetchLeadBio, updateStatus } from "@/app/actions/discover-opportunities";
 import { OutreachStrategist } from "./OutreachStrategist";
-import { updateOpportunityValue, markAsWon } from "@/app/actions/marketplace-actions";
 
 function HighlightText({ text, highlights }: { text: string, highlights: { word: string, color: string }[] }) {
     if (!highlights || highlights.length === 0) return <span>{text}</span>;
-
-    // Sort highlights by length descending to avoid partial matches
-    const sorted = [...highlights].sort((a, b) => b.word.length - a.word.length);
-    const words = sorted.map(h => h.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const regex = new RegExp(`(${words.join('|')})`, 'gi');
-
-    const parts = text.split(regex);
+    let parts = [text];
+    highlights.forEach(({ word, color }) => {
+        const nextParts: string[] = [];
+        parts.forEach(p => {
+            if (typeof p !== 'string') {
+                nextParts.push(p);
+                return;
+            }
+            const regex = new RegExp(`(${word})`, 'gi');
+            const split = p.split(regex);
+            nextParts.push(...split);
+        });
+        parts = nextParts;
+    });
 
     return (
-        <span>
+        <>
             {parts.map((part, i) => {
-                const match = sorted.find(h => h.word.toLowerCase() === part.toLowerCase());
-                return match ? (
-                    <span key={i} className={`font-black ${match.color} bg-current/10 px-0.5 rounded transition-all`}>{part}</span>
-                ) : part;
+                const highlight = highlights.find(h => h.word.toLowerCase() === (typeof part === 'string' ? part.toLowerCase() : ''));
+                return highlight ? <span key={i} className={`${highlight.color} font-bold`}>{part}</span> : part;
             })}
-        </span>
+        </>
     );
 }
 
@@ -39,9 +44,10 @@ export type Opportunity = {
     tweet_author: string;
     intent_level: 'high' | 'medium' | 'low';
     pain_detected: string;
-    status: 'new' | 'contacted' | 'replied' | 'archived';
+    status: 'new' | 'contacted' | 'replied' | 'archived' | 'won';
     suggested_dm: string;
     created_at: string;
+    tweet_posted_at?: string;
     source?: string;
     subreddit?: string;
     relevance_score?: number;
@@ -50,6 +56,8 @@ export type Opportunity = {
     author_bio?: string;
     conversion_value?: number;
     match_score?: number;
+    is_archived?: boolean;
+    run_id?: string;
 };
 
 interface OpportunityCardProps {
@@ -58,20 +66,38 @@ interface OpportunityCardProps {
     onRefresh?: () => void;
 }
 
+function getFreshnessMeta(timestamp?: string) {
+    const raw = timestamp ? new Date(timestamp).getTime() : NaN;
+    const sourceTime = Number.isNaN(raw) ? Date.now() : raw;
+    const daysOld = (Date.now() - sourceTime) / (1000 * 60 * 60 * 24);
+
+    if (daysOld <= 3) {
+        return { label: "Fresh", tone: "text-[#3EEA9A]", dot: "bg-[#3EEA9A]" };
+    }
+    if (daysOld <= 30) {
+        return { label: "Warm", tone: "text-yellow-400", dot: "bg-yellow-400" };
+    }
+    return { label: "Historical", tone: "text-zinc-400", dot: "bg-zinc-500" };
+}
+
 export function OpportunityCard({ opportunity, onStatusUpdate, onRefresh }: OpportunityCardProps) {
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [editText, setEditText] = useState("");
+    const [editText, setEditText] = useState(opportunity.suggested_dm);
     const [savingId, setSavingId] = useState<string | null>(null);
     const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
     const [isStrategistOpen, setIsStrategistOpen] = useState(false);
     const [fetchingBio, setFetchingBio] = useState(false);
-    const [isWon, setIsWon] = useState((opportunity.status as string) === 'won');
-    const [convValue, setConvValue] = useState(opportunity.conversion_value || 0);
-    const [isSavingValue, setIsSavingValue] = useState(false);
-
 
     const isReddit = opportunity.source === 'reddit_post';
-    const isCompetitive = opportunity.intent_category === 'Switching' || !!opportunity.competitor_name;
+    const isLinkedIn = opportunity.source === 'linkedin_post';
+    const intentLabel = opportunity.intent_level ? `${opportunity.intent_level.toUpperCase()} INTENT` : "REVIEW";
+    const intentTone = opportunity.intent_level === 'high'
+        ? 'bg-red-500/10 text-red-500/80 border-red-500/20'
+        : opportunity.intent_level === 'medium'
+            ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+            : 'bg-zinc-500/10 text-zinc-300 border-zinc-500/20';
+    const matchValue = opportunity.match_score ?? opportunity.relevance_score ?? 0;
+    const freshness = getFreshnessMeta(opportunity.tweet_posted_at || opportunity.created_at);
 
     const handleUpdateDM = async () => {
         setSavingId(opportunity.id);
@@ -88,7 +114,7 @@ export function OpportunityCard({ opportunity, onStatusUpdate, onRefresh }: Oppo
         setRegeneratingId(opportunity.id);
         const res = await regenerateSingleDM(opportunity.id);
         if (res.success && res.newDM) {
-            opportunity.suggested_dm = res.newDM!;
+            opportunity.suggested_dm = res.newDM;
             toast.success("Message regenerated!");
             if (onRefresh) onRefresh();
         } else if (res.error) {
@@ -96,28 +122,6 @@ export function OpportunityCard({ opportunity, onStatusUpdate, onRefresh }: Oppo
         }
         setRegeneratingId(null);
     };
-
-    const handleMarkAsWon = async () => {
-        setIsSavingValue(true);
-        const res = await markAsWon(opportunity.id);
-        if (res.success) {
-            setIsWon(true);
-            onStatusUpdate(opportunity.id, 'won');
-            toast.success("Opportunity closed as WON! ROI recorded.");
-        }
-        setIsSavingValue(false);
-    };
-
-    const handleUpdateValue = async () => {
-        setIsSavingValue(true);
-        const res = await updateOpportunityValue(opportunity.id, convValue);
-        if (res.success) {
-            opportunity.conversion_value = convValue;
-            toast.success("Monetary value updated");
-        }
-        setIsSavingValue(false);
-    };
-
 
     const handleFetchBio = async () => {
         setFetchingBio(true);
@@ -134,191 +138,158 @@ export function OpportunityCard({ opportunity, onStatusUpdate, onRefresh }: Oppo
     const highlights: { word: string, color: string }[] = [];
     if (opportunity.competitor_name) highlights.push({ word: opportunity.competitor_name, color: 'text-red-400' });
     if (opportunity.pain_detected) {
-        // Simple heuristic: extract key words from pain_detected
         const words = opportunity.pain_detected.split(' ');
-        words.forEach(w => {
-            if (w.length > 3) highlights.push({ word: w, color: 'text-primary' });
-        });
+        words.forEach(w => { if (w.length > 3) highlights.push({ word: w, color: isReddit ? 'text-orange-400' : 'text-[#3EEA9A]' }); });
     }
 
     return (
-        <div className={`glass-card p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 relative group transition-all ${isReddit ? 'hover:border-orange-500/30' : isCompetitive ? 'hover:border-red-500/30 bg-red-500/[0.02]' : 'hover:border-primary/30'}`}>
-            <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl ${opportunity.status === 'new' ? (isReddit ? 'bg-orange-500' : isCompetitive ? 'bg-red-500' : 'bg-primary') : opportunity.status === 'contacted' ? 'bg-secondary' : opportunity.status === 'replied' ? 'bg-primary' : 'bg-gray-700'}`} />
+        <div className={`relative group bg-[#0A0A0A] border-l-4 border-y border-r border-white/5 rounded-2xl p-6 transition-all hover:bg-[#111111] flex flex-col md:flex-row gap-8 ${isReddit ? 'border-l-orange-500' : isLinkedIn ? 'border-l-blue-500' : 'border-l-emerald-500'}`}>
 
             <div className="flex-1 space-y-4">
-                <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        {/* Source badge */}
-                        {isReddit ? (
-                            <span className="bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded text-xs font-bold border border-orange-500/20 flex items-center gap-1">
-                                <MessageCircle className="w-3 h-3" /> Reddit
-                            </span>
-                        ) : (
-                            <span className="bg-gray-500/10 text-gray-300 px-2 py-0.5 rounded text-xs font-bold border border-gray-500/20 flex items-center gap-1">
-                                <svg viewBox="0 0 24 24" className="w-3 h-3" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-                                X
-                            </span>
-                        )}
-
-                        {isCompetitive && (
-                            <span className="bg-red-500/10 text-red-400 px-2 py-0.5 rounded text-xs font-bold border border-red-500/20 flex items-center gap-1 uppercase tracking-wider animate-pulse">
-                                <Swords className="w-3 h-3" /> Switcher
-                                {opportunity.competitor_name && `: ${opportunity.competitor_name}`}
-                            </span>
-                        )}
-
-                        {opportunity.intent_level === 'high' && <span className="bg-red-500/10 text-red-400 px-2 py-0.5 rounded text-xs font-bold border border-red-500/20 flex items-center gap-1"><Flame className="w-3 h-3" /> HIGH INTENT</span>}
-                        {opportunity.match_score && opportunity.match_score > 0 && (
-                            <span className="bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded text-xs font-black border border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.1)]">
-                                {opportunity.match_score}% MATCH
-                            </span>
-                        )}
-
-                        {isWon && (
-                            <span className="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded text-xs font-black border border-emerald-500/20 flex items-center gap-1">
-                                <DollarSign className="w-3 h-3" /> WON
-                            </span>
-                        )}
-
-                        {opportunity.subreddit && (
-                            <span className="bg-orange-500/5 text-orange-300 px-2 py-0.5 rounded text-xs border border-orange-500/10">
-                                r/{opportunity.subreddit}
-                            </span>
-                        )}
-
-                        <span className="text-xs text-muted-foreground">• {new Date(opportunity.created_at).toLocaleDateString()}</span>
-                    </div>
-                    <a href={opportunity.tweet_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-white transition-colors"><ExternalLink className="w-4 h-4" /></a>
-                </div>
-
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-bold text-white">{opportunity.tweet_author || "Unknown"}</p>
-                        {!opportunity.author_bio && (
-                            <button
-                                onClick={handleFetchBio}
-                                disabled={fetchingBio}
-                                className="text-[9px] font-black uppercase tracking-widest text-primary/50 hover:text-primary transition-colors flex items-center gap-1"
-                            >
-                                {fetchingBio ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5" />}
-                                Fetch Intel
-                            </button>
-                        )}
-                    </div>
-
-                    {opportunity.author_bio && (
-                        <div className="mb-3 p-2 bg-primary/5 rounded-lg border border-primary/10 flex gap-2 items-start animate-in fade-in duration-500">
-                            <div className="p-1 bg-primary/20 rounded mt-0.5">
-                                <Target className="w-2.5 h-2.5 text-primary" />
-                            </div>
-                            <p className="text-[10px] text-zinc-400 italic leading-relaxed">
-                                <span className="text-primary font-bold uppercase tracking-tighter mr-1">DOSSIER:</span>
-                                {opportunity.author_bio}
-                            </p>
-                        </div>
+                {/* Badge Row */}
+                <div className="flex items-center gap-3 flex-wrap">
+                    {isReddit ? (
+                        <span className="bg-orange-500/10 text-orange-400 px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-orange-500/20 flex items-center gap-1.5">
+                            <MessageCircle className="w-3 md:w-3.5 h-3 md:h-3.5" /> Reddit
+                        </span>
+                    ) : isLinkedIn ? (
+                        <span className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-blue-500/20 flex items-center gap-1.5">
+                            <svg viewBox="0 0 24 24" className="w-3 md:w-3.5 h-3 md:h-3.5" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+                            LinkedIn
+                        </span>
+                    ) : (
+                        <span className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 flex items-center gap-1.5">
+                            <svg viewBox="0 0 24 24" className="w-3 md:w-3.5 h-3 md:h-3.5" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                            X Feed
+                        </span>
                     )}
 
-                    <p className="text-muted-foreground text-sm italic mb-2">
+                    <span className={`px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5 ${intentTone}`}>
+                        <Flame className="w-3 md:w-3.5 h-3 md:h-3.5" /> {intentLabel}
+                    </span>
+
+                    <span className="bg-yellow-500/10 text-yellow-500 px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-yellow-500/20">
+                        {matchValue}% MATCH
+                    </span>
+
+                    {opportunity.subreddit && (
+                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">
+                            {opportunity.subreddit.startsWith('r/') ? opportunity.subreddit : `r/${opportunity.subreddit}`}
+                        </span>
+                    )}
+
+                    <span className="text-[11px] font-bold text-gray-700 ml-auto">
+                        <span className={`inline-flex items-center gap-1.5 mr-3 ${freshness.tone}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${freshness.dot}`} />
+                            {freshness.label}
+                        </span>
+                        • {new Date(opportunity.tweet_posted_at || opportunity.created_at).toLocaleDateString()}
+                    </span>
+
+                    <a href={opportunity.tweet_url} target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-white transition-colors">
+                        <ExternalLink className="w-4 h-4" />
+                    </a>
+                </div>
+
+                {/* Content Section */}
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <p className="text-white font-bold text-lg tracking-tight">{opportunity.tweet_author}</p>
+                        <button onClick={handleFetchBio} disabled={fetchingBio} className="text-[#3EEA9A] flex items-center gap-1 text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-80 hover:opacity-100 transition-all">
+                            {fetchingBio ? <Loader2 className="w-2 md:w-2.5 h-2 md:h-2.5 animate-spin" /> : <Sparkles className="w-2 md:w-2.5 h-2 md:h-2.5" />}
+                            FETCH INTEL
+                        </button>
+                    </div>
+
+                    <p className="text-gray-400 text-lg leading-[1.6] italic font-medium">
                         "<HighlightText text={opportunity.tweet_content} highlights={highlights} />"
                     </p>
-                    {opportunity.pain_detected && (
-                        <p className="text-xs text-primary/80 bg-primary/5 px-2 py-1 rounded inline-block border border-primary/10 flex items-center gap-1">
-                            <Lightbulb className="w-3 h-3" /> Match: {opportunity.pain_detected}
-                        </p>
-                    )}
+
+                    <div className={`flex items-center gap-2 text-[10px] md:text-[11px] font-black tracking-tight ${isReddit ? 'text-orange-400/80' : 'text-[#3EEA9A]/80'} uppercase`}>
+                        <Sparkles className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                        MATCH: {opportunity.pain_detected || "Scored lead"}
+                    </div>
                 </div>
 
-                <div className={`p-3 rounded-lg border ${isReddit ? 'bg-orange-500/5 border-orange-500/10' : isCompetitive ? 'bg-red-500/5 border-red-500/10' : 'bg-white/5 border-white/5'}`}>
-                    <div className="flex justify-between items-center mb-2">
-                        <p className={`text-[10px] font-bold uppercase tracking-widest ${isReddit ? 'text-orange-400' : isCompetitive ? 'text-red-400' : 'text-primary'}`}>
-                            {isReddit ? 'Suggested Reply' : 'Suggested DM'}
-                        </p>
-                        <div className="flex items-center gap-2">
-                            {editingId === opportunity.id ? (
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={handleUpdateDM}
-                                        disabled={savingId === opportunity.id}
-                                        className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-primary/20 text-[10px] text-primary font-bold uppercase tracking-widest hover:bg-primary/30 transition-all disabled:opacity-50 border border-primary/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]"
-                                    >
-                                        {savingId === opportunity.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
-                                        Save
-                                    </button>
-                                    <button
-                                        onClick={() => setEditingId(null)}
-                                        className="px-3 py-1.5 rounded-md bg-white/5 text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all border border-white/10"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="flex items-center rounded-lg bg-black/30 border border-white/10 p-1">
-                                    <button
-                                        onClick={() => { setEditingId(opportunity.id); setEditText(opportunity.suggested_dm); }}
-                                        className="flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:text-white hover:bg-white/5 transition-all group/btn"
-                                    >
-                                        <Pencil className="w-3 h-3 text-gray-500 group-hover/btn:text-white transition-colors" />
-                                        Edit
-                                    </button>
-                                    <div className="w-[1px] h-3 bg-white/10 mx-1" />
-                                    <button
-                                        onClick={handleRegenerate}
-                                        disabled={regeneratingId === opportunity.id}
-                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 group/regen ${isReddit ? 'text-orange-500 hover:bg-orange-500/10' : 'text-zinc-500 hover:bg-primary/10 hover:text-primary'}`}
-                                    >
-                                        {regeneratingId === opportunity.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3 group-hover/regen:rotate-180 transition-transform duration-500" />}
-                                        Regen
-                                    </button>
-                                    <div className="w-[1px] h-3 bg-white/10 mx-1" />
-                                    <button
-                                        onClick={() => { navigator.clipboard.writeText(opportunity.suggested_dm); toast.success("Copied to clipboard!"); }}
-                                        className="flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:text-white hover:bg-white/5 transition-all group/copy"
-                                    >
-                                        <CheckCircle className="w-3 h-3 text-gray-500 group-hover/copy:text-primary transition-colors" />
-                                        Copy
-                                    </button>
-                                </div>
-                            )}
+                {/* Suggested Reply Box */}
+                <div className="relative group/reply bg-[#141414] border border-white/5 rounded-2xl p-5 mt-4 transition-all hover:border-white/10">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest md:tracking-[0.2em] ${isReddit ? 'text-orange-400' : 'text-[#3EEA9A]'}`}>SUGGESTED REPLY</span>
+                        <div className="flex items-center gap-3">
+                            <button onClick={() => setEditingId(opportunity.id)} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#555555] hover:text-white transition-all">
+                                <Pencil className="w-3 h-3" /> EDIT
+                            </button>
+                            <button onClick={handleRegenerate} disabled={regeneratingId === opportunity.id} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#555555] hover:text-white transition-all">
+                                {regeneratingId === opportunity.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} REGEN
+                            </button>
+                            <button onClick={() => { navigator.clipboard.writeText(opportunity.suggested_dm); toast.success("Copied!"); }} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#555555] hover:text-white transition-all">
+                                <Check className="w-3 h-3" /> COPY
+                            </button>
                         </div>
                     </div>
+
                     {editingId === opportunity.id ? (
-                        <textarea
-                            value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
-                            rows={3}
-                            className="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-primary/30 resize-y"
-                            placeholder="Edit your message..."
-                        />
+                        <div className="space-y-4">
+                            <textarea
+                                value={editText}
+                                onChange={(e) => setEditText(e.target.value)}
+                                className="w-full bg-[#0F0F0F] border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#3EEA9A]/40"
+                                rows={3}
+                            />
+                            <div className="flex justify-end gap-3">
+                                <button onClick={() => setEditingId(null)} className="px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-all">CANCEL</button>
+                                <button onClick={handleUpdateDM} className="px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#3EEA9A]/10 text-[#3EEA9A] border border-[#3EEA9A]/20 hover:bg-[#3EEA9A]/20 transition-all">SAVE CHANGES</button>
+                            </div>
+                        </div>
                     ) : (
-                        <p className="text-xs text-muted-foreground">{opportunity.suggested_dm}</p>
+                        <p className="text-gray-400/90 leading-relaxed text-[15px]">{opportunity.suggested_dm}</p>
                     )}
                 </div>
 
-                {/* Outreach Strategist Trigger */}
+                {/* Launch Strategist Trigger */}
                 <button
                     onClick={() => setIsStrategistOpen(true)}
-                    className={`w-full py-2.5 rounded-xl border border-dashed flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all group/strategist ${isCompetitive ? 'border-red-500/30 bg-red-500/5 text-red-400 hover:bg-red-500/10 hover:border-red-500/50' : 'border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/50'}`}
+                    className="w-full bg-transparent group/strat hover:bg-[#3EEA9A]/5 border border-[#3EEA9A]/20 border-dashed py-3 rounded-2xl flex items-center justify-center gap-3 transition-all"
                 >
-                    <Sparkles className={`w-3.5 h-3.5 ${isCompetitive ? 'text-red-400' : 'text-primary'} group-hover/strategist:animate-pulse`} />
-                    Launch Outreach Strategist
+                    <Sparkles className="w-3.5 md:w-4 h-3.5 md:h-4 text-[#3EEA9A] group-hover/strat:scale-110 transition-transform" />
+                    <span className="text-[9.5px] md:text-[11px] font-black uppercase tracking-widest md:tracking-[0.4em] text-[#3EEA9A]">LAUNCH OUTREACH STRATEGIST</span>
+                </button>
+            </div>
+
+            {/* Right Side Actions - Vertical Menu */}
+            <div className="flex flex-row md:flex-col gap-1 md:w-36 md:border-l md:border-white/5 md:pl-8 justify-center md:justify-start pt-6 md:pt-2">
+                <button
+                    onClick={() => onStatusUpdate(opportunity.id, 'contacted')}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all group/btn ${opportunity.status === 'contacted' ? 'text-[#3EEA9A]' : 'text-[#555555] hover:text-gray-300'}`}
+                >
+                    <Circle className={`w-5 h-5 ${opportunity.status === 'contacted' ? 'text-[#3EEA9A]' : 'text-[#333333]'}`} />
+                    <span className="text-xs font-bold tracking-tight">Contacted</span>
                 </button>
 
-                <OutreachStrategist
-                    isOpen={isStrategistOpen}
-                    onClose={() => setIsStrategistOpen(false)}
-                    opportunityId={opportunity.id}
-                    tweetContent={opportunity.tweet_content}
-                    authorBio={opportunity.author_bio}
-                />
+                <button
+                    onClick={() => onStatusUpdate(opportunity.id, 'replied')}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all group/btn ${opportunity.status === 'replied' ? 'text-[#3EEA9A]' : 'text-[#555555] hover:text-gray-300'}`}
+                >
+                    <CheckCircle2 className={`w-5 h-5 ${opportunity.status === 'replied' ? 'text-[#3EEA9A]' : 'text-[#333333]'}`} />
+                    <span className="text-xs font-bold tracking-tight">Replied</span>
+                </button>
+
+                <button
+                    onClick={() => onStatusUpdate(opportunity.id, 'archived')}
+                    className="flex items-center gap-3 p-3 rounded-xl transition-all text-[#555555] hover:text-gray-300 group/btn"
+                >
+                    <Ban className={`w-5 h-5 ${opportunity.status === 'archived' ? 'text-[#3EEA9A]' : 'text-[#333333]'}`} />
+                    <span className="text-xs font-bold tracking-tight">Archive</span>
+                </button>
             </div>
 
-            <div className="flex flex-row md:flex-col gap-2 md:w-40 md:border-l md:border-white/5 md:pl-6 justify-center flex-wrap pt-4 md:pt-0 border-t md:border-t-0 border-white/5">
-                <button onClick={() => onStatusUpdate(opportunity.id, 'contacted')} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] md:text-xs font-medium transition-all flex-1 md:flex-initial justify-center md:justify-start ${opportunity.status === 'contacted' ? 'bg-secondary/20 text-slate-400 border border-secondary/30' : 'hover:bg-white/5 text-muted-foreground'}`}><MessageCircle className="w-4 h-4" /> <span className="hidden sm:inline">Contacted</span></button>
-                <button onClick={() => onStatusUpdate(opportunity.id, 'replied')} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] md:text-xs font-medium transition-all flex-1 md:flex-initial justify-center md:justify-start ${opportunity.status === 'replied' ? 'bg-primary/20 text-primary border border-primary/30' : 'hover:bg-white/5 text-muted-foreground'}`}><CheckCircle className="w-4 h-4" /> <span className="hidden sm:inline">Replied</span></button>
-                {opportunity.status !== 'archived' && (
-                    <button onClick={() => onStatusUpdate(opportunity.id, 'archived')} className="flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] md:text-xs font-medium text-muted-foreground hover:text-gray-400 hover:bg-white/5 transition-all flex-1 md:flex-initial justify-center md:justify-start"><Ban className="w-4 h-4" /> <span className="hidden sm:inline">Archive</span></button>
-                )}
-            </div>
+            <OutreachStrategist
+                isOpen={isStrategistOpen}
+                onClose={() => setIsStrategistOpen(false)}
+                opportunityId={opportunity.id}
+                tweetContent={opportunity.tweet_content}
+                authorBio={opportunity.author_bio || ""}
+            />
         </div >
     );
 }

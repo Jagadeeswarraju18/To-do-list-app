@@ -218,7 +218,6 @@ export function AIChatBubble() {
                                         "Write a viral tweet about my product",
                                         "What subreddits am I missing?",
                                         "Draft a cold DM for a creator",
-                                        "Analyze my intent queries",
                                     ].map((suggestion) => (
                                         <button
                                             key={suggestion}

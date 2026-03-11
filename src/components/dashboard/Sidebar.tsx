@@ -86,7 +86,6 @@ export function Sidebar() {
                         <NavItem href="/founder/dashboard" icon={<LayoutDashboard />} label="Dashboard" active={pathname === "/founder/dashboard"} role="founder" />
                         <NavItem href="/founder/battlefield" icon={<Swords />} label="Battlefield" active={pathname === "/founder/battlefield"} role="founder" />
                         <NavItem href="/founder/opportunities" icon={<ListFilter />} label="Opportunities" active={pathname === "/founder/opportunities"} role="founder" />
-                        <NavItem href="/founder/queries" icon={<Search />} label="Intent Queries" active={pathname === "/founder/queries"} role="founder" />
                         <NavItem href="/founder/platforms" icon={<Share2 />} label="Platform Strategy" active={pathname === "/founder/platforms"} role="founder" />
                         <NavItem href="/founder/find-creators" icon={<Users />} label="Find Creators" active={pathname === "/founder/find-creators"} role="founder" />
                         <NavItem href="/founder/deals" icon={<Handshake />} label="Creator Deals" active={pathname === "/founder/deals"} role="founder" />

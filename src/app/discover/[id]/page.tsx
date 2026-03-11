@@ -1,7 +1,8 @@
 import { getPublicProductDetails } from "@/app/actions/public-actions";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users, Target, ArrowLeft, ArrowUpRight, CheckCircle2, Radar, Twitter, Linkedin } from "lucide-react";
+import { Users, Target, ArrowLeft, ArrowUpRight, CheckCircle2, Radar, Twitter, Linkedin, Heart } from "lucide-react";
+import { SignalButton } from "@/components/ui/SignalButton";
 
 export const dynamic = "force-dynamic";
 
@@ -49,27 +50,35 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                     <div className="lg:col-span-2 space-y-6">
                         {/* Main Product Card */}
                         <div className="bg-slate-900/40 border border-slate-800 rounded-[24px] p-8 md:p-10 backdrop-blur-sm relative overflow-hidden">
-                            
+
                             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
 
                             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-6 relative z-10">
                                 {product.name}
                             </h1>
-                            
+
                             <p className="text-lg text-slate-400 leading-relaxed mb-10 relative z-10 font-medium">
                                 {product.description || product.pain_solved}
                             </p>
 
                             {product.website_url && (
-                                <a 
-                                    href={product.website_url.startsWith('http') ? product.website_url : `https://${product.website_url}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center gap-2 group relative px-6 py-3 w-fit overflow-hidden rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all hover:scale-105 shadow-[0_0_20px_rgba(59,130,246,0.2)] hover:shadow-[0_0_25px_rgba(59,130,246,0.4)]"
-                                >
-                                    <span className="relative z-10 font-bold text-sm">Visit Website</span>
-                                    <ArrowUpRight className="relative z-10 w-4 h-4 ml-1 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                                </a>
+                                <div className="flex items-center gap-4 relative z-10">
+                                    <a
+                                        href={product.website_url.startsWith('http') ? product.website_url : `https://${product.website_url}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center justify-center gap-2 group relative px-6 py-3 w-fit overflow-hidden rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all hover:scale-105 shadow-[0_0_20px_rgba(59,130,246,0.2)] hover:shadow-[0_0_25px_rgba(59,130,246,0.4)]"
+                                    >
+                                        <span className="relative z-10 font-bold text-sm">Visit Website</span>
+                                        <ArrowUpRight className="relative z-10 w-4 h-4 ml-1 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                                    </a>
+
+                                    <SignalButton
+                                        productId={product.id}
+                                        initialUpvotes={product.upvotes_count || 0}
+                                        size="lg"
+                                    />
+                                </div>
                             )}
                         </div>
 
@@ -119,9 +128,9 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
 
                             <div className="flex flex-col items-center justify-center text-center">
                                 {profile?.avatar_url ? (
-                                    <img 
-                                        src={profile.avatar_url} 
-                                        alt={profile.full_name || "Founder"} 
+                                    <img
+                                        src={profile.avatar_url}
+                                        alt={profile.full_name || "Founder"}
                                         className="w-24 h-24 rounded-[20px] object-cover mb-5 border border-slate-700 shadow-xl bg-slate-800"
                                     />
                                 ) : (
@@ -131,11 +140,11 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                                 )}
 
                                 <h2 className="text-xl font-bold text-white/90">{profile?.full_name || "Anonymous Maker"}</h2>
-                                
+
                                 {/* Social Links */}
                                 <div className="flex items-center justify-center gap-3 w-full mt-6 pt-6 border-t border-slate-800/80">
                                     {profile?.social_links?.x && (
-                                        <a 
+                                        <a
                                             href={profile.social_links.x}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -146,7 +155,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                                         </a>
                                     )}
                                     {profile?.social_links?.linkedin && (
-                                        <a 
+                                        <a
                                             href={profile.social_links.linkedin}
                                             target="_blank"
                                             rel="noopener noreferrer"

@@ -29,7 +29,6 @@ export async function POST(req: NextRequest) {
         const [
             { data: profile },
             { data: products },
-            { data: queries },
             { data: opportunities },
             { data: drafts },
             { data: savedSubs },
@@ -37,7 +36,6 @@ export async function POST(req: NextRequest) {
         ] = await Promise.all([
             supabase.from("profiles").select("*").eq("id", user.id).single(),
             supabase.from("products").select("*").eq("user_id", user.id),
-            supabase.from("search_queries").select("*").limit(20),
             supabase.from("opportunities").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
             supabase.from("content_drafts").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
             supabase.from("saved_subreddits").select("*").eq("user_id", user.id),
@@ -60,10 +58,6 @@ export async function POST(req: NextRequest) {
             contextParts.push(`SOLUTION: ${product.solution_statement || "Not defined"}`);
         }
 
-        if (queries && queries.length > 0) {
-            const queryList = queries.map((q: any) => `• "${q.query_text}" (${q.query_type}, ${q.confidence_level})`).join("\n");
-            contextParts.push(`ACTIVE SEARCH QUERIES (${queries.length}):\n${queryList}`);
-        }
 
         if (opportunities && opportunities.length > 0) {
             const oppList = opportunities.slice(0, 5).map((o: any) => `• @${o.tweet_author}: "${o.tweet_content?.slice(0, 100)}..." (${o.intent_level} intent, ${o.status})`).join("\n");
@@ -100,7 +94,6 @@ ${contextParts.join("\n\n")}
 
 WHAT YOU CAN HELP WITH:
 - Writing tweets, LinkedIn posts, Reddit posts, cold DMs (You can use the built-in generator tools for this if they ask)
-- Analyzing their intent queries and suggesting improvements
 - Reviewing their opportunities and suggesting responses
 - Marketing strategy, positioning, messaging
 - Subreddit strategy, content repurposing

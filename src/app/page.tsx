@@ -8,6 +8,7 @@ import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Pricing } from "@/components/landing/Pricing";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { MovingBackground } from "@/components/landing/MovingBackground";
+import { Footer } from "@/components/landing/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function LandingPage() {
@@ -60,25 +61,7 @@ export default function LandingPage() {
                             </div>
                         </section>
 
-                        <footer className="py-24 px-6 text-center border-t border-white/5 relative z-10">
-                            <div className="max-w-7xl mx-auto flex flex-col items-center">
-                                <div className="flex items-center gap-3 mb-8">
-                                    <div className="w-8 h-8 rounded-lg bg-primary shadow-lg shadow-primary/20 flex items-center justify-center">
-                                        <div className="w-4 h-4 rounded-sm bg-black" />
-                                    </div>
-                                    <span className="font-black text-white tracking-tight">DemandRadar</span>
-                                </div>
-                                <div className="flex flex-wrap justify-center gap-x-10 gap-y-6 text-gray-500 text-xs font-bold uppercase tracking-widest mb-12">
-                                    <span className="hover:text-white cursor-pointer transition-colors">Twitter (X)</span>
-                                    <span className="hover:text-white cursor-pointer transition-colors">Privacy</span>
-                                    <span className="hover:text-white cursor-pointer transition-colors">Terms</span>
-                                    <span className="hover:text-white cursor-pointer transition-colors">Open Startup</span>
-                                </div>
-                                <p className="text-gray-700 font-bold uppercase tracking-widest text-[8px]">
-                                    &copy; 2024 DemandRadar. Built for the founders who actually build.
-                                </p>
-                            </div>
-                        </footer>
+                        <Footer />
                     </main>
                 </motion.div>
             </AnimatePresence>

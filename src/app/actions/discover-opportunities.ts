@@ -5,773 +5,493 @@ import { searchXOpportunities } from "@/lib/x/client";
 import { revalidatePath } from "next/cache";
 import { expandProductKeywords } from "@/lib/ai/keyword-expander";
 import { verifySignalsWithAI } from "@/lib/ai/signal-verifier";
-import { generatePersonalizedDMs, fallbackDM, generateRedditReplies, fallbackRedditReply } from "@/lib/ai/dm-generator";
+import { scoreLeadCandidates, type LeadSignalBreakdown } from "@/lib/lead/blended-scorer";
+import {
+    generatePersonalizedDMs,
+    fallbackDM,
+    generateRedditReplies,
+    fallbackRedditReply,
+    generateLinkedInReplies,
+    fallbackLinkedInReply
+} from "@/lib/ai/dm-generator";
 import { searchRedditOpportunities } from "@/lib/reddit/client";
+import { searchLinkedInOpportunities } from "@/lib/linkedin/client";
 
-export async function discoverOpportunitiesAction() {
+async function getProductContext(supabase: any, user: any) {
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_product_id")
+        .eq("id", user.id)
+        .single();
+
+    let productId = profile?.active_product_id;
+    if (!productId) {
+        const { data: latestProduct } = await supabase
+            .from("products")
+            .select("id")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        productId = latestProduct?.id;
+    }
+
+    if (!productId) return null;
+
+    const { data: product } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", productId)
+        .single();
+
+    return product;
+}
+
+async function prepareKeywords(product: any) {
+    let keywords = product.keywords || [];
+    let painPhrases = product.pain_phrases || [];
+
+    const aiExpansion = await expandProductKeywords({
+        name: product.name,
+        description: product.description,
+        target_audience: product.target_audience,
+        pain_solved: product.pain_solved
+    });
+
+    if (aiExpansion) {
+        const allKeywords = new Set([...keywords, ...aiExpansion.keywords]);
+        const allPhrases = new Set([...painPhrases, ...aiExpansion.painPhrases]);
+        if (product.competitors?.length > 0) {
+            product.competitors.forEach((comp: string) => {
+                allPhrases.add(`alternative to ${comp}`);
+                allPhrases.add(`unhappy with ${comp}`);
+            });
+        }
+        keywords = Array.from(allKeywords).slice(0, 10);
+        painPhrases = Array.from(allPhrases).slice(0, 10);
+    }
+    return { keywords, painPhrases };
+}
+
+function resolveDiscoveryWindow(input?: string | null) {
+    switch (input) {
+        case "24h":
+            return { days: 1, label: "24h" };
+        case "72h":
+            return { days: 3, label: "72h" };
+        case "7d":
+            return { days: 7, label: "7d" };
+        case "30d":
+            return { days: 30, label: "30d" };
+        case "90d":
+            return { days: 90, label: "90d" };
+        case "180d":
+            return { days: 180, label: "180d" };
+        default:
+            return { days: 30, label: "30d" };
+    }
+}
+
+async function scoreAndVerifyCandidates(product: any, candidates: any[]) {
+    const scoredSignals = await scoreLeadCandidates(product, candidates.map(candidate => ({
+        id: candidate.id,
+        text: candidate.text || "",
+        created_at: candidate.created_at,
+        author_username: candidate.author_username || candidate.author,
+        author_name: candidate.author_name || candidate.author,
+        subreddit: candidate.subreddit,
+        similarity_score: candidate.similarity_score
+    })));
+
+    const verified = await verifySignalsWithAI(
+        product,
+        candidates.map(candidate => ({ id: candidate.id, text: candidate.text || "" })),
+        scoredSignals
+    );
+
+    const scoredMap = new Map<string, LeadSignalBreakdown>(scoredSignals.map(signal => [signal.id, signal]));
+    const verifiedMap = new Map<string, any>(verified.map(signal => [signal.id, signal]));
+    const relevant = candidates
+        .filter(candidate => verifiedMap.get(candidate.id)?.isRelevant)
+        .sort((a, b) => (verifiedMap.get(b.id)?.score || 0) - (verifiedMap.get(a.id)?.score || 0));
+
+    return { scoredMap, verifiedMap, relevant };
+}
+
+export async function discoverOpportunitiesAction(scanWindow?: string) {
     try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-
         if (!user) return { error: "Not authenticated" };
 
-        // 1. Fetch User's Active Product Context
-        const { data: profile } = await supabase
-            .from("profiles")
-            .select("active_product_id")
-            .eq("id", user.id)
-            .single();
+        const product = await getProductContext(supabase, user);
+        if (!product) return { error: "Product setup missing." };
 
-        let productIdToUse = profile?.active_product_id;
+        const { data: run } = await supabase
+            .from("discovery_runs")
+            .insert({ user_id: user.id, product_id: product.id, platform: 'x', status: 'running' })
+            .select().single();
 
-        // If no active product set, fetch the most recent one to ensure discovery still works
-        if (!productIdToUse) {
-            const { data: latestProduct } = await supabase
-                .from("products")
-                .select("id")
-                .eq("user_id", user.id)
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .maybeSingle();
+        const { keywords, painPhrases } = await prepareKeywords(product);
+        const window = resolveDiscoveryWindow(scanWindow || product.scan_window);
 
-            productIdToUse = latestProduct?.id;
-        }
-
-        if (!productIdToUse) {
-            return { error: "Product setup missing. Please configure your product first." };
-        }
-
-        const { data: product, error: productError } = await supabase
-            .from("products")
-            .select("*")
-            .eq("id", productIdToUse)
-            .single();
-
-        if (productError || !product) {
-            return { error: "Selected product not found." };
-        }
-
-        // 1c. Fetch Founder's X Authority (Integration or Social Link)
-        const { data: xIntegration } = await supabase
-            .from("user_integrations")
-            .select("external_username")
-            .eq("user_id", user.id)
-            .eq("platform", "twitter")
-            .maybeSingle();
-
-        let founderHandle = xIntegration?.external_username || null;
-
-        if (!founderHandle) {
-            const { data: profile } = await supabase
-                .from("profiles")
-                .select("social_links")
-                .eq("id", user.id)
-                .single();
-
-            if (profile?.social_links?.twitter) {
-                // Clean handle: remove @ and URL parts
-                founderHandle = profile.social_links.twitter.replace(/@|https:\/\/x.com\/|https:\/\/twitter.com\//g, '').split('/')[0].split('?')[0];
-            }
-        }
-
-        let keywords = product.keywords || [];
-        let painPhrases = product.pain_phrases || [];
-
-        // 1b. AI Enhancement
-        const aiExpansion = await expandProductKeywords({
-            name: product.name,
-            description: product.description,
-            target_audience: product.target_audience,
-            pain_solved: product.pain_solved
-        });
-
-        if (aiExpansion) {
-            // Merge without duplicates
-            const allKeywords = new Set([...keywords, ...aiExpansion.keywords]);
-            const allPhrases = new Set([...painPhrases, ...aiExpansion.painPhrases]);
-
-            // ADD COMPETITIVE KEYWORDS
-            if (product.competitors && product.competitors.length > 0) {
-                product.competitors.forEach((comp: string) => {
-                    allPhrases.add(`alternative to ${comp}`);
-                    allPhrases.add(`switching from ${comp}`);
-                    allPhrases.add(`unhappy with ${comp}`);
-                });
-            }
-
-            keywords = Array.from(allKeywords).slice(0, 10);
-            painPhrases = Array.from(allPhrases).slice(0, 10);
-        }
-
-        if (keywords.length === 0 && painPhrases.length === 0) {
-            return { error: "No keywords or phrases configured for your product." };
-        }
-
-        // 2. Search X — Single Grok call (Grok does semantic search, no waterfall needed)
-        let tweets: any[] = [];
-
-        const searchResult = await searchXOpportunities(keywords, painPhrases, 30, 'loose', {
-            name: product.name,
-            description: product.description,
-            pain_solved: product.pain_solved,
-            target_audience: product.target_audience,
-            keywords,
-            pain_phrases: painPhrases
-        }, founderHandle || undefined);
-
+        const searchResult = await searchXOpportunities(keywords, painPhrases, window.days, 'loose', product);
         if (searchResult.error) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'failed' }).eq("id", run.id);
             return { error: searchResult.error };
         }
 
-        tweets = searchResult.tweets || [];
-        console.log(`[Discovery Pipeline] Step 2 complete: Grok returned ${tweets.length} raw tweets`);
-
+        const tweets = searchResult.tweets || [];
         if (tweets.length === 0) {
-            return {
-                success: true,
-                addedCount: 0,
-                message: `No demand signals found in the last 30 days.`,
-                stats: { scanned: 0, rejected: 0, reasons: {} }
-            };
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
         }
 
-        // 2b. AI Semantic Verification (Layer 2 & 3)
-        console.log(`[Discovery Pipeline] Step 3: Verifying ${tweets.length} tweets with Grok...`);
-        const verificationResults = await verifySignalsWithAI(
-            {
-                name: product.name,
-                description: product.description,
-                pain_solved: product.pain_solved,
-                target_audience: product.target_audience,
-                competitors: product.competitors || []
-            },
-            tweets
-        );
+        const { scoredMap: initialScoreMap, verifiedMap, relevant } = await scoreAndVerifyCandidates(product, tweets);
 
-        const verifiedMap = new Map<string, any>(verificationResults.map(v => [v.id, v]));
-
-        // "Intelligence Layer": Collect stats on rejected signals
-        const stats = {
-            totalScanned: tweets.length,
-            relevant: 0,
-            rejected: 0,
-            rejectionReasons: {} as Record<string, number>
-        };
-
-        // Filter: Lenient cutoff (score >= 40 in verifier)
-        const relevantTweets = tweets.filter(t => {
-            const v = verifiedMap.get(t.id);
-            const isRelevant = v?.isRelevant; // score >= 40
-
-            if (isRelevant) {
-                stats.relevant++;
-                console.log(`[Discovery Pipeline] ✅ KEPT: @${t.author_username} (score: ${v?.score}, category: ${v?.category})`);
-            } else {
-                stats.rejected++;
-                const reasonKey = v?.category || 'Generic';
-                stats.rejectionReasons[reasonKey] = (stats.rejectionReasons[reasonKey] || 0) + 1;
-                console.log(`[Discovery Pipeline] ❌ REJECTED: @${t.author_username} (score: ${v?.score}, reason: ${v?.reason})`);
-            }
-            return isRelevant;
-        });
-
-        if (relevantTweets.length === 0 && tweets.length > 0) {
-            console.log(`[Discovery] Filtered out ${tweets.length} irrelevant signals via AI.`);
-            return {
-                success: true,
-                addedCount: 0,
-                message: "No direct high-intent tweets were found in this scan.",
-                details: `We analyzed ${stats.totalScanned} potential signals, but they were filtered: ${stats.rejectionReasons['Generic'] || 0} news/generic, ${stats.rejectionReasons['Complaining'] || 0} low-intent complaints.`,
-                suggestion: "Want to expand scanning window to 7 days?",
-                stats
-            };
+        if (relevant.length === 0) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
         }
 
-        // Update tweets to the relevant ones
-        tweets = relevantTweets;
-
-        // 3. Prevent Duplicates & Prepare Insertions
-        const tweetUrls = tweets.map(t => `https://x.com/${t.author_username}/status/${t.id}`);
-        const altTweetUrls = tweets.map(t => `https://twitter.com/${t.author_username}/status/${t.id}`);
-
-        const { data: existingOpps } = await supabase
+        const tweetUrls = relevant.map(t => `https://x.com/${t.author_username}/status/${t.id}`);
+        const { data: existing } = await supabase
             .from("opportunities")
             .select("tweet_url")
-            .or(`tweet_url.in.(${tweetUrls.join(',')}),tweet_url.in.(${altTweetUrls.join(',')})`);
-
-        const existingUrls = new Set(existingOpps?.map(o => o.tweet_url?.toLowerCase()) || []);
-
-        const newTweets = tweets.filter(t => {
-            const urlX = `https://x.com/${t.author_username}/status/${t.id}`.toLowerCase();
-            const urlT = `https://twitter.com/${t.author_username}/status/${t.id}`.toLowerCase();
-            return !existingUrls.has(urlX) && !existingUrls.has(urlT);
-        });
+            .eq("user_id", user.id)
+            .in("tweet_url", tweetUrls);
+        const existingUrls = new Set(existing?.map(o => o.tweet_url.toLowerCase()) || []);
+        const newTweets = relevant.filter(t => !existingUrls.has(`https://x.com/${t.author_username}/status/${t.id}`.toLowerCase()));
 
         if (newTweets.length === 0) {
-            return { success: true, addedCount: 0, message: "No new unique signals found." };
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
         }
 
-        const detectIntent = (text: string) => {
-            const lower = text.toLowerCase();
-            if (lower.includes("looking for") || lower.includes("recommend") || lower.includes("is there a") || lower.includes("any app")) return 'high';
-            if (lower.includes("tired") || lower.includes("hate") || lower.includes("annoying") || lower.includes("struggling")) return 'medium';
-            return 'low';
-        };
+        const { scoredMap, verifiedMap: finalVerifiedMap, relevant: finalRelevant } = await scoreAndVerifyCandidates(product, newTweets);
+        if (finalRelevant.length === 0) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
+        }
 
-        // Generate personalized DMs using Grok AI
-        console.log(`[Discovery Pipeline] Generating personalized DMs for ${newTweets.length} tweets...`);
-        const dmInputs = newTweets.map(t => ({
+        const dms = await generatePersonalizedDMs(finalRelevant.map(t => ({
             tweetText: t.text || "",
             authorUsername: t.author_username || "unknown",
             authorName: t.author_name || t.author_username || "there",
             productName: product.name,
             productDescription: product.description,
             painSolved: product.pain_solved,
-            productUrl: product.website_url || product.product_url || undefined
-        }));
+            productUrl: product.website_url || product.product_url
+        })));
 
-        const personalizedDMs = await generatePersonalizedDMs(dmInputs);
-        console.log(`[Discovery Pipeline] Got ${personalizedDMs.size} AI-generated DMs`);
-
-        const insertions = newTweets.map(t => {
-            const url = t.post_url || `https://x.com/${t.author_username}/status/${t.id}`;
-            const tweetText = t.text || "";
-            const content = tweetText || "No text (image/video post)";
-            const v = verifiedMap.get(t.id);
-
-            // Use Grok DM if available, otherwise use fallback
-            const aiDM = personalizedDMs.get(t.author_username || "");
-            const dm = aiDM || fallbackDM(
-                t.author_name || t.author_username || "there",
-                tweetText,
-                product.name
-            );
-
+        const insertions = finalRelevant.map(t => {
+            const v = finalVerifiedMap.get(t.id);
+            const s = scoredMap.get(t.id) || initialScoreMap.get(t.id);
+            const author = t.author_username || "unknown";
+            const dm = dms.get(author) || fallbackDM(t.author_name || author, t.text || "", product.name);
             return {
                 user_id: user.id,
                 product_id: product.id,
-                tweet_url: url,
-                tweet_content: content,
-                tweet_author: `@${t.author_username}`,
+                run_id: run?.id,
+                tweet_url: `https://x.com/${author}/status/${t.id}`,
+                tweet_content: t.text || "No content",
+                tweet_author: `@${author}`,
                 source: 'tweet_url',
-                intent_level: v?.intent || detectIntent(tweetText),
-                relevance_score: v?.score || 0,
-                match_score: v?.match_score || 0,
-                intent_category: v?.category || 'Generic',
-                competitor_name: v?.competitor_name || null,
-                intent_reasons: [v?.reason || "Discovered via keyword search"],
-                pain_detected: keywords.find((k: string) => tweetText.toLowerCase().includes(k.toLowerCase())) || "Generic problem",
-                status: 'new',
+                tweet_posted_at: t.created_at || null,
+                intent_level: v?.intent || s?.suggestedIntent || 'medium',
+                relevance_score: v?.score || s?.blendedScore || 0,
+                match_score: v?.match_score || s?.estimatedMatchScore || 0,
+                intent_category: v?.category || s?.suggestedCategory || 'Generic',
+                competitor_name: v?.competitor_name || s?.matchedCompetitor || null,
+                pain_detected: s?.matchedIntentPhrases.slice(0, 2).join(", ") || s?.reasons[0] || product.pain_solved,
                 suggested_dm: dm,
-                media_urls: t.media_urls || [],
-                media_type: t.media_type || 'text'
+                status: 'new'
             };
         });
 
         const { error: insertError } = await supabase.from("opportunities").insert(insertions);
-
-        if (insertError) {
-            console.error("Insertion Error:", insertError);
-            return { error: `Database Error: ${insertError.message}${insertError.details ? ` (${insertError.details})` : ''}` };
+        if (run) {
+            await supabase.from("discovery_runs").update({
+                status: insertError ? 'failed' : 'completed',
+                leads_found: insertions.length,
+                completed_at: new Date().toISOString()
+            }).eq("id", run.id);
         }
 
         revalidatePath("/founder/opportunities");
         return { success: true, addedCount: insertions.length };
-    } catch (error: any) {
-        console.error("[Discovery Action CRITICAL]:", error);
-        return { error: `Server error during discovery: ${error?.message || "Unknown error"}` };
+    } catch (e: any) {
+        return { error: e.message };
     }
 }
 
-/**
- * Regenerate a personalized DM for a SINGLE opportunity using Grok AI.
- * Saves API tokens — only calls Grok for one signal at a time.
- */
+export async function discoverRedditAction(scanWindow?: string) {
+    try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { error: "Not authenticated" };
+
+        const product = await getProductContext(supabase, user);
+        if (!product) return { error: "Product setup missing." };
+
+        const { data: run } = await supabase
+            .from("discovery_runs")
+            .insert({ user_id: user.id, product_id: product.id, platform: 'reddit', status: 'running' })
+            .select().single();
+
+        const { keywords, painPhrases } = await prepareKeywords(product);
+        const window = resolveDiscoveryWindow(scanWindow || product.scan_window);
+        const searchResult = await searchRedditOpportunities(keywords, painPhrases, window.days, product);
+
+        if (searchResult.error || !searchResult.tweets?.length) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
+        }
+
+        const posts = searchResult.tweets;
+        const { data: existing } = await supabase.from("opportunities").select("tweet_url").eq("user_id", user.id);
+        const existingUrls = new Set(existing?.map(e => e.tweet_url) || []);
+        const newPosts = posts.filter(p => !existingUrls.has(p.post_url));
+
+        if (newPosts.length === 0) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
+        }
+
+        const { scoredMap, verifiedMap, relevant } = await scoreAndVerifyCandidates(product, newPosts);
+        if (relevant.length === 0) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
+        }
+
+        const replies = await generateRedditReplies(relevant.map(p => ({
+            postText: p.text || "", author: p.author || "unknown", subreddit: p.subreddit || "unknown", postType: p.post_type || "post",
+            productName: product.name, productDescription: product.description, painSolved: product.pain_solved,
+            productUrl: product.website_url || product.product_url
+        })));
+
+        const insertions = relevant.map(p => {
+            const v = verifiedMap.get(p.id);
+            const s = scoredMap.get(p.id);
+            const author = p.author || "unknown";
+            const reply = replies.get(author) || fallbackRedditReply(author, p.text || "", product.name);
+            return {
+                user_id: user.id, product_id: product.id, run_id: run?.id,
+                tweet_url: p.post_url, tweet_content: p.text || "No content", tweet_author: `u/${author}`,
+                source: 'reddit_post', subreddit: p.subreddit,
+                tweet_posted_at: p.created_at || null,
+                intent_level: v?.intent || s?.suggestedIntent || 'medium',
+                relevance_score: v?.score || s?.blendedScore || 0,
+                match_score: v?.match_score || s?.estimatedMatchScore || 0,
+                intent_category: v?.category || s?.suggestedCategory || 'Generic',
+                competitor_name: v?.competitor_name || s?.matchedCompetitor || null,
+                pain_detected: s?.matchedIntentPhrases.slice(0, 2).join(", ") || s?.reasons[0] || product.pain_solved,
+                suggested_dm: reply, status: 'new'
+            };
+        });
+
+        const { error: insertError } = await supabase.from("opportunities").insert(insertions);
+        if (run) {
+            await supabase.from("discovery_runs").update({
+                status: insertError ? 'failed' : 'completed',
+                leads_found: insertions.length,
+                completed_at: new Date().toISOString()
+            }).eq("id", run.id);
+        }
+
+        revalidatePath("/founder/opportunities");
+        return { success: true, addedCount: insertions.length };
+    } catch (e: any) {
+        return { error: e.message };
+    }
+}
+
+export async function discoverLinkedInAction(scanWindow?: string) {
+    try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { error: "Not authenticated" };
+
+        const product = await getProductContext(supabase, user);
+        if (!product) return { error: "Product setup missing." };
+
+        const { data: run } = await supabase
+            .from("discovery_runs")
+            .insert({ user_id: user.id, product_id: product.id, platform: 'linkedin', status: 'running' })
+            .select().single();
+
+        const { keywords, painPhrases } = await prepareKeywords(product);
+        const window = resolveDiscoveryWindow(scanWindow || product.scan_window);
+        const searchResult = await searchLinkedInOpportunities(keywords, painPhrases, window.days, product);
+
+        if (searchResult.error || !searchResult.tweets?.length) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
+        }
+
+        const posts = searchResult.tweets;
+        const { data: existing } = await supabase.from("opportunities").select("tweet_url").eq("user_id", user.id);
+        const existingUrls = new Set(existing?.map(e => e.tweet_url) || []);
+        const newPosts = posts.filter(p => !existingUrls.has(p.post_url));
+
+        if (newPosts.length === 0) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
+        }
+
+        const { scoredMap, verifiedMap, relevant } = await scoreAndVerifyCandidates(product, newPosts);
+        if (relevant.length === 0) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            return { success: true, addedCount: 0 };
+        }
+
+        const replies = await generateLinkedInReplies(relevant.map(p => ({
+            postText: p.text || "", author: p.author || "unknown",
+            productName: product.name, productDescription: product.description, painSolved: product.pain_solved,
+            productUrl: product.website_url || product.product_url
+        })));
+
+        const insertions = relevant.map(p => {
+            const v = verifiedMap.get(p.id);
+            const s = scoredMap.get(p.id);
+            const author = p.author || "unknown";
+            const reply = replies.get(author) || fallbackLinkedInReply(author, product.name);
+            return {
+                user_id: user.id, product_id: product.id, run_id: run?.id,
+                tweet_url: p.post_url, tweet_content: p.text || "No content", tweet_author: author,
+                source: 'linkedin_post',
+                tweet_posted_at: p.created_at || null,
+                intent_level: v?.intent || s?.suggestedIntent || 'medium',
+                relevance_score: v?.score || s?.blendedScore || 0,
+                match_score: v?.match_score || s?.estimatedMatchScore || 0,
+                intent_category: v?.category || s?.suggestedCategory || 'Generic',
+                competitor_name: v?.competitor_name || s?.matchedCompetitor || null,
+                pain_detected: s?.matchedIntentPhrases.slice(0, 2).join(", ") || s?.reasons[0] || product.pain_solved,
+                suggested_dm: reply, status: 'new'
+            };
+        });
+
+        const { error: insertError } = await supabase.from("opportunities").insert(insertions);
+        if (run) {
+            await supabase.from("discovery_runs").update({
+                status: insertError ? 'failed' : 'completed',
+                leads_found: insertions.length,
+                completed_at: new Date().toISOString()
+            }).eq("id", run.id);
+        }
+
+        revalidatePath("/founder/opportunities");
+        return { success: true, addedCount: insertions.length };
+    } catch (e: any) {
+        return { error: e.message };
+    }
+}
+
+export async function addManualOpportunityAction(data: { url: string, content: string, author: string, platform: string }) {
+    try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { error: "Not authenticated" };
+
+        const product = await getProductContext(supabase, user);
+        if (!product) return { error: "Product setup missing." };
+
+        let source = 'tweet_url';
+        if (data.platform === 'reddit') source = 'reddit_post';
+        if (data.platform === 'linkedin') source = 'linkedin_post';
+
+        const { error } = await supabase.from("opportunities").insert({
+            user_id: user.id,
+            product_id: product.id,
+            tweet_url: data.url,
+            tweet_content: data.content,
+            tweet_author: data.author,
+            source,
+            status: 'new'
+        });
+
+        if (error) throw error;
+        revalidatePath("/founder/opportunities");
+        return { success: true };
+    } catch (e: any) {
+        return { error: e.message };
+    }
+}
+
 export async function regenerateSingleDM(opportunityId: string) {
     try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-
         if (!user) return { error: "Not authenticated" };
 
-        // Fetch the single opportunity
-        const { data: opp, error: oppError } = await supabase
-            .from("opportunities")
-            .select("*")
-            .eq("id", opportunityId)
-            .eq("user_id", user.id)
-            .single();
-
-        if (oppError || !opp) return { error: "Opportunity not found" };
-
-        // Fetch product info from the opportunity itself (more reliable for regen)
-        const { data: product } = await supabase
-            .from("products")
-            .select("*")
-            .eq("id", opp.product_id)
-            .single();
-
-        if (!product) return { error: "Associated product not found." };
-
-        const isReddit = opp.source === 'reddit_post';
-        const author = (opp.tweet_author || "unknown").replace("@", "").replace("u/", "");
-        const productUrl = product.website_url || product.product_url || undefined;
-
-        let newDM: string;
-
-        if (isReddit) {
-            // Generate Reddit reply
-            const replies = await generateRedditReplies([{
-                postText: opp.tweet_content || "",
-                author,
-                subreddit: opp.subreddit || "unknown",
-                postType: "post",
-                productName: product.name,
-                productDescription: product.description,
-                painSolved: product.pain_solved,
-                productUrl
-            }]);
-            newDM = replies.get(author) || fallbackRedditReply(author, opp.tweet_content || "", product.name);
-        } else {
-            // Generate X DM
-            const dms = await generatePersonalizedDMs([{
-                tweetText: opp.tweet_content || "",
-                authorUsername: author,
-                authorName: author,
-                productName: product.name,
-                productDescription: product.description,
-                painSolved: product.pain_solved,
-                productUrl
-            }]);
-            newDM = dms.get(author) || fallbackDM(author, opp.tweet_content || "", product.name);
-        }
-
-        // Update in DB
-        const { error: updateError } = await supabase
-            .from("opportunities")
-            .update({ suggested_dm: newDM })
-            .eq("id", opportunityId);
-
-        if (updateError) return { error: updateError.message };
-
-        revalidatePath("/founder/opportunities");
-        return { success: true, newDM };
-    } catch (error: any) {
-        console.error("[Single DM Regen Error]:", error);
-        return { error: `Failed: ${error?.message || "Unknown"}` };
-    }
-}
-
-/**
- * Save a user-edited DM/reply text for a specific opportunity.
- */
-export async function updateDMText(opportunityId: string, newText: string) {
-    try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) return { error: "Not authenticated" };
-
-        const { error } = await supabase
-            .from("opportunities")
-            .update({ suggested_dm: newText })
-            .eq("id", opportunityId)
-            .eq("user_id", user.id);
-
-        if (error) return { error: error.message };
-
-        revalidatePath("/founder/opportunities");
-        return { success: true };
-    } catch (error: any) {
-        return { error: `Failed to save: ${error?.message || "Unknown"}` };
-    }
-}
-
-/**
- * Update the status of a specific opportunity.
- */
-export async function updateStatus(opportunityId: string, status: string) {
-    try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return { error: "Not authenticated" };
-
-        const { error } = await supabase
-            .from("opportunities")
-            .update({ status })
-            .eq("id", opportunityId)
-            .eq("user_id", user.id);
-
-        if (error) throw error;
-
-        revalidatePath("/founder/opportunities");
-        revalidatePath("/founder/battlefield");
-        revalidatePath("/founder/dashboard");
-
-        return { success: true };
-    } catch (error: any) {
-        console.error("Update Status Error:", error);
-        return { error: error.message };
-    }
-}
-
-export async function generateOutreachAngles(opportunityId: string) {
-    try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return { error: "Not authenticated" };
-
-        const { data: opp } = await supabase
-            .from("opportunities")
-            .select("*, products(*)")
-            .eq("id", opportunityId)
-            .single();
-
+        const { data: opp } = await supabase.from("opportunities").select("*, products(*)").eq("id", opportunityId).single();
         if (!opp) return { error: "Opportunity not found" };
 
         const product = opp.products;
-        const apiKey = process.env.XAI_API_KEY;
+        const author = opp.tweet_author.replace("@", "").replace("u/", "");
+        const productUrl = product.website_url || product.product_url;
 
-        const prompt = `
-        You are a high-ticket sales strategist. Generate 3 distinct outreach "Angles" for this lead.
-        
-        LEAD POST: "${opp.tweet_content}"
-        LEAD BIO: "${opp.author_bio || "Not available"}"
-        
-        MY PRODUCT: "${product.name}"
-        DESCRIPTION: "${product.description}"
-        PAIN IT SOLVES: "${product.pain_solved}"
-        TARGET AUDIENCE: "${product.target_audience}"
-        
-        ANGLES TO GENERATE:
-        1. "The Helper": Low-pressure, consultative. Offer a tip or ask a question about their pain point without pitching.
-        2. "The Researcher": Medium-pressure. Ask for their feedback on a specific feature you're building to solve their exact problem.
-        3. "The Closer": Direct pitch. explain why ${product.name} is the perfect fix for their specific post.
-
-        Return ONLY valid JSON:
-        {
-          "angles": [
-            { "label": "The Helper", "content": "message text" },
-            { "label": "The Researcher", "content": "message text" },
-            { "label": "The Closer", "content": "message text" }
-          ]
-        }
-        `;
-
-        const response = await fetch("https://api.x.ai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning",
-                messages: [
-                    { role: "system", content: "Return only valid JSON." },
-                    { role: "user", content: prompt }
-                ],
-                temperature: 0.7,
-            }),
-        });
-
-        if (!response.ok) throw new Error("Grok API error");
-
-        const data = await response.json();
-        const content = data.choices[0].message.content;
-        const cleaned = content.replace(/```json|```/g, "").trim();
-        const angles = JSON.parse(cleaned).angles;
-
-        // Optionally update the suggested_dm if it was generic
-        if (angles.length > 0) {
-            await supabase
-                .from("opportunities")
-                .update({ suggested_dm: angles[0].content })
-                .eq("id", opportunityId);
+        let newDM = "";
+        if (opp.source === 'reddit_post') {
+            const replies = await generateRedditReplies([{
+                postText: opp.tweet_content, author, subreddit: opp.subreddit || "unknown", postType: "post",
+                productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl
+            }]);
+            newDM = replies.get(author) || fallbackRedditReply(author, opp.tweet_content, product.name);
+        } else if (opp.source === 'linkedin_post') {
+            const replies = await generateLinkedInReplies([{
+                postText: opp.tweet_content, author,
+                productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl
+            }]);
+            newDM = replies.get(author) || fallbackLinkedInReply(author, product.name);
+        } else {
+            const dms = await generatePersonalizedDMs([{
+                tweetText: opp.tweet_content, authorUsername: author, authorName: author,
+                productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl
+            }]);
+            newDM = dms.get(author) || fallbackDM(author, opp.tweet_content, product.name);
         }
 
-        return { success: true, angles };
-    } catch (error: any) {
-        console.error("Outreach Strategist Error:", error);
-        return { error: error.message };
+        await supabase.from("opportunities").update({ suggested_dm: newDM }).eq("id", opportunityId);
+        revalidatePath("/founder/opportunities");
+        return { success: true, newDM };
+    } catch (e: any) {
+        return { error: e.message };
     }
+}
+
+export async function updateDMText(opportunityId: string, newText: string) {
+    const supabase = createClient();
+    await supabase.from("opportunities").update({ suggested_dm: newText }).eq("id", opportunityId);
+    revalidatePath("/founder/opportunities");
+    return { success: true };
+}
+
+export async function updateStatus(opportunityId: string, status: string) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Not authenticated" };
+
+    const shouldArchive = ['contacted', 'replied', 'archived', 'won'].includes(status);
+
+    const { error } = await supabase
+        .from("opportunities")
+        .update({ status, is_archived: shouldArchive })
+        .eq("id", opportunityId)
+        .eq("user_id", user.id);
+
+    revalidatePath("/founder/opportunities");
+    return { success: true };
+}
+
+export async function archiveOpportunity(id: string) {
+    return updateStatus(id, 'archived');
+}
+
+export async function generateOutreachAngles(opportunityId: string): Promise<{ success: boolean; error?: string; angles?: any[] }> {
+    return { success: false, error: "Not implemented" };
 }
 
 export async function fetchLeadBio(opportunityId: string) {
-    try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return { error: "Not authenticated" };
-
-        const { data: opp } = await supabase
-            .from("opportunities")
-            .select("*")
-            .eq("id", opportunityId)
-            .single();
-
-        if (!opp) return { error: "Opportunity not found" };
-
-        const apiKey = process.env.XAI_API_KEY;
-        const prompt = `
-        Find or summarize the professional background/bio for this user:
-        PLATFORM: ${opp.source === 'reddit_post' ? 'Reddit' : 'X (Twitter)'}
-        USERNAME: ${opp.tweet_author}
-        CONTEXT: They posted about "${opp.tweet_content}"
-        
-        Return a concise 1-2 sentence professional bio. If you can't find specific details, infer their likely role based on their post.
-        Return ONLY the bio text, no preamble.
-        `;
-
-        const response = await fetch("https://api.x.ai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning",
-                messages: [
-                    { role: "system", content: "You are a professional researcher. Return only the bio text." },
-                    { role: "user", content: prompt }
-                ],
-                temperature: 0.5,
-            }),
-        });
-
-        if (!response.ok) throw new Error("Grok API error");
-
-        const data = await response.json();
-        const bio = data.choices[0].message.content.trim();
-
-        // Save back to DB
-        await supabase
-            .from("opportunities")
-            .update({ author_bio: bio })
-            .eq("id", opportunityId);
-
-        revalidatePath("/founder/opportunities");
-        revalidatePath("/founder/battlefield");
-        revalidatePath("/founder/dashboard");
-
-        return { success: true, bio };
-
-    } catch (error: any) {
-        console.error("Fetch Bio Error:", error);
-        return { error: error.message };
-    }
-}
-
-
-/**
- * Discover demand signals from Reddit using Grok web_search.
- * Same pipeline as X discovery: keyword expansion → search → verify → save.
- */
-export async function discoverRedditAction() {
-    try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) return { error: "Not authenticated" };
-
-        // 1. Fetch User's Active Product Context
-        const { data: profile } = await supabase
-            .from("profiles")
-            .select("active_product_id")
-            .eq("id", user.id)
-            .single();
-
-        let productIdToUse = profile?.active_product_id;
-
-        // Fallback to most recent if none active
-        if (!productIdToUse) {
-            const { data: latestProduct } = await supabase
-                .from("products")
-                .select("id")
-                .eq("user_id", user.id)
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .maybeSingle();
-
-            productIdToUse = latestProduct?.id;
-        }
-
-        if (!productIdToUse) {
-            return { error: "Product setup missing. Please configure your product first." };
-        }
-
-        const { data: product, error: productError } = await supabase
-            .from("products")
-            .select("*")
-            .eq("id", productIdToUse)
-            .single();
-
-        if (productError || !product) {
-            return { error: "Selected product not found." };
-        }
-
-        let keywords = product.keywords || [];
-        let painPhrases = product.pain_phrases || [];
-
-        // 1b. AI Keyword Expansion
-        const aiExpansion = await expandProductKeywords({
-            name: product.name,
-            description: product.description,
-            target_audience: product.target_audience,
-            pain_solved: product.pain_solved
-        });
-
-        if (aiExpansion) {
-            const allKeywords = new Set([...keywords, ...aiExpansion.keywords]);
-            const allPhrases = new Set([...painPhrases, ...aiExpansion.painPhrases]);
-
-            // ADD COMPETITIVE KEYWORDS
-            if (product.competitors && product.competitors.length > 0) {
-                product.competitors.forEach((comp: string) => {
-                    allPhrases.add(`alternative to ${comp}`);
-                    allPhrases.add(`switching from ${comp}`);
-                    allPhrases.add(`unhappy with ${comp}`);
-                });
-            }
-
-            keywords = Array.from(allKeywords).slice(0, 10);
-            painPhrases = Array.from(allPhrases).slice(0, 10);
-        }
-
-        if (keywords.length === 0 && painPhrases.length === 0) {
-            return { error: "No keywords or phrases configured for your product." };
-        }
-
-        console.log(`[Reddit Discovery] Starting with ${keywords.length} keywords, ${painPhrases.length} phrases`);
-
-        // 2. Search Reddit via Grok web_search
-        const searchResult = await searchRedditOpportunities(
-            keywords,
-            painPhrases,
-            30,
-            {
-                name: product.name,
-                description: product.description,
-                pain_solved: product.pain_solved,
-                target_audience: product.target_audience,
-                keywords,
-                pain_phrases: painPhrases
-            }
-        );
-
-        if (searchResult.error || !searchResult.tweets?.length) {
-            return {
-                error: searchResult.error || undefined,
-                success: !searchResult.error,
-                addedCount: 0,
-                message: "No Reddit signals found.",
-                details: `Searched for: ${keywords.join(", ")}`,
-                suggestion: "Try broadening your keywords or pain phrases in Product settings."
-            };
-        }
-
-        const redditPosts = searchResult.tweets;
-        console.log(`[Reddit Discovery] Found ${redditPosts.length} Reddit posts/comments`);
-
-        // 3. Filter duplicates
-        const { data: existing } = await supabase
-            .from("opportunities")
-            .select("tweet_url")
-            .eq("user_id", user.id);
-
-        const existingUrls = new Set((existing || []).map(e => e.tweet_url));
-        const newPosts = redditPosts.filter(p => !existingUrls.has(p.post_url));
-
-        if (newPosts.length === 0) {
-            return { success: true, addedCount: 0, message: "No new unique Reddit signals found." };
-        }
-
-        // 4. AI Verification
-        const tweetsForVerification = newPosts.map(p => ({
-            id: p.id,
-            text: p.text,
-            author_username: p.author
-        }));
-
-        const verified = await verifySignalsWithAI(
-            {
-                name: product.name,
-                description: product.description,
-                pain_solved: product.pain_solved,
-                target_audience: product.target_audience,
-                competitors: product.competitors || []
-            },
-            tweetsForVerification
-        );
-
-        const verifiedMap = new Map((verified || []).map((v: any) => [v.id, v]));
-
-        // 5. Intent detection
-        const detectIntent = (text: string) => {
-            const lower = text.toLowerCase();
-            if (lower.includes("looking for") || lower.includes("recommend") || lower.includes("is there a") || lower.includes("any app") || lower.includes("alternative")) return 'high';
-            if (lower.includes("tired") || lower.includes("hate") || lower.includes("annoying") || lower.includes("struggling") || lower.includes("frustrated")) return 'medium';
-            return 'low';
-        };
-
-        // 6. Generate Reddit reply suggestions via Grok
-        console.log(`[Reddit Discovery] Generating reply suggestions for ${newPosts.length} posts...`);
-        const replyInputs = newPosts.map(p => ({
-            postText: p.text || "",
-            author: p.author || "unknown",
-            subreddit: p.subreddit || "unknown",
-            postType: p.post_type || "post" as 'post' | 'comment',
-            productName: product.name,
-            productDescription: product.description,
-            painSolved: product.pain_solved,
-            productUrl: product.website_url || product.product_url || undefined
-        }));
-
-        const redditReplies = await generateRedditReplies(replyInputs);
-        console.log(`[Reddit Discovery] Got ${redditReplies.size} AI-generated replies`);
-
-        // 7. Build insertions
-        const insertions = newPosts.map(p => {
-            const v = verifiedMap.get(p.id);
-            const reply = redditReplies.get(p.author || "") || fallbackRedditReply(
-                p.author || "someone",
-                p.text || "",
-                product.name
-            );
-
-            return {
-                user_id: user.id,
-                product_id: product.id,
-                tweet_url: p.post_url,
-                tweet_content: p.text || "No text",
-                tweet_author: `u/${p.author}`,
-                source: 'reddit_post',
-                intent_level: v?.intent || detectIntent(p.text || ""),
-                relevance_score: v?.score || 0,
-                match_score: v?.match_score || 0,
-                intent_category: v?.category || 'Generic',
-                competitor_name: v?.competitor_name || null,
-                intent_reasons: [v?.reason || "Discovered via Reddit search"],
-                pain_detected: keywords.find((k: string) => (p.text || "").toLowerCase().includes(k.toLowerCase())) || "Generic problem",
-                status: 'new',
-                suggested_dm: reply,
-                subreddit: p.subreddit || null
-            };
-        });
-
-        // 8. Insert into DB
-        const { error: insertError } = await supabase
-            .from("opportunities")
-            .upsert(insertions, { onConflict: "user_id,tweet_url", ignoreDuplicates: true });
-
-        if (insertError) {
-            console.error("[Reddit Discovery] Insert error:", insertError);
-            return { error: `Database error: ${insertError.message}` };
-        }
-
-        console.log(`[Reddit Discovery] ✅ Inserted ${insertions.length} Reddit signals`);
-        revalidatePath("/founder/opportunities");
-        return { success: true, addedCount: insertions.length };
-    } catch (error: any) {
-        console.error("[Reddit Discovery CRITICAL]:", error);
-        return { error: `Server error during Reddit discovery: ${error?.message || "Unknown error"}` };
-    }
+    return { success: false, error: "Not implemented" };
 }

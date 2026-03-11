@@ -43,12 +43,12 @@ export function Pricing() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-6xl font-black text-white mb-6"
+                        className="text-2xl md:text-6xl font-black text-white mb-6 uppercase tracking-tight"
                     >
                         Transparent Pricing. <br />
                         No hidden fees. Just ROI.
                     </motion.h2>
-                    <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
+                    <p className="text-gray-400 text-[10px] md:text-xl max-w-2xl mx-auto leading-relaxed">
                         Pick the plan that fits your growth stage. Scale as you find more demand.
                     </p>
                 </div>
@@ -73,19 +73,19 @@ export function Pricing() {
                             )}
 
                             <div className="mb-10 text-left">
-                                <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">{plan.name}</h3>
-                                <p className="text-gray-500 font-medium text-sm leading-relaxed mb-6">
+                                <h3 className="text-base md:text-2xl font-black text-white mb-2 uppercase tracking-tight">{plan.name}</h3>
+                                <p className="text-gray-500 font-medium text-[10px] md:text-sm leading-relaxed mb-6">
                                     {plan.desc}
                                 </p>
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-4xl md:text-6xl font-black text-white">${plan.price}</span>
-                                    <span className="text-gray-500 font-bold uppercase tracking-widest text-xs">/ month</span>
+                                    <span className="text-gray-500 font-bold uppercase tracking-widest text-[8px] md:text-xs">/ month</span>
                                 </div>
                             </div>
 
                             <div className="space-y-4 mb-10 text-left">
                                 {plan.features.map(feature => (
-                                    <div key={feature} className="flex items-center gap-3 text-sm font-bold text-gray-400">
+                                    <div key={feature} className="flex items-center gap-3 text-[10px] md:text-sm font-bold text-gray-400">
                                         <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${plan.popular ? "bg-primary/20 text-primary" : "bg-white/5 text-gray-600"}`}>
                                             <Check className="w-3 h-3" />
                                         </div>

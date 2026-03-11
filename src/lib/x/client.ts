@@ -1,4 +1,5 @@
 "use server";
+import { semanticReRank } from "../semantic/re-ranker";
 
 export interface XTweet {
     id: string;
@@ -176,7 +177,42 @@ If no relevant posts found, return: { "tweets": [] }`,
         }
 
         console.log("[Grok Agent Tools] Extracted text preview:", outputText.substring(0, 500));
-        return parseTweetResponse(outputText);
+
+        // 1. Parse Grok's raw JSON output
+        const parsedResult = parseTweetResponse(outputText);
+        if (parsedResult.error || !parsedResult.tweets || parsedResult.tweets.length === 0) {
+            return parsedResult;
+        }
+
+        // 2. Semantic Re-Ranking (The true magic)
+        // We use the product's core pain as the embedding target
+        const targetConcept = product
+            ? `Someone complaining about exactly this problem: ${product.pain_solved}. Target audience: ${product.target_audience}. Core frustration: ${product.pain_phrases.join(' or ')}`
+            : `Someone expressing frustration about: ${allTerms.join(" ")}`;
+
+        console.log("-----------------------------------------");
+        console.log("🧠 Initiating Semantic Search Re-Ranking...");
+        console.log(`Target Intent: "${targetConcept.substring(0, 100)}..."`);
+
+        // Convert to format accepted by re-ranker
+        const rankingRequest = {
+            targetConcept: targetConcept,
+            items: parsedResult.tweets.map(t => ({ id: t.id, text: t.text, raw: t })),
+            threshold: 0.35 // Slightly lower threshold for Twitter given its casual nature
+        };
+
+        const rankingResult = await semanticReRank<any>(rankingRequest);
+
+        console.log(`📉 Filtered out ${rankingResult.originalCount - rankingResult.filteredCount} low-signal tweets.`);
+        console.log("-----------------------------------------");
+
+        // Map back to original XTweet format, injecting the similarity score
+        const finalTweets = rankingResult.items.map(item => ({
+            ...item.raw,
+            similarity_score: item.similarityScore
+        }));
+
+        return { tweets: finalTweets as XTweet[], error: undefined };
 
     } catch (error) {
         console.error("[Grok Agent Tools] Exception:", error);

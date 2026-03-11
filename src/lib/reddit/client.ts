@@ -1,3 +1,5 @@
+import { semanticReRank } from "../semantic/re-ranker";
+
 export interface RedditPost {
     id: string;
     text: string;
@@ -68,11 +70,11 @@ export async function searchRedditOpportunities(
                         type: "web_search"
                     }
                 ],
-                instructions: `You are a Reddit demand signal researcher helping a SaaS founder find REAL potential customers on Reddit.
+                    instructions: `You are a Reddit demand signal researcher helping a SaaS founder find REAL potential customers on Reddit.
 
 YOUR TASK:
 1. Search Reddit using web_search with "site:reddit.com" queries to find posts/comments from people who have the EXACT problem this product solves
-2. Find REAL, RECENT posts (within the last 30-60 days ideally)
+2. Find REAL, RECENT posts within the last ${maxDays} days where possible
 3. Focus on subreddits where the target audience hangs out
 4. Return structured JSON with REAL Reddit URLs
 
@@ -80,7 +82,7 @@ CRITICAL RULES:
 - ONLY return posts/comments you actually found via web_search
 - Do NOT fabricate or hallucinate posts — every result MUST have a real Reddit URL
 - Each result must be from a REAL Reddit user with a REAL post/comment
-- Prefer RECENT posts (last 30 days) over old ones
+ - Prefer RECENT posts from the last ${maxDays} days over old ones
 - Quality over quantity — 5 highly relevant results beat 15 weak ones
 
 SEARCH STRATEGY:
@@ -144,7 +146,7 @@ Also try these high-intent searches:
 - site:reddit.com "need help with" ${allTerms[0]}
 - site:reddit.com "best tool for" ${allTerms[0]}
 
-Find diverse results from different subreddits. Prioritize RECENT posts. Include both posts and comments.`
+ Find diverse results from different subreddits. Prioritize posts from the last ${maxDays} days. Include both posts and comments.`
             }),
         });
 
@@ -171,7 +173,34 @@ Find diverse results from different subreddits. Prioritize RECENT posts. Include
         const posts = parseRedditResponse(responseText);
         console.log(`[Grok Reddit Search] Parsed ${posts.length} Reddit posts/comments`);
 
-        return { tweets: posts };
+        if (posts.length === 0) {
+            return { tweets: [], error: undefined };
+        }
+
+        // Semantic Re-Ranking (Noise Filter)
+        const targetConcept = product
+            ? `Someone complaining about exactly this problem: ${product.pain_solved}. Target audience: ${product.target_audience}. Core frustration: ${product.pain_phrases.join(' or ')}`
+            : `Someone expressing frustration about: ${allTerms.join(" ")}`;
+
+        console.log("-----------------------------------------");
+        console.log("🧠 Initiating Semantic Search Re-Ranking for Reddit...");
+
+        const rankingRequest = {
+            targetConcept: targetConcept,
+            items: posts.map(p => ({ id: p.id, text: p.text, raw: p })),
+            threshold: 0.40 // slightly higher threshold for Reddit since posts are longer
+        };
+
+        const rankingResult = await semanticReRank<any>(rankingRequest);
+        console.log(`📉 Filtered out ${rankingResult.originalCount - rankingResult.filteredCount} low-signal Reddit posts.`);
+        console.log("-----------------------------------------");
+
+        const finalPosts = rankingResult.items.map(item => ({
+            ...item.raw,
+            similarity_score: item.similarityScore
+        }));
+
+        return { tweets: finalPosts as RedditPost[], error: undefined };
 
     } catch (error: any) {
         console.error("[Grok Reddit Search] Fatal error:", error);

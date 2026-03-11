@@ -33,11 +33,11 @@ export function Testimonials() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-6xl font-black text-white mb-6"
+                        className="text-2xl md:text-6xl font-black text-white mb-6 uppercase tracking-tight"
                     >
                         Founder Love.
                     </motion.h2>
-                    <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
+                    <p className="text-gray-400 text-[10px] md:text-xl max-w-2xl mx-auto leading-relaxed">
                         Don't take our word for it. Listen to the builders who are actually closing deals.
                     </p>
                 </div>
@@ -53,7 +53,7 @@ export function Testimonials() {
                             className="p-10 glass-card border-white/5 relative"
                         >
                             <Quote className="absolute top-8 right-8 w-10 h-10 text-primary/10" />
-                            <p className="text-white font-medium text-lg leading-relaxed mb-8 relative z-10">
+                            <p className="text-white font-medium text-sm md:text-lg leading-relaxed mb-8 relative z-10">
                                 "{t.content}"
                             </p>
                             <div className="flex items-center gap-4">
@@ -61,8 +61,8 @@ export function Testimonials() {
                                     {t.avatar}
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-white font-black uppercase tracking-tight text-sm">{t.name}</p>
-                                    <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">{t.role}</p>
+                                    <p className="text-white font-black uppercase tracking-tight text-[10px] md:text-sm">{t.name}</p>
+                                    <p className="text-gray-500 text-[8px] md:text-[10px] font-black uppercase tracking-widest">{t.role}</p>
                                 </div>
                             </div>
                         </motion.div>

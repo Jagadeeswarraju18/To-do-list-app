@@ -19,13 +19,13 @@ export function ProblemAgitation() {
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight"
+                        className="text-2xl md:text-6xl font-black text-white mb-8 leading-tight uppercase tracking-tight"
                     >
                         Cold outreach is <br />
                         <span className="text-red-500">slowly killing</span> <br />
                         your startup.
                     </motion.h2>
-                    <p className="text-gray-400 text-lg md:text-xl mb-10 leading-relaxed max-w-xl">
+                    <p className="text-gray-400 text-[10px] md:text-xl mb-10 leading-relaxed max-w-xl">
                         Founders spend 40% of their week hunting for leads instead of building. Most of that time is spent talking to people who don't care.
                     </p>
 
@@ -37,9 +37,9 @@ export function ProblemAgitation() {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className="flex items-center gap-4 text-gray-500 font-medium"
+                                className="flex items-center gap-4 text-[10px] text-gray-500 font-medium"
                             >
-                                <XCircle className="w-5 h-5 text-red-500/50 shrink-0" />
+                                <XCircle className="w-4 h-4 text-red-500/50 shrink-0" />
                                 {pain}
                             </motion.div>
                         ))}
@@ -64,7 +64,7 @@ export function ProblemAgitation() {
                         <div className="absolute top-0 right-0 p-4">
                             <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
                         </div>
-                        <h3 className="text-2xl font-black text-white mb-6">The "Founder Burnout" Cycle</h3>
+                        <h3 className="text-base md:text-2xl font-black text-white mb-6 uppercase tracking-tight">The "Founder Burnout" Cycle</h3>
                         <div className="space-y-6">
                             <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                                 <motion.div
@@ -92,7 +92,7 @@ export function ProblemAgitation() {
                                 <span className="text-primary">5% Actual Progress</span>
                             </div>
                         </div>
-                        <p className="mt-8 text-sm text-gray-500 leading-relaxed italic">
+                        <p className="mt-8 text-[10px] md:text-sm text-gray-500 leading-relaxed italic">
                             "I spent 3 weeks manually searching keywords on X. 80% was noise. The other 20% already had a solution. I almost gave up."
                         </p>
                     </motion.div>

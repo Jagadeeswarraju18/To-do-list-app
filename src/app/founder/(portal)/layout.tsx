@@ -19,7 +19,7 @@ export default function DashboardLayout({
                     {/* Background Gradients */}
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-                    <div className="max-w-7xl mx-auto relative z-10 transition-all duration-300">
+                    <div className="w-full px-4 sm:px-6 md:px-0 relative z-10 transition-all duration-300">
                         {children}
                     </div>
                 </main>

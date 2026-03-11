@@ -324,3 +324,91 @@ export function fallbackRedditReply(author: string, postText: string, productNam
 
     return `been dealing with ${context} too. ended up trying ${productName} which has been helping a lot with this tbh. might be worth checking out`;
 }
+
+// ─── LinkedIn Reply Generator ───
+
+interface LinkedInReplyInput {
+    postText: string;
+    author: string;
+    productName: string;
+    productDescription: string;
+    painSolved: string;
+    productUrl?: string;
+}
+
+/**
+ * Uses Grok to write professional LinkedIn comments.
+ * Tone: insightful, professional, peer-to-peer.
+ */
+export async function generateLinkedInReplies(
+    posts: LinkedInReplyInput[]
+): Promise<Map<string, string>> {
+    const apiKey = process.env.XAI_API_KEY;
+    if (!apiKey) return new Map();
+
+    const results = new Map<string, string>();
+    if (posts.length === 0) return results;
+
+    const postsBlock = posts.map((p, i) =>
+        `POST ${i + 1}:
+Author: ${p.author}
+Content: "${p.postText.substring(0, 500)}"
+---`
+    ).join("\n\n");
+
+    const product = posts[0];
+    const productLink = product.productUrl || `[link]`;
+
+    try {
+        const response = await fetch("https://api.x.ai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                model: "grok-3-fast",
+                messages: [
+                    {
+                        role: "system",
+                        content: `You write professional LinkedIn comments for a founder.
+                        
+TONE:
+- Insightful and value-added (not just salesy)
+- Short (2-3 sentences)
+- Professional yet approachable
+- Mention the product as a solution you built for this exact problem
+
+BAD: "Buy my tool at link.com"
+GOOD: "Really interesting perspective on {pain}. I actually dealt with this so much that I built {productName} (${productLink}) to automate the {process}. Might be worth a look if you're still struggling with it."`
+                    },
+                    {
+                        role: "user",
+                        content: `Write a unique LinkedIn reply for each post:\n\n${postsBlock}`
+                    }
+                ],
+                temperature: 0.7,
+            }),
+        });
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (!content) return results;
+
+        let cleaned = content.trim().replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+        const parsed = JSON.parse(cleaned);
+        const replies = parsed.replies || [];
+
+        for (const reply of replies) {
+            const idx = (reply.post_index || reply.index) - 1;
+            if (idx >= 0 && idx < posts.length) {
+                results.set(posts[idx].author, reply.reply_text || "");
+            }
+        }
+        return results;
+    } catch { return results; }
+}
+
+export function fallbackLinkedInReply(author: string, productName: string): string {
+    return `Great share, ${author.split(' ')[0]}. I actually built ${productName} to help with exactly this kind of challenge. Would love to hear your thoughts on it sometime.`;
+}

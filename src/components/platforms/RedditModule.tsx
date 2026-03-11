@@ -302,24 +302,70 @@ export default function RedditModule({ product }: { product: any }) {
 
             {/* Compact Search Bar */}
             <div className="glass-card p-5 border-orange-500/20 bg-orange-600/[0.02]">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-orange-600/10">
+                            <MessageSquare className="w-4 h-4 text-orange-600" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">REDDIT POST GENERATOR</h2>
+                            <p className="text-[10px] font-bold text-gray-500 tracking-widest italic opacity-60 uppercase">Enter a topic (or click a signal above) → Find communities → Draft value-first content</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => { setView("saved"); loadSavedDrafts(); }}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-600/5 hover:bg-orange-600/10 text-[10px] font-bold text-orange-500 transition-all border border-orange-500/10"
+                    >
+                        <BookOpen className="w-3 h-3 text-orange-400" />
+                        {savedDrafts.length > 0 ? `${savedDrafts.length} Saved` : 'History'}
+                    </button>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-6 mb-6">
+                    <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Length</span>
+                        <div className="flex bg-black/40 p-1 rounded-lg border border-white/5">
+                            {(['short', 'balanced', 'deep'] as const).map((l) => (
+                                <button
+                                    key={l}
+                                    onClick={() => setPreferredLength(l)}
+                                    className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${preferredLength === l ? "bg-zinc-800 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
+                                >
+                                    {l}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Strategy</span>
+                        <div className="flex bg-black/40 p-1 rounded-lg border border-white/5">
+                            <button
+                                onClick={() => setIsProductLed(true)}
+                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${isProductLed ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
+                            >
+                                Product-Led
+                            </button>
+                            <button
+                                onClick={() => setIsProductLed(false)}
+                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${!isProductLed ? "bg-white/10 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
+                            >
+                                General Viral
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="flex gap-3">
                     <input
                         value={niche}
                         onChange={(e) => setNiche(e.target.value)}
-                        className="flex-1 bg-[#0a0f1d] border border-white/5 rounded-xl px-4 py-3 text-xs font-medium focus:border-orange-500/30 outline-none text-white placeholder:text-gray-600 transition-all font-sans italic"
+                        className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs font-medium focus:border-orange-500/30 outline-none text-white placeholder:text-gray-600 transition-all font-sans italic"
                         placeholder="SaaS subscription fatigue / tracking trial renewals"
                         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
-                    <button onClick={handleSearch} disabled={!niche.trim()} className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-black rounded-xl transition-all shadow-xl shadow-orange-600/10 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap uppercase text-[10px] tracking-widest">
+                    <button onClick={handleSearch} disabled={!niche.trim()} className="px-8 py-3 bg-orange-600 hover:bg-orange-500 text-white font-black rounded-xl transition-all shadow-xl shadow-orange-600/10 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap uppercase text-[10px] tracking-widest">
                         <Search className="w-3.5 h-3.5" /> Find Communities
-                    </button>
-                    <button
-                        onClick={() => { setView("saved"); loadSavedDrafts(); }}
-                        className="px-3 py-3 bg-orange-600/10 hover:bg-orange-600/20 text-orange-400 font-black rounded-xl transition-all flex items-center gap-2 text-xs flex-shrink-0 border border-orange-500/20"
-                        title="View Saved Drafts"
-                    >
-                        <BookOpen className="w-4 h-4" />
-                        <span className="text-[10px]">{savedDrafts.length > 0 ? savedDrafts.length : ''}</span>
                     </button>
                 </div>
             </div>
@@ -391,40 +437,6 @@ export default function RedditModule({ product }: { product: any }) {
                             </button>
                         </div>
 
-                        <div className="flex items-center gap-6 mb-4 mt-2 px-2">
-                            <div className="flex items-center gap-3">
-                                <div className="flex bg-[#FF4500]/5 p-1 rounded-lg border border-[#FF4500]/10">
-                                    {(['short', 'balanced', 'deep'] as const).map((l) => (
-                                        <button
-                                            key={l}
-                                            onClick={() => setPreferredLength(l)}
-                                            className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${preferredLength === l ? "bg-[#FF4500]/20 text-[#FF4500]" : "text-gray-500 hover:text-gray-300"}`}
-                                        >
-                                            {l}
-                                        </button>
-                                    ))}
-                                </div>
-                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest italic">Length</span>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <div className="flex bg-[#FF4500]/5 p-1 rounded-lg border border-[#FF4500]/10">
-                                    <button
-                                        onClick={() => setIsProductLed(true)}
-                                        className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${isProductLed ? "bg-[#FF4500]/20 text-[#FF4500]" : "text-gray-500 hover:text-gray-300"}`}
-                                    >
-                                        Product-Led
-                                    </button>
-                                    <button
-                                        onClick={() => setIsProductLed(false)}
-                                        className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
-                                    >
-                                        General Viral
-                                    </button>
-                                </div>
-                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest italic">Type</span>
-                            </div>
-                        </div>
 
                         <div className="glass-card p-6 bg-black/40 border-white/5 min-h-[250px] flex flex-col justify-between relative overflow-hidden">
                             {generating ? (

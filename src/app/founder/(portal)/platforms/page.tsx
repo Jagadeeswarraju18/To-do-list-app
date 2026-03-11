@@ -11,6 +11,7 @@ import TwitterModule from "@/components/platforms/TwitterModule";
 import { useUser } from "@/components/providers/UserProvider";
 import { setActiveProductAction } from "@/app/actions/product-actions";
 import { toast } from "sonner";
+import MicroInterview from "@/components/dashboard/MicroInterview";
 
 export default function PlatformStrategyPage() {
     const { user, product, loading: userLoading, refreshData } = useUser();
@@ -54,10 +55,10 @@ export default function PlatformStrategyPage() {
         <div className="w-full space-y-10 animate-fade-up">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-2">Platform Strategy</h1>
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-2">Brand Command</h1>
                     <div className="flex items-center gap-3">
                         <p className="text-gray-400 font-medium tracking-tight text-sm">
-                            Turn high-intent signals into strategic growth assets.
+                            Manage your founder persona and platform distribution.
                         </p>
                         <div className="h-4 w-px bg-white/10 hidden sm:block" />
 
@@ -114,6 +115,11 @@ export default function PlatformStrategyPage() {
                         <span>{tab.label}</span>
                     </button>
                 ))}
+            </div>
+
+            {/* Micro-Interview Section */}
+            <div className="w-full">
+                <MicroInterview productId={product?.id} />
             </div>
 
             {/* Daily Briefing Section Removed */}

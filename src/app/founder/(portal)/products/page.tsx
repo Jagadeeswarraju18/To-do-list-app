@@ -212,13 +212,11 @@ export default function ProductsPage() {
                 pain_solved: formData.pain_solved,
                 keywords: formData.keywords,
                 pain_phrases: formData.pain_phrases,
+                competitors: formData.competitors,
                 scan_window: formData.scan_window,
                 outreach_tone: formData.outreach_tone,
                 updated_at: new Date().toISOString(),
             };
-
-            // Note: competitors field requires DB migration before saving
-            // Run in Supabase SQL editor: ALTER TABLE public.products ADD COLUMN IF NOT EXISTS competitors TEXT[] DEFAULT ARRAY[]::TEXT[];
 
             if (formData.id) {
                 const { error } = await supabase.from("products").update(updateData).eq("id", formData.id);
@@ -265,7 +263,7 @@ export default function ProductsPage() {
     const remainingSlots = limits[tier] - products.length;
 
     return (
-        <div className="max-w-6xl mx-auto space-y-10">
+        <div className="space-y-10 animate-fade-up">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-4xl font-black tracking-tight mb-2">My Products</h1>
@@ -570,14 +568,16 @@ export default function ProductsPage() {
                                         <div>
                                             <label className="text-sm font-black uppercase tracking-widest text-zinc-500 mb-6 block">Scan Sensitivity</label>
                                             <div className="space-y-4">
-                                                {["24h", "72h", "7d", "30d"].map(opt => (
+                                                {["24h", "72h", "7d", "30d", "90d", "180d"].map(opt => (
                                                     <label key={opt} className={`flex items-center gap-4 p-4 rounded-2xl border bg-black/20 cursor-pointer transition-all ${formData.scan_window === opt ? "border-primary bg-primary/5" : "border-white/5 hover:border-primary/30"}`}>
                                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.scan_window === opt ? "border-primary" : "border-zinc-700"}`}>
                                                             {formData.scan_window === opt && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className={`text-sm font-bold ${formData.scan_window === opt ? "text-white" : "text-zinc-500"}`}>Last {opt}</span>
-                                                            <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">{opt === '24h' ? 'High Precision' : 'Broad Range'}</span>
+                                                            <span className={`text-sm font-bold ${formData.scan_window === opt ? "text-white" : "text-zinc-500"}`}>{opt === '180d' ? 'Last 6 Months' : `Last ${opt}`}</span>
+                                                            <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+                                                                {opt === '24h' ? 'Highest freshness' : opt === '72h' ? 'Very recent' : opt === '7d' ? 'Tight range' : opt === '30d' ? 'Balanced default' : opt === '90d' ? 'More coverage' : 'Historical mining'}
+                                                            </span>
                                                         </div>
                                                     </label>
                                                 ))}

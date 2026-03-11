@@ -9,6 +9,22 @@ export type UrgencyLevel = 'low' | 'medium' | 'high';
 export type PreferredLength = 'short' | 'balanced' | 'deep';
 export type PainType = string;
 
+// --- NEW STRATEGIC TYPES ---
+export type BridgeArchetype =
+    | 'THE_UNFAIR_COMPETITION'
+    | 'THE_HIDDEN_TOXICITY'
+    | 'THE_FOUNDER_MISTAKE'
+    | 'THE_BETTER_WAY'
+    | 'THE_CONTRARIAN_TRUTH'
+    | 'DIRECT_VALUE';
+
+export interface VibeRules {
+    emojisAllowed: boolean;
+    formality: 'low' | 'medium' | 'high';
+    jargonTolerance: 'low' | 'medium' | 'high';
+    forbiddenKeywords: string[];
+}
+
 export interface StrategyParams {
     signalContext?: string;
     userInput?: string;
@@ -29,6 +45,9 @@ export interface ComputedStrategy {
     isSignalBased: boolean;
     hasPersonalContext: boolean;
     heuristicScore: number;
+    // New Strategic Additions
+    bridgeArchetype: BridgeArchetype;
+    vibeRules: VibeRules;
 }
 
 export interface PlatformToneConfig {
@@ -117,13 +136,33 @@ export function computePlatformFormat(platform: Platform): PlatformFormat {
 
 // --- 6. Compute Platform Persona (Strict Enforcement) ---
 export function computePlatformTone(platform: Platform, length: PreferredLength = 'balanced'): PlatformToneConfig {
+    const lengthMap = {
+        short: {
+            twitter: "Max 160 characters. 1-2 punchy sentences maximum.",
+            linkedin: "Max 2-3 short sentences. Extremely concise. 1 tiny paragraph.",
+            reddit: "Max 100 words. Direct insight or answer. Zero fluff."
+        },
+        balanced: {
+            twitter: "Max 240 characters. 1-2 paragraphs maximum.",
+            linkedin: "Max 3 short paragraphs. Clear, direct, and efficient.",
+            reddit: "Max 250 words. Concise story or detail. No filler."
+        },
+        deep: {
+            twitter: "Strictly max 280 characters. Deep dense insight or mini-story.",
+            linkedin: "Max 4-5 short paragraphs. Detailed but highly efficient.",
+            reddit: "Max 400 words. Detailed breakdown without unnecessary bulk."
+        }
+    };
+
+    const currentLen = lengthMap[length];
+
     switch (platform) {
         case 'twitter':
             return {
-                structure: 'Line-separated, Short punchy sentences, No thread formatting.',
+                structure: `${currentLen.twitter} Line-separated, Short punchy sentences, No thread formatting.`,
                 energy: 'Medium-high, Personal, Direct.',
                 promotionTolerance: 'Low (No direct selling).',
-                sentenceDensity: 'low',
+                sentenceDensity: length === 'short' ? 'low' : 'medium',
                 forbiddenPatterns: [
                     'In today’s world', 'Game-changer', 'Unlock', 'Here are 5...', 'Thread 🧵',
                     'Let that sink in', 'Crushing it', 'Hustle harder', 'Here’s what I learned',
@@ -131,6 +170,7 @@ export function computePlatformTone(platform: Platform, length: PreferredLength 
                 ],
                 systemInstruction: `PLATFORM: X (Twitter)
                 TONE: Personal, Direct, Medium-high energy.
+                LENGTH CONSTRAINT: ${currentLen.twitter}
                 RULES:
                 - Low density. Strong hook. One vivid moment.
                 - End with question or sharp belief.
@@ -138,30 +178,32 @@ export function computePlatformTone(platform: Platform, length: PreferredLength 
             };
         case 'linkedin':
             return {
-                structure: 'Structured paragraphs, Medium density.',
+                structure: `${currentLen.linkedin} Structured paragraphs.`,
                 energy: 'Calm, Reflective, Subtle authority.',
                 promotionTolerance: 'Subtle positioning (No aggressive CTA).',
-                sentenceDensity: 'medium',
+                sentenceDensity: length === 'short' ? 'low' : 'medium',
                 forbiddenPatterns: [
                     'In today’s world', 'Game-changer', 'Unlock', 'Meme tone',
                     'Twitter-style short lines', 'Aggressive CTA'
                 ],
                 systemInstruction: `PLATFORM: LinkedIn
                 TONE: Calm, Reflective, Professional but human.
+                LENGTH CONSTRAINT: ${currentLen.linkedin}
                 RULES:
                 - Include 1 concrete business example.
-                - Slightly longer. Soft close.
+                - Soft close.
                 - No slang. No meme tone.`
             };
         case 'reddit':
             return {
-                structure: 'Long-form, High density, Explanatory.',
+                structure: `${currentLen.reddit} High density, Explanatory.`,
                 energy: 'Peer-to-peer, Honest, Neutral.',
                 promotionTolerance: 'No selling (No "check my product").',
-                sentenceDensity: 'high',
+                sentenceDensity: length === 'deep' ? 'high' : 'medium',
                 forbiddenPatterns: ['Promotional CTA', 'Polished marketing language', 'Buzzwords'],
                 systemInstruction: `PLATFORM: Reddit
                 TONE: Peer-to-peer, Honest, Neutral energy.
+                LENGTH CONSTRAINT: ${currentLen.reddit}
                 RULES:
                 - Value-first. Show thought process.
                 - Add real detail. No selling.`
@@ -220,6 +262,73 @@ export function calculateHeuristicScore(urgency: UrgencyLevel, isSignal: boolean
     return score; // 50-90
 }
 
+// --- NEW: Bridge Archetype Logic ---
+export function computeBridgeArchetype(input: string, goal: ContentGoal): BridgeArchetype {
+    const lower = input.toLowerCase();
+
+    // Default to direct value unless we detect a specific strategic opportunity
+    if (goal === 'introduce_product') return 'DIRECT_VALUE';
+
+    if (/\b(hate|sucks|terrible|slow|annoying|tired of|frustrating)\b/.test(lower)) {
+        return 'THE_HIDDEN_TOXICITY'; // They hate the current way
+    }
+
+    if (/\b(big tech|enterprise|expensive|enterprise|salesforce|hubspot)\b/.test(lower)) {
+        return 'THE_UNFAIR_COMPETITION'; // Goliath vs David
+    }
+
+    if (/\b(fail|mistake|wrong|loss|cost me|didn't work)\b/.test(lower)) {
+        return 'THE_FOUNDER_MISTAKE'; // Empathy through shared failure
+    }
+
+    if (goal === 'challenge_norm') {
+        return 'THE_CONTRARIAN_TRUTH';
+    }
+
+    return 'THE_BETTER_WAY'; // Generic positive bridge
+}
+
+// --- NEW: Vibe Detection ---
+export function computeVibe(platform: Platform, input: string): VibeRules {
+    const lower = input.toLowerCase();
+
+    // Default baselines
+    const vibe: VibeRules = {
+        emojisAllowed: true,
+        formality: 'medium',
+        jargonTolerance: 'medium',
+        forbiddenKeywords: []
+    };
+
+    if (platform === 'linkedin') {
+        vibe.formality = 'high';
+        vibe.jargonTolerance = 'high';
+        // LinkedIn allows emojis but keep it professional
+        vibe.forbiddenKeywords = ['bro', 'lmao', 'wtf'];
+    }
+
+    if (platform === 'twitter') {
+        vibe.formality = 'low';
+        vibe.jargonTolerance = 'low';
+        vibe.forbiddenKeywords = ['synergy', 'leverage', 'paradigm'];
+    }
+
+    if (platform === 'reddit') {
+        vibe.formality = 'low';
+        vibe.emojisAllowed = false; // Reddit hates emojis generally
+        vibe.jargonTolerance = 'low';
+        vibe.forbiddenKeywords = ['subscribe', 'check out my', 'link in bio', 'growth hack'];
+
+        // Specific strict subreddits detection (simplified)
+        if (lower.includes('programming') || lower.includes('developer') || lower.includes('coding')) {
+            vibe.formality = 'medium';
+            vibe.forbiddenKeywords.push('marketing', 'sales', 'funnel');
+        }
+    }
+
+    return vibe;
+}
+
 // --- Main Engine Function ---
 export function computeStrategy(params: StrategyParams): ComputedStrategy {
     const input = params.userInput || params.signalContext || "";
@@ -238,6 +347,8 @@ export function computeStrategy(params: StrategyParams): ComputedStrategy {
         hookFocus: computeHookFocus(computePositioningAngle(mode, goal), params.urgency),
         isSignalBased: !!params.signalContext,
         hasPersonalContext: hasPersonal,
-        heuristicScore: calculateHeuristicScore(params.urgency || 'medium', !!params.signalContext)
+        heuristicScore: calculateHeuristicScore(params.urgency || 'medium', !!params.signalContext),
+        bridgeArchetype: computeBridgeArchetype(input, goal),
+        vibeRules: computeVibe(params.platform, input)
     };
 }

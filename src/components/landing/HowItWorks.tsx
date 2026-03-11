@@ -44,11 +44,11 @@ export function HowItWorks() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-6xl font-black text-white mb-6"
+                        className="text-2xl md:text-6xl font-black text-white mb-6 uppercase tracking-tight"
                     >
                         The 3-Step <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-400 to-slate-400">Demand Engine.</span>
                     </motion.h2>
-                    <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
+                    <p className="text-gray-400 text-[10px] md:text-xl max-w-2xl mx-auto leading-relaxed">
                         Stop hunting for leads. Build a repeatable system that brings customers to your doorstep.
                     </p>
                 </div>
@@ -72,8 +72,8 @@ export function HowItWorks() {
                                     {step.id}
                                 </div>
                             </div>
-                            <h3 className="text-2xl font-black text-white mb-4 uppercase tracking-tighter">{step.title}</h3>
-                            <p className="text-gray-500 font-medium leading-relaxed">
+                            <h3 className="text-base md:text-2xl font-black text-white mb-4 uppercase tracking-tighter">{step.title}</h3>
+                            <p className="text-gray-500 text-[10px] md:text-lg font-medium leading-relaxed">
                                 {step.desc}
                             </p>
                         </motion.div>
@@ -90,7 +90,7 @@ export function HowItWorks() {
                         <div className="flex items-center gap-3 text-primary text-sm font-black uppercase tracking-widest">
                             <CheckCircle2 className="w-5 h-5" /> ROI-Focused Guarantee
                         </div>
-                        <h3 className="text-3xl font-black text-white leading-tight">
+                        <h3 className="text-base md:text-3xl font-black text-white leading-tight">
                             "If you don't find high-intent demand signals within 48 hours, we'll work with you 1-on-1 until you do."
                         </h3>
                     </div>

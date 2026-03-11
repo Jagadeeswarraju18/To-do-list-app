@@ -93,21 +93,26 @@ export async function generateContentAction(params: GenerationParams) {
     - Use simple periods, commas, or single dashes (-) if needed.
     - Blunt and reflective sentences should feel like "founder typing between product builds."
 
-    PLATFORM PERSONA:
+    PLATFORM PERSONA & VIBE:
     - ${strategy.platformTone.systemInstruction}
     - Platform: ${platform.toUpperCase()}
     - Constraints: ${strategy.platformTone.structure}
-    - Banned Phrases: ${strategy.platformTone.forbiddenPatterns.join(', ')}
+    - Emojis: ${strategy.vibeRules.emojisAllowed ? "Allowed" : "STRICTLY BANNED"}
+    - Formality: ${strategy.vibeRules.formality}
+    - Jargon Tolerance: ${strategy.vibeRules.jargonTolerance}
+    - Banned Phrases: ${strategy.vibeRules.forbiddenKeywords.join(', ')}, ${strategy.platformTone.forbiddenPatterns.join(', ')}
 
-    PRODUCT MENTION RULE:
+    PRODUCT MENTION RULE (${strategy.bridgeArchetype}):
     - Mention Level: ${strategy.productMentionLevel}
-    - Only mention product if it fits naturally and contextually. If it sounds like a pitch → REMOVE.
+    - Archetype to apply: ${strategy.bridgeArchetype}
+    - Only mention product if it fits naturally and contextually using the archetype. If it sounds like a pitch → REMOVE.
 
     INPUT VARIABLES:
     - Platform: ${platform}
     - Mode: ${strategy.hasPersonalContext ? 'Personal Story' : 'Insight Breakdown'}
     - Positioning Angle: ${strategy.positioningAngle}
     - Content Goal: ${strategy.contentGoal}
+    - PREFERRED LENGTH: ${preferredLength?.toUpperCase() || 'BALANCED'}
 
     OUTPUT FORMAT:
     Return a JSON object:
@@ -142,14 +147,18 @@ export async function generateContentAction(params: GenerationParams) {
     - Keep it simple, conversational, and punchy.
     - Vary sentence lengths to create a natural rhythm. DO NOT use overly robotic or uniformly choppy sentences.
     
-    PLATFORM PERSONA:
+    PLATFORM PERSONA & VIBE:
     - ${strategy.platformTone.systemInstruction}
     - Platform: ${platform.toUpperCase()}
+    - Emojis: ${strategy.vibeRules.emojisAllowed ? "Allowed" : "STRICTLY BANNED"}
+    - Formality: ${strategy.vibeRules.formality}
+    - Banned Phrases: ${strategy.vibeRules.forbiddenKeywords.join(', ')}
 
     INPUT VARIABLES:
     - Platform: ${platform}
     - Positioning Angle: ${strategy.positioningAngle}
     - Content Goal: ${strategy.contentGoal}
+    - PREFERRED LENGTH: ${preferredLength?.toUpperCase() || 'BALANCED'}
 
     OUTPUT FORMAT:
     Return a JSON object:
@@ -239,16 +248,51 @@ export async function generateContentAction(params: GenerationParams) {
   }
 
   try {
+    console.log("Starting Pass 1: Raw Generation...");
     let result = await callAI();
 
     // 4. Authenticity Filter / Scoring
     // If total < 6, regenerate once.
     if (result.internal_scoring?.total_score < 6) {
-      console.log("Low score detected, regenerating...", result.internal_scoring.total_score);
+      console.log("Low score detected, regenerating Pass 1...", result.internal_scoring.total_score);
       result = await callAI();
     }
 
-    const generatedText = result.post_text || "";
+    const firstPassText = result.post_text || "";
+
+    // --- PASS 2: THE CRITIC (ANTI-AI HUMANIZATION) ---
+    console.log("Starting Pass 2: The Critic...");
+    const criticSystemPrompt = `You are "The Critic" - a cynical, brilliant founder who hates AI marketing speak.
+    Your job is to read a draft post and aggressively strip out ANY words that smell like AI ("seamless", "leverage", "empower", "unlock", "crucial", "testament", "tapestry", "game-changer", etc.).
+    
+    RULES:
+    1. Make it sound like a tired, honest human wrote it on their phone.
+    2. Shorten anything that is overly verbose.
+    3. Remove any remaining clichés.
+    4. Keep the core insight/story intact, but make the *delivery* gritty and real.
+    
+    OUTPUT JSON FORMAT:
+    {
+      "humanized_text": "The aggressively edited final text",
+      "critic_redline": [
+        {"original": "seamlessly integrate", "reason": "sounds like a b2b SaaS landing page"},
+        {"original": "game changer", "reason": "cliche"}
+      ]
+    }`;
+
+    const criticResponse = await openai.chat.completions.create({
+      model: model,
+      messages: [
+        { role: "system", content: criticSystemPrompt },
+        { role: "user", content: `HUMANIZE THIS DRAFT:\n\n${firstPassText}` }
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const criticResult = JSON.parse(criticResponse.choices[0].message.content || "{}");
+    const generatedText = criticResult.humanized_text || firstPassText;
+    const criticRedline = criticResult.critic_redline || [];
+    console.log("Pass 2 Complete. Redlines found:", criticRedline.length);
 
     // 5. Async Logging
     (async () => {
@@ -282,7 +326,8 @@ export async function generateContentAction(params: GenerationParams) {
         analysis: {
           predicted_engagement_score: result.analysis?.predicted_engagement_score || 8,
           reasoning: result.analysis?.reasoning || "Authentic founder voice."
-        }
+        },
+        criticRedline
       };
     } else if (platform === 'linkedin') {
       // Split into hook, body, cta for LinkedIn UI compatibility
@@ -299,7 +344,8 @@ export async function generateContentAction(params: GenerationParams) {
         analysis: {
           predicted_engagement_score: result.analysis?.predicted_engagement_score || 8,
           reasoning: result.analysis?.reasoning || "Thought leadership at scale."
-        }
+        },
+        criticRedline
       };
     } else if (platform === 'reddit') {
       // Split title and body if generated in markdown style # Title \n Body
@@ -313,11 +359,12 @@ export async function generateContentAction(params: GenerationParams) {
         analysis: {
           predicted_engagement_score: result.analysis?.predicted_engagement_score || 8,
           reasoning: result.analysis?.reasoning || "Peer-to-peer value delivery."
-        }
+        },
+        criticRedline
       };
     }
 
-    return { content: generatedText };
+    return { content: generatedText, criticRedline };
 
   } catch (error: any) {
     console.error("Generation Error:", error);

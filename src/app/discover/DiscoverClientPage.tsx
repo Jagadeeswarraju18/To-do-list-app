@@ -1,224 +1,217 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Users, ArrowUpRight, Sparkles, Radar, Layers } from "lucide-react";
+import {
+    Users, ArrowUpRight, Sparkles, Radar, Layers, Search, Activity,
+    LayoutGrid, Brain, Database, Code2, Palette, Filter, ChevronRight
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { SignalButton } from "@/components/ui/SignalButton";
 
-export function DiscoverClientPage({ products }: { products: any[] }) {
+export function DiscoverClientPage({ products: initialProducts }: { products: any[] }) {
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-    const [isMounted, setIsMounted] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("All Products");
 
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    const colors = [
-        { primary: "bg-blue-500", secondary: "bg-purple-500", border: "group-hover:border-blue-500/50", glow: "group-hover:shadow-[0_20px_40px_-20px_rgba(59,130,246,0.3)]" },
-        { primary: "bg-emerald-500", secondary: "bg-teal-500", border: "group-hover:border-emerald-500/50", glow: "group-hover:shadow-[0_20px_40px_-20px_rgba(16,185,129,0.3)]" },
-        { primary: "bg-rose-500", secondary: "bg-orange-500", border: "group-hover:border-rose-500/50", glow: "group-hover:shadow-[0_20px_40px_-20px_rgba(244,63,94,0.3)]" },
-        { primary: "bg-indigo-500", secondary: "bg-cyan-500", border: "group-hover:border-indigo-500/50", glow: "group-hover:shadow-[0_20px_40px_-20px_rgba(99,102,241,0.3)]" },
-        { primary: "bg-fuchsia-500", secondary: "bg-pink-500", border: "group-hover:border-fuchsia-500/50", glow: "group-hover:shadow-[0_20px_40px_-20px_rgba(217,70,239,0.3)]" },
-        { primary: "bg-amber-500", secondary: "bg-red-500", border: "group-hover:border-amber-500/50", glow: "group-hover:shadow-[0_20px_40px_-20px_rgba(245,158,11,0.3)]" },
+    const categories = [
+        { name: "All Products", icon: LayoutGrid },
+        { name: "Marketing", icon: Sparkles },
+        { name: "Artificial Intelligence", icon: Brain },
+        { name: "B2B SaaS", icon: Database },
+        { name: "Developer Tools", icon: Code2 },
+        { name: "Design", icon: Filter },
+        { name: "Others", icon: ChevronRight },
     ];
+
+    const filteredProducts = useMemo(() => {
+        return initialProducts.filter(p => {
+            const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (p.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesCategory = selectedCategory === "All Products" || p.category === selectedCategory;
+            return matchesSearch && matchesCategory;
+        });
+    }, [initialProducts, searchQuery, selectedCategory]);
 
     const container = {
         hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
+        show: { opacity: 1, transition: { staggerChildren: 0.05 } }
     } as const;
 
     const item = {
-        hidden: { opacity: 0, y: 30, scale: 0.95 },
-        show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
+        hidden: { opacity: 0, y: 15 },
+        show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 25 } }
     } as const;
 
     return (
-        <div className="min-h-screen flex flex-col bg-[#020617] text-slate-100 font-sans selection:bg-blue-500/30 overflow-hidden relative">
-            {/* Ambient Deep Blue Background Orbs */}
-            <motion.div
-                animate={{ scale: [1, 1.1, 1], opacity: [0.15, 0.25, 0.15] }}
-                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-[20%] -left-[10%] w-[60vw] h-[60vw] bg-blue-600/20 rounded-full blur-[150px] pointer-events-none mix-blend-screen"
-            />
-            <motion.div
-                animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
-                transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                className="absolute top-[40%] text-right -right-[10%] w-[50vw] h-[50vw] bg-indigo-600/20 rounded-full blur-[150px] pointer-events-none mix-blend-screen"
-            />
+        <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden relative">
+            {/* Ambient Background */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] opacity-30" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:32px_32px]" />
+            </div>
 
-            {/* Subtle Patterns */}
-            <div className="absolute inset-0 z-0 pointer-events-none bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
-            <div className="absolute inset-0 z-0 pointer-events-none bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+            <header className="w-full max-w-7xl mx-auto px-6 pt-12 pb-16 relative z-50">
+                {/* Navbar */}
+                <div className="flex items-center justify-between mb-24">
+                    <Link href="/" className="group flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-[#0f172a] border border-blue-500/20 flex items-center justify-center shadow-xl group-hover:border-blue-500/40 transition-all duration-500">
+                            <Radar className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">Discover</span>
+                            <span className="text-[9px] font-bold tracking-[.2em] text-slate-500 uppercase mt-1">Founders Directory</span>
+                        </div>
+                    </Link>
 
-            {/* Header */}
-            <header className="w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative z-50">
-                <Link href="/" className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/20 group-hover:border-blue-500/40 transition-all shadow-[0_0_15px_rgba(59,130,246,0.15)]">
-                        <Radar className="w-5 h-5 text-blue-400 group-hover:rotate-12 transition-transform duration-500" />
+                    <div className="flex items-center gap-6">
+                        <Link href="/login" className="text-sm font-bold text-slate-500 hover:text-white transition-colors">Sign In</Link>
+                        <Link href="/signup" className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold text-sm text-white shadow-lg transition-all active:scale-95 border border-blue-400/20">
+                            Submit Application
+                        </Link>
                     </div>
-                    <span className="font-extrabold text-xl tracking-tight text-white/90 group-hover:text-white transition-colors">DemandRadar</span>
-                </Link>
-                <div className="flex items-center gap-4">
-                    <Link href="/login" className="text-sm font-semibold text-slate-400 hover:text-white transition-colors hidden sm:block">
-                        Sign In
-                    </Link>
-                    <Link href="/signup" className="group relative px-5 py-2.5 overflow-hidden rounded-full bg-blue-600 hover:bg-blue-500 transition-colors shadow-[0_0_20px_rgba(59,130,246,0.25)] hover:shadow-[0_0_30px_rgba(59,130,246,0.4)]">
-                        <span className="relative z-10 font-bold text-sm text-white">Create Profile</span>
-                    </Link>
                 </div>
-            </header>
 
-            <main className="w-full flex-grow pt-8 pb-24 px-6 max-w-7xl mx-auto relative z-10 flex flex-col">
-                <div className="flex flex-col items-center text-center mb-12 max-w-3xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 font-bold text-xs tracking-widest backdrop-blur-sm"
-                    >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        Directory
-                    </motion.div>
-
+                {/* Hero Section */}
+                <div className="flex flex-col items-center text-center mb-16 px-4">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-5 text-white leading-[1.1] max-w-4xl"
+                        transition={{ duration: 0.6 }}
+                        className="text-5xl md:text-7xl font-black tracking-tight text-white mb-6 leading-[1.1]"
                     >
-                        Discover products people <br className="hidden sm:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 inline-block drop-shadow-[0_0_15px_rgba(59,130,246,0.4)] mt-1 sm:mt-0">
-                            actually want to use
-                        </span>
+                        The Future of <br />
+                        <span className="text-blue-400 drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]">Indie Software</span>
                     </motion.h1>
-
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
                         className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed"
                     >
-                        A curated directory of high-conviction tools from founders shipping real products. Clean signal, fast evaluation, and direct access.
+                        Browse high-signal tools built by founders who ship daily. Upvote your favorites and join the ecosystem.
                     </motion.p>
                 </div>
 
-                {!products || products.length === 0 ? (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex-1 flex flex-col items-center justify-center py-20 bg-slate-900/40 border border-slate-800/60 rounded-3xl backdrop-blur-sm"
-                    >
-                        <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mb-6 border border-blue-500/20">
-                            <Layers className="w-8 h-8 text-blue-400" />
+                {/* Unified Search & Category Bar */}
+                <div className="max-w-7xl mx-auto">
+                    <div className="p-2 bg-[#0f172a]/40 border border-slate-800/40 rounded-[28px] backdrop-blur-3xl shadow-2xl flex flex-col lg:flex-row items-center gap-3">
+                        {/* Search Input Area */}
+                        <div className="relative group flex-shrink-0 w-full lg:w-72 pl-4">
+                            <Search className="absolute left-8 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-blue-400 transition-colors z-10" />
+                            <input
+                                type="text"
+                                placeholder="Search products, problems, or four"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 bg-[#0f172a]/20 border border-slate-800/20 rounded-2xl focus:outline-none focus:border-blue-500/20 text-white placeholder:text-slate-600 transition-all font-bold text-sm"
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 px-1.5 py-0.5 bg-slate-800/40 rounded text-[8px] font-black text-slate-600 tracking-widest uppercase pointer-events-none">CMD + K</div>
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-2">The vault is empty</h2>
-                        <p className="text-slate-500 font-medium">Founders are still setting up their profiles.</p>
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        variants={container}
-                        initial="hidden"
-                        animate="show"
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[minmax(280px,auto)]"
-                    >
-                        {products.map((product, index) => {
-                            const profile = Array.isArray(product.profiles) ? product.profiles[0] : product.profiles;
-                            const isHovered = hoveredCard === product.id;
-                            const theme = colors[index % colors.length];
 
-                            return (
-                                <motion.div
-                                    key={product.id}
-                                    variants={item}
-                                    className="h-full relative group"
-                                    onMouseEnter={() => setHoveredCard(product.id)}
-                                    onMouseLeave={() => setHoveredCard(null)}
+                        {/* Category Buttons Horizontal Scroll */}
+                        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full px-2 py-1 scroll-smooth">
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat.name}
+                                    onClick={() => setSelectedCategory(cat.name)}
+                                    className={`flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all whitespace-nowrap font-bold text-xs ${selectedCategory === cat.name
+                                            ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]'
+                                            : 'bg-[#0f172a]/40 border-slate-800/40 text-slate-500 hover:bg-slate-800/60 hover:border-slate-700 hover:text-slate-300'
+                                        }`}
                                 >
-                                    <Link href={`/discover/${product.id}`} className="block h-full outline-none">
-                                        <div className={`relative h-full bg-[#0a0f1c] backdrop-blur-xl rounded-[32px] border border-slate-800/80 overflow-hidden transition-all duration-500 ${theme.border} hover:-translate-y-2 ${theme.glow}`}>
+                                    <cat.icon className={`w-4 h-4 ${selectedCategory === cat.name ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                                    <span>{cat.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-                                            {/* Colorful Top Banner */}
-                                            <div className="h-32 w-full bg-slate-900 relative overflow-hidden transition-all duration-500 group-hover:h-36">
-                                                <div className="absolute inset-0 opacity-20 bg-[url('/noise.png')] mix-blend-overlay z-10" />
-                                                <div className={`absolute -top-10 -left-10 w-48 h-48 rounded-full blur-3xl opacity-60 ${theme.primary} transition-all duration-700 group-hover:scale-150 group-hover:opacity-80`} />
-                                                <div className={`absolute -bottom-10 -right-10 w-48 h-48 rounded-full blur-3xl opacity-40 ${theme.secondary} transition-all duration-700 group-hover:scale-150 group-hover:opacity-60`} />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1c] to-transparent z-20" />
+            <main className="w-full max-w-7xl mx-auto px-6 pb-20 relative z-10">
+                <AnimatePresence mode="wait">
+                    {filteredProducts.length === 0 ? (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-32 flex flex-col items-center justify-center text-center">
+                            <Layers className="w-12 h-12 text-slate-800 mb-6" />
+                            <h2 className="text-xl font-black text-slate-600 uppercase tracking-tighter">No signals found</h2>
+                        </motion.div>
+                    ) : (
+                        <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredProducts.map((product) => {
+                                const profile = Array.isArray(product.profiles) ? product.profiles[0] : product.profiles;
+
+                                return (
+                                    <motion.div key={product.id} variants={item} className="group">
+                                        <div className="h-full bg-[#0a0f1c] bg-gradient-to-b from-white/[0.02] to-transparent backdrop-blur-3xl rounded-[32px] border border-slate-800/60 p-8 flex flex-col transition-all duration-500 hover:border-blue-500/30 group-hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.5)]">
+
+                                            <div className="flex items-start justify-between mb-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="relative w-14 h-14 rounded-2xl bg-[#0f172a] border border-blue-500/10 flex items-center justify-center overflow-hidden transition-all group-hover:border-blue-400 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                                                        {profile?.avatar_url ? (
+                                                            <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <span className="text-xl font-black text-white italic">{(product.name || "A")[0].toLowerCase()}</span>
+                                                        )}
+                                                        <div className="absolute bottom-0 right-0 w-4 h-4 rounded-md bg-blue-600 border border-[#0a0f1c] flex items-center justify-center shadow-lg">
+                                                            <Activity className="w-2 h-2 text-white" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-end gap-[1px] h-3.5">
+                                                            <div className="w-[3px] bg-blue-400/20 h-1.5 rounded-full group-hover:bg-blue-400 group-hover:h-2 transition-all duration-500" />
+                                                            <div className="w-[3px] bg-blue-400/20 h-3.5 rounded-full group-hover:bg-blue-400 group-hover:h-4.5 transition-all duration-500 delay-75" />
+                                                            <div className="w-[3px] bg-blue-400/20 h-2 rounded-full group-hover:bg-blue-400 group-hover:h-3 transition-all duration-500 delay-150" />
+                                                        </div>
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 group-hover:text-blue-400/80 transition-colors">
+                                                            {product.upvotes_count || 0} Signal
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="px-3 py-1 rounded-lg bg-white/5 border border-white/5">
+                                                    <span className="text-[9px] font-black tracking-widest text-slate-500 uppercase">
+                                                        {product.category || "Other"}
+                                                    </span>
+                                                </div>
                                             </div>
 
-                                            <div className="p-6 pt-0 relative z-30 flex flex-col h-[calc(100%-8rem)] group-hover:h-[calc(100%-9rem)] transition-all duration-500">
-                                                {/* Avatar Overlap & Badges */}
-                                                <div className="relative -mt-10 mb-4 flex justify-between items-end">
-                                                    <div className="relative">
-                                                        {profile?.avatar_url ? (
-                                                            <img
-                                                                src={profile.avatar_url}
-                                                                alt={profile.full_name || "Founder"}
-                                                                className="w-[72px] h-[72px] rounded-2xl object-cover border-4 border-[#0a0f1c] bg-slate-800 shadow-xl transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-3"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-[72px] h-[72px] rounded-2xl bg-slate-800 flex items-center justify-center text-white font-bold text-2xl border-4 border-[#0a0f1c] shadow-xl transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-3">
-                                                                {(profile?.full_name || product.name || "F")[0].toUpperCase()}
-                                                            </div>
-                                                        )}
-                                                        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-[3px] border-[#0a0f1c] bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
-                                                    </div>
-
-                                                    {product.target_audience && (
-                                                        <div className="mb-2 px-3 py-1 bg-slate-800/80 backdrop-blur-md rounded-full border border-slate-700/50 shadow-sm transition-colors group-hover:bg-slate-800">
-                                                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest truncate max-w-[100px] block">
-                                                                {product.target_audience}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Title & Author */}
-                                                <div>
-                                                    <h3 className="font-extrabold text-[22px] leading-tight text-white tracking-tight transition-colors group-hover:text-blue-200">
-                                                        {product.name}
-                                                    </h3>
-                                                    <p className="text-sm font-semibold text-slate-500 mt-1">
-                                                        built by <span className="text-slate-300 transition-colors group-hover:text-white">{profile?.full_name || "Unknown"}</span>
-                                                    </p>
-                                                </div>
-
-                                                {/* Description */}
-                                                <p className="text-slate-400/90 text-[15px] leading-relaxed mt-4 line-clamp-3 font-medium">
-                                                    {product.description || product.pain_solved || "An innovative solution built by a DemandRadar founder."}
+                                            <div className="flex-grow">
+                                                <h2 className="text-2xl font-black tracking-tight text-white mb-1 group-hover:text-blue-100 transition-colors">
+                                                    {product.name}
+                                                </h2>
+                                                <p className="text-[13px] font-bold text-slate-500 mb-4">
+                                                    by <span className="text-slate-400 group-hover:text-slate-300 transition-colors">@{profile?.full_name || "maker"}</span>
                                                 </p>
+                                                <p className="text-slate-500/90 text-[14px] leading-relaxed line-clamp-2 font-medium">
+                                                    {product.description || product.pain_solved || "Innovative solutions from the DemandRadar builder network."}
+                                                </p>
+                                            </div>
 
-                                                {/* Spacer */}
-                                                <div className="flex-grow min-h-[1.5rem]" />
+                                            <div className="mt-8 flex items-center justify-between pt-2">
+                                                <SignalButton productId={product.id} initialUpvotes={product.upvotes_count || 0} />
 
-                                                {/* Footer Action */}
-                                                <div className="mt-4 pt-5 border-t border-slate-800/60 flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="flex h-2 w-2 rounded-full relative">
-                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                                                        </span>
-                                                        <span className="text-xs font-bold text-slate-400">Live app</span>
+                                                <Link href={`/discover/${product.id}`} className="group/btn flex items-center gap-4 pr-1.5 pl-6 py-1.5 rounded-full bg-[#0f172a] border border-white/5 hover:bg-blue-600 hover:border-blue-500 transition-all duration-500">
+                                                    <span className="text-[10px] font-black uppercase tracking-[.25em] text-white/50 group-hover/btn:text-white transition-colors">Launch</span>
+                                                    <div className="w-10 h-10 rounded-full bg-blue-600 border border-blue-400/30 flex items-center justify-center shadow-lg group-hover/btn:rotate-45 transition-all duration-500">
+                                                        <ArrowUpRight className="w-5 h-5 text-white" />
                                                     </div>
-
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-bold text-slate-300 transition-colors group-hover:text-white">Explore</span>
-                                                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center transition-all duration-300 group-hover:bg-blue-600 border border-slate-700 group-hover:border-blue-500 shadow-sm group-hover:shadow-[0_0_15px_rgba(59,130,246,0.6)]">
-                                                            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-white group-hover:rotate-45 transition-all duration-300" />
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                </Link>
                                             </div>
                                         </div>
-                                    </Link>
-                                </motion.div>
-                            )
-                        })}
-                    </motion.div>
-                )}
+                                    </motion.div>
+                                );
+                            })}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </main>
+
+            <style jsx global>{`
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
         </div>
     );
 }

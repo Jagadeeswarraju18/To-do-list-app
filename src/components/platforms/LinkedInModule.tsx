@@ -269,57 +269,57 @@ export default function LinkedInModule({ product }: { product: any }) {
 
             {/* Input - Rich UI */}
             <div className="glass-card p-5 border-[#0A66C2]/20">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-1.5 rounded-lg bg-[#0A66C2]/10">
-                            <PenTool className="w-4 h-4 text-[#0A66C2]" />
+                            <Linkedin className="w-4 h-4 text-[#0A66C2]" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-white">Content Generator</h2>
-                            <p className="text-[10px] text-muted-foreground">Enter a topic (or click a signal above) → Pick a hook → Get a full post</p>
+                            <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">LINKEDIN POST GENERATOR</h2>
+                            <p className="text-[10px] font-bold text-gray-500 tracking-widest italic opacity-60 uppercase">Enter a topic (or click a signal above) → Pick a hook → Get a full post</p>
                         </div>
                     </div>
                     <button
                         onClick={() => { setView("saved"); loadDrafts(); }}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 text-[10px] font-medium text-[#0A66C2] transition-all border border-[#0A66C2]/20"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 text-[10px] font-bold text-[#0A66C2] transition-all border border-[#0A66C2]/20"
                     >
                         <BookOpen className="w-3 h-3" />
                         {savedDrafts.length > 0 ? `${savedDrafts.length} Saved` : 'History'}
                     </button>
                 </div>
 
-                <div className="flex items-center gap-6 mb-4">
+                <div className="flex flex-wrap items-center gap-6 mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="flex bg-[#0A66C2]/5 p-1 rounded-lg border border-[#0A66C2]/10">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Length</span>
+                        <div className="flex bg-[#0A66C2]/5 p-1 rounded-lg border border-[#0A66C2]/10 font-sans">
                             {(['short', 'balanced', 'deep'] as const).map((l) => (
                                 <button
                                     key={l}
                                     onClick={() => setPreferredLength(l)}
-                                    className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${preferredLength === l ? "bg-[#0A66C2]/20 text-[#0A66C2]" : "text-gray-500 hover:text-gray-300"}`}
+                                    className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${preferredLength === l ? "bg-zinc-800 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
                                 >
                                     {l}
                                 </button>
                             ))}
                         </div>
-                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest italic">Length</span>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="flex bg-[#0A66C2]/5 p-1 rounded-lg border border-[#0A66C2]/10">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Strategy</span>
+                        <div className="flex bg-[#0A66C2]/5 p-1 rounded-lg border border-[#0A66C2]/10 font-sans">
                             <button
                                 onClick={() => setIsProductLed(true)}
-                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${isProductLed ? "bg-[#0A66C2]/20 text-[#0A66C2]" : "text-gray-500 hover:text-gray-300"}`}
+                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${isProductLed ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
                             >
                                 Product-Led
                             </button>
                             <button
                                 onClick={() => setIsProductLed(false)}
-                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
+                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${!isProductLed ? "bg-white/10 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
                             >
                                 General Viral
                             </button>
                         </div>
-                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest italic">Type</span>
                     </div>
                 </div>
 
@@ -327,12 +327,12 @@ export default function LinkedInModule({ product }: { product: any }) {
                     <input
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
-                        className="flex-1 bg-[#0a0f1d] border border-white/5 rounded-xl px-4 py-3 text-xs font-medium focus:border-secondary/30 outline-none text-white placeholder:text-gray-600 transition-all"
+                        className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs font-medium focus:border-secondary/30 outline-none text-white placeholder:text-gray-600 transition-all font-sans italic"
                         placeholder="The hidden cost of 'ghost' subscriptions in startups..."
                         onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                     />
-                    <button onClick={handleGenerate} disabled={generating || !topic} className="px-6 py-3 bg-slate-600 hover:bg-secondary text-white font-black rounded-xl transition-all shadow-xl shadow-slate-600/10 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap uppercase text-[10px] tracking-widest">
-                        {generating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 fill-current" />}
+                    <button onClick={handleGenerate} disabled={generating || !topic} className="px-8 py-3 bg-[#0A66C2] hover:bg-[#0A66C2]/90 text-white font-black rounded-xl transition-all shadow-xl shadow-[#0A66C2]/10 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap uppercase text-[10px] tracking-widest">
+                        {generating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 fill-current" />}
                         Generate
                     </button>
                 </div>

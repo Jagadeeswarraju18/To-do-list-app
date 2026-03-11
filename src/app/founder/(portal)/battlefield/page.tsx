@@ -30,6 +30,7 @@ export default function BattlefieldPage() {
                 .select("*")
                 .eq("user_id", user.id)
                 .or("intent_category.eq.Switching,competitor_name.neq.null")
+                .order("relevance_score", { ascending: false })
                 .order("created_at", { ascending: false });
 
             if (error) throw error;
@@ -93,7 +94,7 @@ export default function BattlefieldPage() {
     });
 
     return (
-        <div className="max-w-6xl mx-auto space-y-10 pb-20">
+        <div className="space-y-10 pb-20 animate-fade-up">
             {/* Header Area */}
             <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-orange-600 rounded-[2.5rem] blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
