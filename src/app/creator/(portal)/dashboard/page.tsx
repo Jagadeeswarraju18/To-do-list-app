@@ -17,6 +17,7 @@ export default function CreatorDashboardPage() {
         activeDeals: 0,
         profileViews: 0
     });
+
     const [deals, setDeals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [heatmap, setHeatmap] = useState<Record<string, number>>({});
@@ -61,6 +62,8 @@ export default function CreatorDashboardPage() {
                 .eq("creator_id", user.id)
                 .eq("event_type", "profile_view");
 
+
+
             // Fetch All Recent Deals for Pipeline
             const { data: dealsData, error: dealsError } = await supabase
                 .from("collaborations")
@@ -75,6 +78,7 @@ export default function CreatorDashboardPage() {
                 activeDeals: activeDealsCount || 0,
                 profileViews: viewsCount || 0
             });
+
             setDeals(dealsData || []);
             setLoading(false);
         }
@@ -114,6 +118,8 @@ export default function CreatorDashboardPage() {
                     </button>
                 </Link>
             </div>
+
+
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">

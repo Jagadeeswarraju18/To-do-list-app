@@ -29,31 +29,33 @@ export async function verifySignalsWithAI(
     }
 
     const prompt = `
-    You are a high-precision demand signal scorer for "${product.name}".
+    You are a forensic demand signal auditor for "${product.name}". 
+    Your job is to identify only the absolute HIGHEST intent leads from social media noise.
 
     PRODUCT CONTEXT:
     - Name: ${product.name}
-    - What it does: ${product.description}
-    - Specific pain solved: ${product.pain_solved}
-    - Target audience: ${product.target_audience}
-    - Known competitors: ${product.competitors?.length ? product.competitors.join(", ") : "None specified"}
+    - Mission: ${product.description}
+    - Pain Solved: ${product.pain_solved}
+    - Ideal Customer: ${product.target_audience}
+    - Competitors to watch: ${product.competitors?.length ? product.competitors.join(", ") : "None specified"}
 
-    RELEVANT VS NOISE:
-    - Reject (0-39): unrelated discussion, self-promotion, generic chatter, or broad content with no lead signal.
-    - Accept (40-69): real problem match, but intent is implied rather than explicit.
-    - Strong accept (70-100): clear pain, explicit urgency, tool search, comparison, or switching behavior.
+    STRICT FILTERING CRITERIA (0-100 Score):
+    - 0-30: NOISE. General chatter, memes, news shares, self-promotion, or broad topics with no specific pain.
+    - 31-64: WEAK SIGNAL. Adjacent interest but no clear urgency or problem match.
+    - 65-84: VALID LEAD. Clear problem match or specific question about the niche.
+    - 85-100: HIGH INTENT. Explicitly asking for a tool, complaining about a competitor, or switching behavior.
 
-    INTENT CATEGORIES:
-    - Complaining: frustrated with the problem
-    - Researching: asking for a tool, workflow, or recommendation
-    - Switching: looking for alternatives or replacements
-    - Generic: adjacent but not clearly urgent
+    DETECTION CATEGORIES:
+    - Complaining: Frustrated with current manual workflow or competitor tool.
+    - Researching: Actively asking for tool recommendations or "how-to" solve the ICP pain.
+    - Switching: Specifically mentioned leaving a competitor or looking for an alternative.
+    - Generic: Industry discussion that might be relevant but lacks explicit intent.
 
-    RULES:
-    - Use the precomputed signals as evidence, but do not blindly trust them.
-    - High semantic match alone is not enough. A lead needs pain plus intent or strong ICP fit.
-    - If competitor switching is explicit, strongly consider category "Switching".
-    - Return only valid JSON.
+    FORENSIC RULES:
+    1. EXCLUDE all self-promotion or bot-like content.
+    2. EXCLUDE "How-to" threads that are just educational unless the author expresses a personal need.
+    3. PRIORITIZE specific problem statements over general "this is interesting" comments.
+    4. If it mentions a competitor (${product.competitors?.join(", ")}), verify if they are unhappy with it.
 
     RETURN FORMAT:
     {
@@ -66,26 +68,17 @@ export async function verifySignalsWithAI(
           "category": "Complaining"|"Researching"|"Switching"|"Generic",
           "intent": "high"|"medium"|"low",
           "competitor_name": "string or null",
-          "reason": "short explanation"
+          "reason": "short forensic explanation (e.g., 'Explicit tool request' or 'Frustrated with competitor X')"
         }
       ]
     }
 
-    POSTS TO ANALYZE:
+    POSTS TO AUDIT:
     ${tweets.map(tweet => {
             const pre = precomputedMap.get(tweet.id);
             return `ID: ${tweet.id}
 Content: ${tweet.text}
-Precomputed pain_match: ${pre ? Math.round(pre.semanticPainScore * 100) : "n/a"}
-Precomputed icp_fit: ${pre ? Math.round(pre.icpScore * 100) : "n/a"}
-Precomputed explicit_intent: ${pre ? Math.round(pre.explicitIntentScore * 100) : "n/a"}
-Precomputed competitor_signal: ${pre ? Math.round(pre.competitorScore * 100) : "n/a"}
-Precomputed recency: ${pre ? Math.round(pre.recencyScore * 100) : "n/a"}
-Precomputed author_fit: ${pre ? Math.round(pre.authorFitScore * 100) : "n/a"}
-Precomputed blended_score: ${pre?.blendedScore ?? "n/a"}
-Precomputed suggested_category: ${pre?.suggestedCategory ?? "n/a"}
-Precomputed matched_competitor: ${pre?.matchedCompetitor ?? "n/a"}
-Precomputed evidence: ${(pre?.reasons || []).join(", ") || "n/a"}`;
+Semantic Match: ${pre ? Math.round(pre.semanticPainScore * 100) : "n/a"}%`;
         }).join("\n\n")}
     `;
 
@@ -99,7 +92,7 @@ Precomputed evidence: ${(pre?.reasons || []).join(", ") || "n/a"}`;
             body: JSON.stringify({
                 model: "grok-4-1-fast-reasoning",
                 messages: [
-                    { role: "system", content: "Return only valid JSON. No markdown or code fences." },
+                    { role: "system", content: "You are a forensic auditor. Return only valid JSON. Be extremely picky." },
                     { role: "user", content: prompt }
                 ],
                 temperature: 0
@@ -126,7 +119,9 @@ Precomputed evidence: ${(pre?.reasons || []).join(", ") || "n/a"}`;
             const precomputed = precomputedMap.get(value.id);
             const score = combineVerifierScore(Number(value.score) || 0, precomputed);
             const matchScore = combineMatchScore(Number(value.match_score) || 0, precomputed);
-            const isRelevant = score >= 58;
+            
+            // INCREASED THRESHOLD: 65 is the new bar for "Relevance"
+            const isRelevant = score >= 65;
 
             return {
                 id: value.id,
@@ -135,7 +130,7 @@ Precomputed evidence: ${(pre?.reasons || []).join(", ") || "n/a"}`;
                 isRelevant,
                 reason: [value.reason, ...(precomputed?.reasons || [])].filter(Boolean).join(" | "),
                 category: (value.category || precomputed?.suggestedCategory || "Generic") as VerifiedSignal["category"],
-                intent: (score >= 78 ? "high" : score >= 58 ? "medium" : "low") as VerifiedSignal["intent"],
+                intent: (score >= 82 ? "high" : score >= 65 ? "medium" : "low") as VerifiedSignal["intent"],
                 competitor_name: value.competitor_name || precomputed?.matchedCompetitor || undefined
             };
         }) as VerifiedSignal[];

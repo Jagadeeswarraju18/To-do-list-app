@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2, Save, CheckCircle, User, Mail, Shield, Linkedin, Instagram, Link as LinkIcon, Lock, PenSquare, X, Globe, Calendar, MapPin, Camera, Plus, Trash2, CreditCard, Zap, Check, Minus, Crown, Rocket, Star, Infinity } from "lucide-react";
+import { Loader2, User, Mail, Shield, Linkedin, Instagram, Link as LinkIcon, Lock, PenSquare, X, Globe, Calendar, Camera, Plus, Trash2, CreditCard, Check } from "lucide-react";
 import { XLogo } from "@/components/ui/XLogo";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser } from "@/components/providers/UserProvider";
@@ -332,107 +332,110 @@ function UserSettingsContent() {
 
             <div className="mt-8 space-y-8">
                 <Section title="Plans & Billing" icon={<CreditCard className="w-5 h-5 text-primary" />}>
-                    <div className="grid lg:grid-cols-3 gap-10 mb-8 mt-14">
+                    <div className="grid lg:grid-cols-4 gap-6 mb-8 mt-14">
                         {/* Free Plan */}
-                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 group ${currentPlan === 'Free' ? 'bg-white/[0.03] border-primary/30 ring-1 ring-primary/20' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 group flex flex-col ${currentPlan === 'Free' ? 'bg-white/[0.03] border-primary/30 ring-1 ring-primary/20' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
                             {currentPlan === 'Free' && (
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-primary text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-2xl shadow-zinc-500/40 z-10">
                                     Active Plan
                                 </div>
                             )}
-                            <div className="mb-8 flex items-center justify-between transition-transform duration-500 group-hover:translate-x-1">
-                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform duration-500">
-                                    <Zap className="w-6 h-6 text-primary/50 group-hover:text-primary transition-colors" />
-                                </div>
-                                <span className="text-4xl font-black italic opacity-5 group-hover:opacity-10 transition-opacity tracking-tighter">SEED</span>
+                            <div className="flex items-center justify-between mb-6">
+                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em]">Free</span>
                             </div>
-                            <div className="space-y-2 mb-8">
-                                <h3 className="text-2xl font-black text-white px-1">The Seed</h3>
-                                <div className="flex items-baseline gap-1 px-1">
-                                    <span className="text-4xl font-black text-white">$0</span>
-                                    <span className="text-muted-foreground text-sm font-medium">/month</span>
+                            <div className="mb-8">
+                                <div className="flex items-baseline gap-1 mb-2">
+                                    <span className="text-4xl font-medium text-white tracking-tighter">$0</span>
+                                    <span className="text-zinc-500 text-sm font-medium">/mo</span>
                                 </div>
+                                <p className="text-zinc-500 text-xs font-medium">Essential for solo builders.</p>
                             </div>
-                            <ul className="space-y-4 mb-10 px-1">
-                                <FeatureItem text="5 Discovery Scans / wk" />
-                                <FeatureItem text="10 AI-Personalized DMs" />
-                                <FeatureItem text="Basic Context Scanning" />
-                                <FeatureItem text="Community Support" />
+                            <ul className="space-y-4 mb-10 flex-grow">
+                                <FeatureItem text="1 Product Slot" />
+                                <FeatureItem text="10 Signals / mo" />
+                                <FeatureItem text="20 Post Drafts / mo" />
+                                <FeatureItem text="Basic Intent Filter" />
                             </ul>
-                            <button className="w-full py-4 rounded-2xl bg-white/5 text-white/50 font-bold text-sm border border-white/10 transition-all cursor-default" disabled>
+                            <button className="w-full py-4 rounded-xl bg-white/5 text-white/50 font-bold text-[13px] border border-white/10 transition-all cursor-default mt-auto" disabled>
                                 Currently Active
                             </button>
                         </div>
 
-                        {/* Basic Plan */}
-                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-700 group ${currentPlan === 'Basic' ? 'bg-white/[0.03] border-cyan-500/30 ring-1 ring-cyan-500/20' : 'bg-black/40 border-white/5 hover:border-cyan-500/30'}`}>
-                            <div className="absolute top-0 right-0 w-40 h-40 bg-cyan-500/5 blur-[80px] rounded-full pointer-events-none group-hover:bg-cyan-500/10 transition-all" />
-                            <div className="mb-8 flex items-center justify-between transition-transform duration-500 group-hover:translate-x-1">
-                                <div className="p-4 bg-cyan-500/10 rounded-2xl border border-cyan-500/20 group-hover:scale-110 transition-transform duration-500">
-                                    <Rocket className="w-6 h-6 text-cyan-400" />
-                                </div>
-                                <span className="text-4xl font-black italic opacity-5 text-cyan-400 group-hover:opacity-10 transition-opacity uppercase tracking-widest">Growth</span>
+                        {/* Starter Plan */}
+                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 group flex flex-col ${currentPlan === 'Starter' ? 'bg-white/[0.03] border-primary/30 ring-1 ring-primary/20' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                            <div className="flex items-center justify-between mb-6">
+                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em]">Starter</span>
                             </div>
-                            <div className="space-y-2 mb-8 px-1">
-                                <h3 className="text-2xl font-black text-white">The Growth</h3>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-4xl font-black text-cyan-400">$29</span>
-                                    <span className="text-muted-foreground text-sm font-medium">/month</span>
+                            <div className="mb-8">
+                                <div className="flex items-baseline gap-1.5 mb-1">
+                                    <span className="text-4xl font-medium text-white tracking-tighter">$15</span>
+                                    <span className="text-zinc-500 text-sm font-medium">/mo</span>
+                                    <span className="text-zinc-700 line-through text-lg ml-2 font-light">$19</span>
                                 </div>
+                                <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2">First 10 spots only</div>
+                                <p className="text-zinc-500 text-xs font-medium">Scaling for active makers.</p>
                             </div>
-                            <ul className="space-y-4 mb-10 px-1">
-                                <FeatureItem text="100 Discovery Scans / wk" color="cyan" />
-                                <FeatureItem text="1,000 AI-Personalized DMs" color="cyan" />
-                                <FeatureItem text="Authority Scanning (Full)" color="cyan" />
-                                <FeatureItem text="X + Reddit Pipeline" color="cyan" />
-                                <FeatureItem text="Email Support" color="cyan" />
+                            <ul className="space-y-4 mb-10 flex-grow">
+                                <FeatureItem text="3 Product Slots" />
+                                <FeatureItem text="150 Signals / mo" />
+                                <FeatureItem text="300 Post Drafts / mo" />
+                                <FeatureItem text="6 Refreshes / day" />
                             </ul>
-                            <button className="w-full py-4 rounded-2xl bg-cyan-500 text-black font-black text-sm hover:bg-cyan-400 transition-all shadow-xl shadow-cyan-500/20 active:scale-95 group-hover:scale-[1.02]">
-                                Scale My Growth
+                            <button className="w-full py-4 rounded-xl bg-white text-black font-bold text-[13px] hover:bg-zinc-200 transition-all shadow-xl shadow-white/5 active:scale-95 mt-auto">
+                                Level Up →
                             </button>
                         </div>
 
                         {/* Pro Plan */}
-                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-1000 group ${currentPlan === 'Pro' ? 'bg-white/[0.05] border-primary/50 ring-2 ring-primary/20' : 'bg-black/60 border-primary/20 hover:border-primary/50'}`}>
-                            {/* Animated Background Glows */}
-                            <div className="absolute -top-20 -right-20 w-64 h-64 bg-zinc-600/20 blur-[100px] rounded-full pointer-events-none group-hover:bg-zinc-600/30 transition-all duration-1000 animate-pulse" />
-                            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-slate-600/10 blur-[100px] rounded-full pointer-events-none group-hover:bg-slate-600/20 transition-all duration-1000" />
-
-                            {/* Fixed "Most Popular" Badge - Enhanced visibility & animation */}
-                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-zinc-600 via-slate-600 to-zinc-600 text-white text-[11px] font-black uppercase tracking-[0.25em] rounded-full shadow-[0_0_40px_rgba(168,85,247,0.6)] z-20 border border-white/20 whitespace-nowrap group-hover:scale-110 transition-transform duration-500">
-                                <span className="mr-2">✨</span> Most Popular
+                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 group flex flex-col ${currentPlan === 'Pro' ? 'bg-white/[0.03] border-primary/30 ring-1 ring-primary/20' : 'bg-white/[0.03] border-white/[0.06] hover:border-white/20'}`}>
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-white/10 text-white text-[9px] font-bold uppercase tracking-wider rounded-full border border-white/20 z-10 whitespace-nowrap">
+                                Most Popular
                             </div>
-
-                            <div className="mb-8 flex items-center justify-between mt-2 transition-transform duration-500 group-hover:translate-x-1">
-                                <div className="p-4 bg-primary/10 rounded-2xl border border-primary/30 group-hover:scale-110 group-hover:shadow-[0_0_25px_rgba(168,85,247,0.3)] transition-all duration-500">
-                                    <Crown className="w-6 h-6 text-primary" />
+                            <div className="flex items-center justify-between mb-6 mt-1">
+                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em]">Pro</span>
+                            </div>
+                            <div className="mb-8">
+                                <div className="flex items-baseline gap-1 mb-2">
+                                    <span className="text-4xl font-medium text-white tracking-tighter">$39</span>
+                                    <span className="text-zinc-500 text-sm font-medium">/mo</span>
                                 </div>
-                                <span className="text-4xl font-black italic opacity-5 text-primary group-hover:opacity-10 transition-opacity uppercase tracking-tighter">Empire</span>
+                                <p className="text-zinc-500 text-xs font-medium">Growth for rising startups.</p>
                             </div>
-                            <div className="space-y-2 mb-8 px-1">
-                                <h3 className="text-2xl font-black text-white flex items-center gap-2">
-                                    The Empire
-                                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
-                                </h3>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-5xl font-black bg-gradient-to-br from-white via-zinc-200 to-slate-400 bg-clip-text text-transparent tracking-tighter">$49</span>
-                                    <span className="text-muted-foreground text-sm font-bold uppercase tracking-widest opacity-80">/mo</span>
-                                </div>
-                            </div>
-                            <ul className="space-y-4 mb-10 px-1">
-                                <FeatureItem text="Unlimited Discovery Scans" color="purple" icon={<Infinity className="w-4 h-4" />} />
-                                <FeatureItem text="Unlimited AI DMs" color="purple" icon={<Infinity className="w-4 h-4" />} />
-                                <FeatureItem text="Auto-Pilot (Full Automation)" color="purple" />
-                                <FeatureItem text="Priority Grok-3 Analysis" color="purple" />
-                                <FeatureItem text="Personal Strategy Call" color="purple" />
-                                <FeatureItem text="Real-time Demand Alerts" color="purple" />
+                            <ul className="space-y-4 mb-10 flex-grow">
+                                <FeatureItem text="10 Product Slots" />
+                                <FeatureItem text="500 Signals / mo" />
+                                <FeatureItem text="1,000 Post Drafts / mo" />
+                                <FeatureItem text="12 Refreshes / day" />
                             </ul>
-                            <button className="w-full py-5 rounded-2xl bg-gradient-to-r from-zinc-600 via-slate-600 to-zinc-600 bg-[length:200%_auto] text-white font-black text-sm hover:bg-[100%_0] transition-all duration-700 shadow-[0_20px_50px_-10px_rgba(168,85,247,0.5)] hover:shadow-[0_25px_60px_-12px_rgba(168,85,247,0.7)] active:scale-[0.98] border border-white/20 group-hover:scale-[1.02] relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
-                                Rule Your Empire
+                            <button className="w-full py-4 rounded-xl glass-pill text-white font-bold text-[13px] hover:bg-white/10 transition-all active:scale-95 mt-auto">
+                                Go Pro →
+                            </button>
+                        </div>
+
+                        {/* Ultra Plan */}
+                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 group flex flex-col ${currentPlan === 'Ultra' ? 'bg-white/[0.03] border-primary/30 ring-1 ring-primary/20' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                            <div className="flex items-center justify-between mb-6">
+                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em]">Ultra</span>
+                            </div>
+                            <div className="mb-8">
+                                <div className="flex items-baseline gap-1 mb-2">
+                                    <span className="text-4xl font-medium text-white tracking-tighter">$69</span>
+                                    <span className="text-zinc-500 text-sm font-medium">/mo</span>
+                                </div>
+                                <p className="text-zinc-500 text-xs font-medium">Scale for market leaders.</p>
+                            </div>
+                            <ul className="space-y-4 mb-10 flex-grow">
+                                <FeatureItem text="25 Product Slots" />
+                                <FeatureItem text="1,500 Signals / mo" />
+                                <FeatureItem text="3,000 Post Drafts / mo" />
+                                <FeatureItem text="Hourly Refresh" />
+                            </ul>
+                            <button className="w-full py-4 rounded-xl glass-pill text-white font-bold text-[13px] hover:bg-white/10 transition-all active:scale-95 mt-auto">
+                                Scale Now →
                             </button>
                         </div>
                     </div>
+
 
                     {/* Billing Support Note */}
                     <p className="text-center text-xs text-muted-foreground pb-4">

@@ -20,43 +20,48 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     const loadData = async () => {
         setLoading(true);
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        setUser(authUser);
+        try {
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            setUser(authUser);
 
-        if (authUser) {
-            // First get the active_product_id from profile
-            const { data: profile } = await supabase
-                .from("profiles")
-                .select("active_product_id")
-                .eq("id", authUser.id)
-                .single();
-
-            let productId = profile?.active_product_id;
-
-            // Fallback to most recent product if no active one set
-            if (!productId) {
-                const { data: latestProduct } = await supabase
-                    .from("products")
-                    .select("id")
-                    .eq("user_id", authUser.id)
-                    .order("created_at", { ascending: false })
-                    .limit(1)
+            if (authUser) {
+                // First get the active_product_id from profile
+                const { data: profile } = await supabase
+                    .from("profiles")
+                    .select("active_product_id")
+                    .eq("id", authUser.id)
                     .maybeSingle();
-                productId = latestProduct?.id;
-            }
 
-            if (productId) {
-                const { data: productData } = await supabase
-                    .from("products")
-                    .select("*")
-                    .eq("id", productId)
-                    .single();
-                setProduct(productData);
-            } else {
-                setProduct(null);
+                let productId = profile?.active_product_id;
+
+                // Fallback to most recent product if no active one set
+                if (!productId) {
+                    const { data: latestProduct } = await supabase
+                        .from("products")
+                        .select("id")
+                        .eq("user_id", authUser.id)
+                        .order("created_at", { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
+                    productId = latestProduct?.id;
+                }
+
+                if (productId) {
+                    const { data: productData } = await supabase
+                        .from("products")
+                        .select("*")
+                        .eq("id", productId)
+                        .single();
+                    setProduct(productData);
+                } else {
+                    setProduct(null);
+                }
             }
+        } catch (err) {
+            console.error("[UserProvider] Error loading user data:", err);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     useEffect(() => {

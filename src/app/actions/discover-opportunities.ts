@@ -143,9 +143,12 @@ export async function discoverOpportunitiesAction(scanWindow?: string) {
 
         const tweets = searchResult.tweets || [];
         if (tweets.length === 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0, total_scanned: 0 }).eq("id", run.id);
             return { success: true, addedCount: 0 };
         }
+
+        if (run) await supabase.from("discovery_runs").update({ total_scanned: tweets.length }).eq("id", run.id);
+
 
         const { scoredMap: initialScoreMap, verifiedMap, relevant } = await scoreAndVerifyCandidates(product, tweets);
 

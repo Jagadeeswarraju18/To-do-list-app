@@ -12,53 +12,89 @@ import { Footer } from "@/components/landing/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function LandingPage() {
+    const spring = {
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+    };
+
     return (
-        <div className="relative min-h-screen bg-[#050a14] overflow-x-hidden">
+        <div className="relative min-h-screen bg-[hsl(var(--background))] overflow-x-hidden selection:bg-white/20 selection:text-white">
+            {/* Volumetric Obsidian Gradient Floor */}
+            <div className="fixed inset-0 bg-gradient-to-b from-black/80 via-[hsl(var(--obsidian-grey))]/10 to-[hsl(var(--obsidian-grey))]/30 pointer-events-none z-[-1]" />
+            <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02)_0%,transparent_70%)] pointer-events-none z-[-1]" />
+            <MovingBackground />
             <AnimatePresence>
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 1 }}
                 >
                     <Navbar />
-                    <MovingBackground />
                     <main className="isolate">
+                        {/* Elite Hero Layer */}
                         <Hero />
 
-                        {/* The Pain Layer */}
+                        {/* Efficiency Gap Layer */}
                         <ProblemAgitation />
 
-                        {/* The Engine */}
+                        {/* Engineering Logic Layer */}
                         <HowItWorks />
 
-                        {/* The Productivity Layer */}
+                        {/* Core Intelligence Layer */}
                         <Features />
 
-                        {/* Social Proof */}
+                        {/* Industrial Proof Layer */}
                         <Testimonials />
 
-                        {/* The Closing Layer */}
+                        {/* Acquisition Layer */}
                         <Pricing />
 
-                        {/* Final Conversion Section */}
-                        <section className="py-24 px-6 relative z-10">
-                            <div className="max-w-4xl mx-auto glass-card p-12 md:p-20 text-center rounded-[3rem] border border-primary/20 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none" />
-                                <h2 className="text-4xl md:text-6xl font-black text-white mb-8 relative z-10">
-                                    Stop Hunting. <br /> Find Your Demand.
+                        {/* Final Elite CTA Section */}
+                        <section className="py-60 px-6 relative z-10">
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={spring}
+                                className="max-w-6xl mx-auto glass-card p-24 md:p-32 text-center relative overflow-hidden group"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.02] via-transparent to-[#4ADE80]/3 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                                
+                                <h2 className="heading-serif text-6xl md:text-[140px] font-normal text-white mb-16 tracking-tighter leading-[0.85]">
+                                    Engineered for <br /> 
+                                    <span className="italic opacity-50 text-[0.8em]">market leaders.</span>
                                 </h2>
-                                <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-xl mx-auto relative z-10">
-                                    Join the elite circle of founders who build businesses on signals, not hope.
+                                
+                                <p className="text-zinc-500 text-xl md:text-2xl mb-20 max-w-xl mx-auto font-medium tracking-tight">
+                                    Join the elite circle of founders who build businesses on precision signals.
                                 </p>
-                                <div className="relative z-10 flex flex-col items-center gap-6">
-                                    <button className="px-12 py-6 bg-white text-black font-black rounded-2xl text-xl shadow-[0_0_50px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 transition-all">
-                                        Join DemandRadar Today
-                                    </button>
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black">
-                                        No Credit Card Required • Instant Setup • GDPR Compliant
-                                    </p>
+                                
+                                <div className="flex flex-col items-center gap-12">
+                                    <motion.button 
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="px-16 py-6 bg-white text-black font-bold rounded-full text-2xl shadow-2xl transition-all"
+                                    >
+                                        Deploy DemandRadar Now
+                                    </motion.button>
+                                    <div className="flex items-center gap-10">
+                                        <div className="flex items-center gap-3">
+                                             <div className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" />
+                                             <p className="text-[10px] text-zinc-600 uppercase tracking-[0.4em] font-black">
+                                                Zero Latency
+                                             </p>
+                                        </div>
+                                        <div className="w-px h-6 bg-white/5" />
+                                        <div className="flex items-center gap-3">
+                                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                             <p className="text-[10px] text-zinc-600 uppercase tracking-[0.4em] font-black">
+                                                Unlimited Scale
+                                             </p>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         </section>
 
                         <Footer />

@@ -5,66 +5,67 @@ import { Quote } from "lucide-react";
 
 const testimonials = [
     {
-        name: "Alex Rivera",
-        role: "Founder, SaaS-OS",
-        content: "DemandRadar cut our customer acquisition cost by 60%. We found 12 high-intent leads in the first 2 hours.",
-        avatar: "AR"
+        quote: "DemandRadar redefined our entire growth engine. It's the standard for our portfolio companies.",
+        author: "Marcus Aurelius",
+        role: "MD, Growth Capital",
+        avatar: "MA"
     },
     {
-        name: "Sarah Chen",
-        role: "Indie Hacker",
-        content: "The AI personalization is frighteningly good. It doesn't sound like a bot—it sounds like me on a good day.",
-        avatar: "SC"
-    },
-    {
-        name: "Marcus Thorne",
-        role: "CEO, LeadSwift",
-        content: "Finally, a tool that focuses on intent instead of volume. Our conversion rate from DMs has doubled.",
-        avatar: "MT"
+        quote: "Precision intelligence that actually works. We've reclaimed 40% of our SDR's time.",
+        author: "Elena Vance",
+        role: "Founder, CypherSaaS",
+        avatar: "EV"
     }
 ];
 
 export function Testimonials() {
+    const spring = {
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+    };
+
     return (
-        <section id="testimonials" className="py-24 px-6 relative z-10 bg-[#050a14]">
+        <section className="py-44 px-6 relative z-10">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-20">
-                    <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                <div className="mb-32">
+                    <motion.h2 
+                        initial={{ opacity: 0, x: -30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="text-2xl md:text-6xl font-black text-white mb-6 uppercase tracking-tight"
+                        transition={spring}
+                        className="heading-serif text-6xl md:text-[120px] font-normal text-white tracking-tight leading-[0.9]"
                     >
-                        Founder Love.
+                        Success <br />
+                        <span className="italic opacity-50">engineered.</span>
                     </motion.h2>
-                    <p className="text-gray-400 text-[10px] md:text-xl max-w-2xl mx-auto leading-relaxed">
-                        Don't take our word for it. Listen to the builders who are actually closing deals.
-                    </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {testimonials.map((t, i) => (
                         <motion.div
-                            key={t.name}
-                            initial={{ opacity: 0, scale: 0.9 }}
+                            key={t.author}
+                            initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            className="p-10 glass-card border-white/5 relative"
+                            transition={{ ...spring, delay: i * 0.1 }}
+                            className="glass-card p-16 relative overflow-hidden group"
                         >
-                            <Quote className="absolute top-8 right-8 w-10 h-10 text-primary/10" />
-                            <p className="text-white font-medium text-sm md:text-lg leading-relaxed mb-8 relative z-10">
-                                "{t.content}"
-                            </p>
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-zinc-500 to-slate-500 flex items-center justify-center text-black font-black text-xs shadow-lg shadow-primary/20">
-                                    {t.avatar}
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-white font-black uppercase tracking-tight text-[10px] md:text-sm">{t.name}</p>
-                                    <p className="text-gray-500 text-[8px] md:text-[10px] font-black uppercase tracking-widest">{t.role}</p>
+                            <div className="relative z-10">
+                                <p className="heading-serif text-3xl md:text-4xl italic text-white mb-16 leading-tight max-w-lg">
+                                    "{t.quote}"
+                                </p>
+                                <div className="flex items-center gap-6">
+                                    <div className="w-16 h-16 rounded-[20px] bg-white/[0.05] border border-white/[0.1] flex items-center justify-center text-white font-medium text-xl shadow-inner uppercase tracking-tighter">
+                                        {t.avatar}
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-bold text-sm tracking-tight">{t.author}</div>
+                                        <div className="text-zinc-600 font-bold text-[10px] uppercase tracking-[0.3em]">{t.role}</div>
+                                    </div>
                                 </div>
                             </div>
+                            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/[0.015] blur-[100px] rounded-full -mr-48 -mt-48 transition-opacity duration-1000" />
                         </motion.div>
                     ))}
                 </div>

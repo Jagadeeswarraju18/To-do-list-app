@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Save, CheckCircle, AlertCircle, X, Plus, Target, Settings, Search, Globe, Users, PenSquare, ExternalLink, ChevronRight, Camera, Trash2, Link2, LayoutGrid, Check } from "lucide-react";
 import { useUser } from "@/components/providers/UserProvider";
@@ -266,360 +267,281 @@ export default function ProductsPage() {
         <div className="space-y-10 animate-fade-up">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight mb-2">My Products</h1>
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white uppercase italic">My Portfolio</h1>
                     <div className="flex items-center gap-3">
-                        <p className="text-muted-foreground font-medium">Manage your portfolio of brands and products.</p>
+                        <p className="text-zinc-500 font-medium tracking-tight">Manage your strategic distribution assets.</p>
                         <div className="h-4 w-px bg-white/10" />
                         <div className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-black uppercase tracking-widest text-primary">
-                            {tier} Plan
+                            {tier} Network
                         </div>
                     </div>
                 </div>
                 <button
                     onClick={handleCreateNew}
                     disabled={remainingSlots <= 0}
-                    className="px-8 py-4 bg-primary hover:bg-zinc-200 text-black font-black rounded-2xl transition-all flex items-center justify-center gap-3 shadow-2xl shadow-primary/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
+                    className="group relative px-10 py-5 bg-white hover:bg-zinc-200 text-black font-black rounded-[24px] transition-all shadow-2xl shadow-primary/20 active:scale-95 disabled:opacity-50 flex items-center gap-4 overflow-hidden uppercase tracking-widest text-xs"
                 >
                     <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
-                    Add New Product
-                    {remainingSlots > 0 && <span className="text-[10px] bg-black/10 px-2 py-0.5 rounded-full">{remainingSlots} left</span>}
+                    New Asset
+                    {remainingSlots > 0 && <span className="text-[10px] bg-black/10 px-3 py-1 rounded-full font-black">{remainingSlots} slots</span>}
                 </button>
             </div>
 
             {/* Products Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.length === 0 ? (
-                    <div className="col-span-full py-20 bg-black/20 border-2 border-dashed border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-4">
-                        <div className="p-6 bg-white/5 rounded-full">
-                            <LayoutGrid className="w-12 h-12 text-muted-foreground/50" />
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-white">No products yet</h3>
-                            <p className="text-muted-foreground max-w-xs mx-auto mt-2">Add your first product to start discovering demand signals.</p>
-                        </div>
-                        <button onClick={handleCreateNew} className="text-primary font-black uppercase text-xs tracking-widest hover:text-zinc-300 transition-colors">
-                            + Create First Product
-                        </button>
-                    </div>
-                ) : (
-                    products.map(product => (
-                        <div
-                            key={product.id}
-                            className={`group relative glass-card p-0 border-white/10 overflow-hidden transition-all duration-500 hover:border-primary/30 ${activeProductId === product.id ? 'ring-2 ring-zinc-500/50 bg-primary/5' : ''}`}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <AnimatePresence mode="popLayout">
+                    {products.length === 0 ? (
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="col-span-full py-32 glass-panel border-dashed border-white/5 flex flex-col items-center justify-center text-center space-y-8"
                         >
-                            {activeProductId === product.id && (
-                                <div className="absolute top-4 right-4 z-10">
-                                    <div className="px-3 py-1 bg-primary text-black text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                                        Active Context
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="p-8 space-y-6">
-                                {/* Product Identity Header */}
-                                <div className="flex gap-4 items-start">
-                                    <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-primary/40 transition-colors">
-                                        {product.logo_url ? (
-                                            <img src={product.logo_url} alt={product.name} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="text-2xl font-black text-primary/20 uppercase">
-                                                {product.name?.charAt(0) || "P"}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h3 className="text-xl font-black text-white truncate group-hover:text-primary transition-colors">{product.name}</h3>
-                                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-                                            <Globe className="w-3 h-3" />
-                                            <span className="truncate">{product.website_url ? product.website_url.replace(/^https?:\/\//, '') : 'No URL'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 min-h-[4.5rem]">
-                                    {product.description || "No description provided."}
-                                </p>
-
-                                <div className="flex items-center gap-4 py-2 border-y border-white/5">
-                                    <div className="flex -space-x-2">
-                                        {product.keywords.slice(0, 3).map((k, i) => (
-                                            <div key={i} className="w-6 h-6 rounded-full bg-zinc-800 border border-black flex items-center justify-center text-[10px] font-bold text-primary">
-                                                {k.charAt(0).toUpperCase()}
-                                            </div>
-                                        ))}
-                                        {product.keywords.length > 3 && (
-                                            <div className="w-6 h-6 rounded-full bg-zinc-800 border border-black flex items-center justify-center text-[8px] font-bold text-muted-foreground">
-                                                +{product.keywords.length - 3}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                                        {product.keywords.length} Keywords
-                                    </span>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 pt-2">
-                                    {activeProductId === product.id ? (
-                                        <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
-                                            <Check className="w-4 h-4" />
+                            <div className="p-10 bg-white/5 rounded-full border border-white/5">
+                                <LayoutGrid className="w-16 h-16 text-zinc-700" />
+                            </div>
+                            <div className="space-y-3">
+                                <h2 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter">No Strategic Assets</h2>
+                                <p className="text-zinc-500 max-w-sm mx-auto text-base leading-relaxed">Add your first product to start scanning for high-intent demand signals.</p>
+                            </div>
+                            <button onClick={handleCreateNew} className="text-primary font-black uppercase text-xs tracking-[0.3em] hover:text-white transition-all bg-primary/5 px-8 py-3 rounded-full border border-primary/10 hover:bg-primary/10">
+                                + Deploy Initial Asset
+                            </button>
+                        </motion.div>
+                    ) : (
+                        products.map((product, idx) => (
+                            <motion.div
+                                key={product.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className={`group relative glass-panel p-0 border-white/5 overflow-hidden transition-all duration-700 hover:border-primary/20 hover:translate-y-[-4px] ${activeProductId === product.id ? 'shadow-[0_0_40px_rgba(16,185,129,0.1)] border-primary/20' : ''}`}
+                            >
+                                {activeProductId === product.id && (
+                                    <div className="absolute top-6 right-6 z-10">
+                                        <div className="px-4 py-1.5 bg-primary text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-2xl">
                                             Active
                                         </div>
-                                    ) : (
-                                        <button
-                                            onClick={() => handleSetActive(product.id)}
-                                            className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-primary hover:text-black hover:border-primary text-white text-xs font-black uppercase tracking-wider transition-all"
-                                        >
-                                            Use Context
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={() => handleEdit(product)}
-                                        className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-black uppercase tracking-wider transition-all"
-                                    >
-                                        Edit
-                                    </button>
-                                </div>
+                                    </div>
+                                )}
 
-                                <DeleteButton
-                                    onClick={() => handleDelete(product.id)}
-                                    className="mt-2"
-                                />
-                            </div>
-                        </div>
-                    ))
-                )}
+                                <div className="p-8 space-y-8">
+                                    {/* Product Identity Header */}
+                                    <div className="flex gap-6 items-start">
+                                        <div className="relative group/logo">
+                                            <div className="absolute -inset-1 bg-primary/20 blur rounded-2xl opacity-0 group-hover/logo:opacity-100 transition-opacity" />
+                                            <div className="relative w-20 h-20 rounded-2xl bg-black/60 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-primary/40 transition-colors shadow-2xl">
+                                                {product.logo_url ? (
+                                                    <img src={product.logo_url} alt={product.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="text-3xl font-black text-primary/10 uppercase italic">
+                                                        {product.name?.charAt(0) || "P"}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="min-w-0 pt-2 space-y-1">
+                                            <h3 className="text-lg font-black text-white truncate group-hover:text-primary transition-colors tracking-tighter uppercase italic">{product.name}</h3>
+                                            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                                <Globe className="w-3 h-3" />
+                                                <span className="truncate">{product.website_url ? product.website_url.replace(/^https?:\/\//, '') : 'OFFLINE'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-sm text-zinc-400 font-medium leading-relaxed line-clamp-3 min-h-[4.5rem]">
+                                        {product.description || "Incomplete asset profile. Configure for better signal matching."}
+                                    </p>
+
+                                    <div className="flex items-center gap-4 py-4 border-y border-white/5">
+                                        <div className="flex -space-x-2">
+                                            {(product.keywords || []).slice(0, 3).map((k, i) => (
+                                                <div key={i} className="w-8 h-8 rounded-full bg-zinc-900 border-2 border-black flex items-center justify-center text-[10px] font-black text-primary shadow-xl">
+                                                    {k.charAt(0).toUpperCase()}
+                                                </div>
+                                            ))}
+                                            {(product.keywords || []).length > 3 && (
+                                                <div className="w-8 h-8 rounded-full bg-zinc-900 border-2 border-black flex items-center justify-center text-[10px] font-black text-zinc-500 shadow-xl">
+                                                    +{(product.keywords || []).length - 3}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
+                                            {(product.keywords || []).length} Strategic Tags
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {activeProductId === product.id ? (
+                                            <div className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+                                                <Check className="w-4 h-4 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                                                Running
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleSetActive(product.id)}
+                                                className="px-6 py-4 rounded-xl bg-primary hover:bg-white text-black text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/10 active:scale-95"
+                                            >
+                                                Switch
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => handleEdit(product)}
+                                            className="px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+                                        >
+                                            Modify
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="flex justify-center">
+                                        <button
+                                            onClick={() => handleDelete(product.id)}
+                                            className="text-[9px] font-black uppercase tracking-[0.3em] text-red-500/30 hover:text-red-500 transition-colors py-2"
+                                        >
+                                            Delete Asset
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Edit/Create Modal Overlay */}
-            {isEditing && (
-                <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 sm:p-6 backdrop-blur-md bg-black/80 animate-in fade-in duration-200 overflow-y-auto custom-scrollbar">
-                    <div className="bg-[#0A0A0A] border border-white/10 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl flex flex-col my-8 animate-in zoom-in-95 duration-200">
-
-                        {/* Header */}
-                        <div className="p-5 md:p-6 border-b border-white/10 flex items-center justify-between bg-black/20">
-                            <div>
-                                <h2 className="text-xl font-black text-white">{formData.id ? 'Edit' : 'Create'} Product</h2>
-                                <p className="text-xs text-muted-foreground mt-1">Configure your product context for AI discovery.</p>
+            <AnimatePresence>
+                {isEditing && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-start justify-center p-4 sm:p-6 backdrop-blur-xl bg-black/80 overflow-y-auto no-scrollbar"
+                    >
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                            className="relative bg-[#0A0A0B] border border-white/5 w-full max-w-4xl rounded-[48px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col my-8"
+                        >
+                            {/* Header */}
+                            <div className="p-8 md:p-10 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                                <div className="space-y-1">
+                                    <h2 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter">{formData.id ? 'Modify' : 'Deploy'} Asset</h2>
+                                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em]">Configure Strategic Intelligence Parameters</p>
+                                </div>
+                                <button onClick={() => setIsEditing(false)} className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all text-zinc-400 hover:text-white">
+                                    <X className="w-6 h-6" />
+                                </button>
                             </div>
-                            <button onClick={() => setIsEditing(false)} className="p-2.5 hover:bg-white/10 rounded-full transition-colors text-white">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
 
-                        {/* Form Content */}
-                        <div className="p-5 md:p-8 space-y-8">
-                            <form id="settings-form" onSubmit={handleSubmit} className="space-y-8">
-                                {/* 1. Product Basics */}
-                                <Section title="Product Basics" icon={<Globe className="w-5 h-5 text-primary" />}>
-                                    <div className="flex flex-col md:flex-row gap-10 mb-8 items-start">
-                                        {/* Logo Upload UI */}
-                                        <div className="relative group/logo cursor-pointer flex-shrink-0" onClick={() => fileInputRef.current?.click()}>
-                                            <div className="w-28 h-28 rounded-3xl bg-zinc-900 border border-white/10 flex items-center justify-center overflow-hidden relative group-hover/logo:border-primary/50 transition-all shadow-2xl">
-                                                {formData.logo_url ? (
-                                                    <img src={formData.logo_url} alt="Logo" className="w-full h-full object-cover transition-transform duration-500 group-hover/logo:scale-110" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-zinc-900 flex flex-col items-center justify-center gap-1.5">
-                                                        <Camera className="w-7 h-7 text-zinc-700 group-hover/logo:text-primary transition-colors" />
-                                                        <span className="text-[8px] font-black uppercase tracking-widest text-zinc-700">Upload Logo</span>
-                                                    </div>
-                                                )}
-                                                {uploadingLogo && (
-                                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                                                        <Loader2 className="animate-spin text-primary w-10 h-10" />
-                                                    </div>
-                                                )}
-                                                <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover/logo:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <div className="bg-black/80 p-3 rounded-full border border-primary/50">
-                                                        <Camera className="w-6 h-6 text-primary" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-                                            {formData.logo_url && (
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => { e.stopPropagation(); setFormData(prev => ({ ...prev, logo_url: "" })); }}
-                                                    className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-zinc-900 border border-white/10 text-zinc-500 hover:text-red-500 flex items-center justify-center shadow-2xl hover:border-red-500/50 transition-all z-20"
-                                                >
-                                                    <X className="w-5 h-5" />
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        <div className="flex-1 space-y-6 w-full">
-                                            <div className="grid md:grid-cols-2 gap-6 w-full">
-                                                <Input label="Product Name" value={formData.name} onChange={(v: string) => setFormData({ ...formData, name: v })} placeholder="e.g. Acme SaaS" required />
-                                                <Input label="Website URL" value={formData.website_url} onChange={(v: string) => setFormData({ ...formData, website_url: v })} placeholder="https://..." />
-                                            </div>
-                                            <Input label="Full Description" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} textarea placeholder="What does your product do? Explain like I'm 5." required />
-                                        </div>
-                                    </div>
-                                </Section>
-
-                                {/* 2. Audience & Problem */}
-                                <Section title="Audience & Problem" icon={<Users className="w-5 h-5 text-primary" />}>
-                                    <div className="grid md:grid-cols-2 gap-8">
-                                        <Input label="Ideal User Profile" value={formData.ideal_user} onChange={(v: string) => setFormData({ ...formData, ideal_user: v })} required placeholder="e.g. solopreneurs" />
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2 block">Business Model</label>
-                                            <div className="flex bg-black/40 p-1 rounded-xl border border-white/10">
-                                                {["B2B", "B2C", "Both"].map(bm => (
-                                                    <button
-                                                        key={bm} type="button"
-                                                        onClick={() => setFormData({ ...formData, business_model: bm })}
-                                                        className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${formData.business_model === bm ? "bg-primary text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}
-                                                    >
-                                                        {bm}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <Input
-                                        label="Problem Solved"
-                                        value={formData.pain_solved}
-                                        onChange={(v: string) => setFormData({ ...formData, pain_solved: v })}
-                                        textarea required
-                                        hint="Grok uses this to find people in ACTUAL pain."
-                                        placeholder="e.g. saves 10 hours a week on social media scheduling"
-                                    />
-                                </Section>
-
-                                {/* 3. Search Signals */}
-                                <Section title="Search Signals" icon={<Search className="w-5 h-5 text-primary" />}>
-                                    <div className="space-y-8">
-                                        <div>
-                                            <label className="text-sm font-black uppercase tracking-widest text-zinc-500 mb-4 block">Product Keywords</label>
-                                            <div className="flex flex-wrap gap-3 mb-4">
-                                                {formData.keywords.map(k => (
-                                                    <span key={k} className="px-4 py-2 bg-primary/10 text-primary rounded-xl text-sm font-bold border border-primary/20 flex items-center gap-3 group/tag transition-all hover:bg-primary/20 hover:scale-105">
-                                                        {k} <button type="button" onClick={() => removeTag('keywords', k)} className="opacity-50 hover:opacity-100 hover:text-red-400 transition-all"><X className="w-4 h-4" /></button>
-                                                    </span>
-                                                ))}
-                                                <div className="flex-1 min-w-[200px] flex items-center gap-3 px-4 py-2 bg-black/40 rounded-xl border border-white/10 focus-within:border-primary/50 transition-all">
-                                                    <input
-                                                        type="text" value={keywordInput}
-                                                        onChange={e => setKeywordInput(e.target.value)}
-                                                        onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag('keywords', keywordInput))}
-                                                        placeholder="Add keyword (e.g. 'crm')"
-                                                        className="bg-transparent text-sm w-full outline-none placeholder:text-zinc-700 text-white"
-                                                    />
-                                                    <Plus className="w-4 h-4 text-zinc-700" />
-                                                </div>
-                                            </div>
-                                            <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Grok will expand these automatically during scan.</p>
-                                        </div>
-
-                                        <div className="h-px bg-white/5" />
-
-                                        <div>
-                                            <label className="text-sm font-black uppercase tracking-widest text-zinc-500 mb-4 block">Pain Phrases</label>
-                                            <div className="flex flex-wrap gap-3 mb-3">
-                                                {formData.pain_phrases.map(p => (
-                                                    <span key={p} className="px-4 py-2 bg-primary/10 text-primary rounded-xl text-sm font-bold border border-primary/20 flex items-center gap-3 group/tag transition-all hover:bg-primary/20 hover:scale-105">
-                                                        &quot;{p}&quot; <button type="button" onClick={() => removeTag('pain_phrases', p)} className="opacity-50 hover:opacity-100 hover:text-red-400 transition-all"><X className="w-4 h-4" /></button>
-                                                    </span>
-                                                ))}
-                                                <div className="flex-1 min-w-[200px] flex items-center gap-3 px-4 py-2 bg-black/40 rounded-xl border border-white/10 focus-within:border-primary/50 transition-all">
-                                                    <input
-                                                        type="text" value={phraseInput}
-                                                        onChange={e => setPhraseInput(e.target.value)}
-                                                        onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag('pain_phrases', phraseInput))}
-                                                        placeholder='e.g. "looking for crm"'
-                                                        className="bg-transparent text-sm w-full outline-none placeholder:text-zinc-700 text-white"
-                                                    />
-                                                    <Plus className="w-4 h-4 text-zinc-700" />
-                                                </div>
-                                            </div>
-                                            <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Specific phrases indicating high intent.</p>
-                                        </div>
-
-                                        <div className="h-px bg-white/5" />
-
-                                        <div>
-                                            <div className="flex items-center justify-between mb-4">
-                                                <label className="text-sm font-black uppercase tracking-widest text-zinc-500 block text-white">Competitors to Watch</label>
-                                            </div>
-                                            <div className="flex flex-wrap gap-3 mb-3">
-                                                {formData.competitors?.map(c => (
-                                                    <span key={c} className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl text-sm font-bold border border-red-500/20 flex items-center gap-3 group/tag transition-all hover:bg-red-500/20 hover:scale-105">
-                                                        {c} <button type="button" onClick={() => removeTag('competitors', c)} className="opacity-50 hover:opacity-100 hover:text-red-400 transition-all"><X className="w-4 h-4" /></button>
-                                                    </span>
-                                                ))}
-                                                <div className="flex-1 min-w-[200px] flex items-center gap-3 px-4 py-2 bg-black/40 rounded-xl border border-white/10 focus-within:border-primary/50 transition-all">
-                                                    <input
-                                                        type="text" value={competitorInput}
-                                                        onChange={e => setCompetitorInput(e.target.value)}
-                                                        onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag('competitors' as any, competitorInput), setCompetitorInput(""))}
-                                                        placeholder='e.g. "SalesForce"'
-                                                        className="bg-transparent text-sm w-full outline-none placeholder:text-zinc-700 text-white"
-                                                    />
-                                                    <Plus className="w-4 h-4 text-zinc-700" />
-                                                </div>
-                                            </div>
-                                            <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">We&apos;ll look for people unhappy with these rivals.</p>
-                                        </div>
-                                    </div>
-                                </Section>
-
-                                {/* 4. Scanning & Outreach Preferences */}
-                                <Section title="Outreach Strategy" icon={<Settings className="w-5 h-5 text-primary" />}>
-                                    <div className="grid md:grid-cols-2 gap-10">
-                                        <div>
-                                            <label className="text-sm font-black uppercase tracking-widest text-zinc-500 mb-6 block">Scan Sensitivity</label>
-                                            <div className="space-y-4">
-                                                {["24h", "72h", "7d", "30d", "90d", "180d"].map(opt => (
-                                                    <label key={opt} className={`flex items-center gap-4 p-4 rounded-2xl border bg-black/20 cursor-pointer transition-all ${formData.scan_window === opt ? "border-primary bg-primary/5" : "border-white/5 hover:border-primary/30"}`}>
-                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.scan_window === opt ? "border-primary" : "border-zinc-700"}`}>
-                                                            {formData.scan_window === opt && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                            {/* Form Content */}
+                            <div className="p-8 md:p-12 space-y-12">
+                                <form id="settings-form" onSubmit={handleSubmit} className="space-y-12">
+                                    {/* 1. Product Basics */}
+                                    <Section title="Asset Fundamentals" icon={<Globe className="w-5 h-5" />}>
+                                        <div className="flex flex-col md:flex-row gap-12 mb-8 items-start">
+                                            {/* Logo Upload UI */}
+                                            <div className="relative group/logo cursor-pointer flex-shrink-0" onClick={() => fileInputRef.current?.click()}>
+                                                <div className="w-32 h-32 rounded-[32px] bg-black border border-white/10 flex items-center justify-center overflow-hidden relative group-hover/logo:border-primary/50 transition-all shadow-2xl">
+                                                    {formData.logo_url ? (
+                                                        <img src={formData.logo_url} alt="Logo" className="w-full h-full object-cover transition-transform duration-700 group-hover/logo:scale-110" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                                                            <Camera className="w-8 h-8 text-zinc-800 group-hover/logo:text-primary transition-colors" />
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-800">Assign Logo</span>
                                                         </div>
-                                                        <div className="flex flex-col">
-                                                            <span className={`text-sm font-bold ${formData.scan_window === opt ? "text-white" : "text-zinc-500"}`}>{opt === '180d' ? 'Last 6 Months' : `Last ${opt}`}</span>
-                                                            <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
-                                                                {opt === '24h' ? 'Highest freshness' : opt === '72h' ? 'Very recent' : opt === '7d' ? 'Tight range' : opt === '30d' ? 'Balanced default' : opt === '90d' ? 'More coverage' : 'Historical mining'}
-                                                            </span>
+                                                    )}
+                                                    {uploadingLogo && (
+                                                        <div className="absolute inset-0 bg-black/80 flex items-center justify-center backdrop-blur-md">
+                                                            <Loader2 className="animate-spin text-primary w-12 h-12" />
                                                         </div>
-                                                    </label>
-                                                ))}
+                                                    )}
+                                                </div>
+                                                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                                             </div>
-                                        </div>
-                                        <div>
-                                            <label className="text-sm font-black uppercase tracking-widest text-zinc-500 mb-6 block">AI Voice Tone</label>
-                                            <div className="space-y-4">
-                                                {['friendly', 'professional', 'educational', 'casual', 'minimal'].map(tone => (
-                                                    <label key={tone} className={`flex items-center gap-4 p-4 rounded-2xl border bg-black/20 cursor-pointer transition-all ${formData.outreach_tone === tone ? "border-primary bg-primary/5" : "border-white/5 hover:border-primary/30"}`}>
-                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.outreach_tone === tone ? "border-primary" : "border-zinc-700"}`}>
-                                                            {formData.outreach_tone === tone && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                                                        </div>
-                                                        <span className={`capitalize text-sm font-bold ${formData.outreach_tone === tone ? "text-white" : "text-zinc-500"}`}>{tone}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Section>
-                            </form>
-                        </div>
 
-                        {/* Footer Actions */}
-                        <div className="p-6 border-t border-white/10 bg-black/40 flex items-center justify-end gap-5">
-                            <button
-                                type="button"
-                                onClick={() => setIsEditing(false)}
-                                className="px-6 py-2.5 text-zinc-500 hover:text-white font-bold uppercase tracking-[0.2em] text-[10px] transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <SaveButton
-                                onClick={handleSubmit}
-                                loading={saving}
-                                label={formData.id ? 'Update Product' : 'Create Product'}
-                                className="!px-8 !py-3.5"
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
+                                            <div className="flex-1 space-y-8 w-full">
+                                                <div className="grid md:grid-cols-2 gap-8 w-full">
+                                                    <Input label="Identity Name" value={formData.name} onChange={(v: string) => setFormData({ ...formData, name: v })} placeholder="Acme Strategic" required />
+                                                    <Input label="Primary URL" value={formData.website_url} onChange={(v: string) => setFormData({ ...formData, website_url: v })} placeholder="https://..." />
+                                                </div>
+                                                <Input label="Value Proposition" value={formData.description} onChange={(v: string) => setFormData({ ...formData, description: v })} textarea placeholder="What strategic gap does this asset fill?" required />
+                                            </div>
+                                        </div>
+                                    </Section>
+
+                                    {/* 2. Search Signals */}
+                                    <Section title="Intelligence Signals" icon={<Search className="w-5 h-5" />}>
+                                        <div className="space-y-10">
+                                            <div>
+                                                <label className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-6 block">Strategic Keywords</label>
+                                                <div className="flex flex-wrap gap-3 mb-4">
+                                                    {formData.keywords.map(k => (
+                                                        <span key={k} className="px-5 py-2.5 bg-primary/5 text-primary rounded-xl text-[11px] font-black uppercase tracking-widest border border-primary/10 flex items-center gap-4 transition-all hover:bg-primary/10">
+                                                            {k} <button type="button" onClick={() => removeTag('keywords', k)} className="text-zinc-600 hover:text-red-500 transition-colors"><X className="w-4 h-4" /></button>
+                                                        </span>
+                                                    ))}
+                                                    <div className="flex-1 min-w-[240px] flex items-center gap-4 px-5 py-2 bg-white/[0.02] rounded-xl border border-white/5 focus-within:border-primary/40 focus-within:bg-white/[0.04] transition-all">
+                                                        <input
+                                                            type="text" value={keywordInput}
+                                                            onChange={e => setKeywordInput(e.target.value)}
+                                                            onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag('keywords', keywordInput))}
+                                                            placeholder="Intercept keyword..."
+                                                            className="bg-transparent text-[11px] font-black uppercase tracking-widest w-full outline-none placeholder:text-zinc-700 text-white"
+                                                        />
+                                                        <Plus className="w-4 h-4 text-zinc-700" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="h-px bg-white/5" />
+
+                                            <div>
+                                                <label className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-6 block">Rival Platforms</label>
+                                                <div className="flex flex-wrap gap-3 mb-4">
+                                                    {formData.competitors?.map(c => (
+                                                        <span key={c} className="px-5 py-2.5 bg-red-500/5 text-red-500 rounded-xl text-[11px] font-black uppercase tracking-widest border border-red-500/10 flex items-center gap-4 transition-all hover:bg-red-500/10">
+                                                            {c} <button type="button" onClick={() => removeTag('competitors', c)} className="text-zinc-600 hover:text-red-400 transition-colors"><X className="w-4 h-4" /></button>
+                                                        </span>
+                                                    ))}
+                                                    <div className="flex-1 min-w-[240px] flex items-center gap-4 px-5 py-2 bg-white/[0.02] rounded-xl border border-white/5 focus-within:border-red-500/40 focus-within:bg-white/[0.04] transition-all">
+                                                        <input
+                                                            type="text" value={competitorInput}
+                                                            onChange={e => setCompetitorInput(e.target.value)}
+                                                            onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag('competitors' as any, competitorInput), setCompetitorInput(""))}
+                                                            placeholder="Target rival name..."
+                                                            className="bg-transparent text-[11px] font-black uppercase tracking-widest w-full outline-none placeholder:text-zinc-700 text-white"
+                                                        />
+                                                        <Plus className="w-4 h-4 text-zinc-700" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Section>
+                                </form>
+                            </div>
+
+                            {/* Footer Actions */}
+                            <div className="p-8 border-t border-white/5 bg-white/[0.02] flex items-center justify-end gap-8">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditing(false)}
+                                    className="text-[11px] font-black text-zinc-500 hover:text-white uppercase tracking-[0.3em] transition-colors"
+                                >
+                                    Abort
+                                </button>
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={saving}
+                                    className="px-12 py-5 bg-white hover:bg-zinc-200 text-black font-black rounded-2xl transition-all shadow-2xl active:scale-95 disabled:opacity-50 flex items-center gap-4 uppercase tracking-[0.3em] text-[11px]"
+                                >
+                                    {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                                    {formData.id ? 'Push Update' : 'Initialize Asset'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
@@ -628,7 +550,7 @@ function Section({ title, icon, children }: { title: string, icon: React.ReactNo
     return (
         <div className="glass-card p-6 md:p-8 border-white/5 relative overflow-hidden group/section">
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-3xl rounded-full -z-10 transition-all group-hover/section:bg-primary/10" />
-            <h2 className="text-lg font-black mb-6 flex items-center gap-3 pb-4 border-b border-white/5 text-white">
+            <h2 className="text-base font-black mb-6 flex items-center gap-3 pb-4 border-b border-white/5 text-white">
                 <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary shadow-inner">
                     {icon}
                 </div>

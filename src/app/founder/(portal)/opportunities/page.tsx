@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import {
     Loader2, Plus, MessageCircle, Swords, ListFilter, Target, ChevronDown, ChevronRight, Check, Flame, Archive, Eye, X as CloseIcon, Sparkles
@@ -16,6 +17,7 @@ import { setActiveProductAction } from "@/app/actions/product-actions";
 import { useUser } from "@/components/providers/UserProvider";
 import { OpportunityCard } from "@/components/dashboard/OpportunityCard";
 import { toast } from "sonner";
+import React from "react";
 
 type TabFilter = 'all' | 'x' | 'reddit' | 'linkedin';
 type ScanWindow = '24h' | '72h' | '7d' | '30d' | '90d' | '180d';
@@ -224,126 +226,122 @@ export default function OpportunitiesPage() {
     return (
         <div className="space-y-10 animate-fade-up">
             {/* Header Section */}
-            <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 sm:gap-4">
-                    <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">Demand Signals</h1>
-
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsProductSelectorOpen(!isProductSelectorOpen)}
-                            className="bg-[#3EEA9A]/10 border border-[#3EEA9A]/20 text-[#3EEA9A] px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-[#3EEA9A]/20 transition-all group"
-                        >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#3EEA9A] animate-pulse" />
-                            CONTEXT: {allProducts.find(p => p.id === activeProductId)?.name || "SELECT PRODUCT"}
-                            <ChevronDown className={`w-3 h-3 transition-transform ${isProductSelectorOpen ? 'rotate-180' : ''}`} />
-                        </button>
-
-                        {isProductSelectorOpen && (
-                            <div className="absolute left-0 mt-2 w-56 bg-[#111111] border border-white/10 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden backdrop-blur-xl">
-                                {allProducts.map(p => (
-                                    <button
-                                        key={p.id}
-                                        onClick={() => handleSwitchProduct(p.id)}
-                                        className="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-sm text-gray-400 hover:text-white transition-all flex items-center justify-between group"
-                                    >
-                                        {p.name}
-                                        {p.id === activeProductId && <Check className="w-4 h-4 text-[#3EEA9A]" />}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+                <div className="space-y-1">
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white uppercase italic">
+                        Demand Signals
+                    </h1>
+                    <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-widest">Capture high-intent leads from across the web.</p>
                 </div>
-                <p className="text-gray-400/80 text-sm sm:text-lg">Capture high-intent leads from across the web.</p>
-            </div>
 
-            {/* Condensed Discovery Console */}
-            <div className="glass-card overflow-hidden">
-                <div className="p-4 md:p-6 space-y-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
-                        <div className="space-y-0.5 sm:space-y-1">
-                            <h3 className="text-[10px] sm:text-sm font-black uppercase tracking-[0.2em] text-[#3EEA9A]">Discovery Window</h3>
-                            <p className="text-[9px] sm:text-[11px] text-gray-500 font-medium">Select the lookback period for signal scanning.</p>
-                        </div>
-                        <div className="flex overflow-x-auto no-scrollbar gap-1 p-0.5 sm:p-1 bg-black/40 rounded-xl sm:rounded-2xl border border-white/5 -mx-2 px-2 lg:mx-0 lg:px-1">
-                            {SCAN_WINDOW_OPTIONS.map(option => (
+                <div className="relative">
+                    <button
+                        onClick={() => setIsProductSelectorOpen(!isProductSelectorOpen)}
+                        className="bg-[#3EEA9A]/10 border border-[#3EEA9A]/20 text-[#3EEA9A] px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-[#3EEA9A]/20 transition-all group"
+                    >
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#3EEA9A] animate-pulse" />
+                        CONTEXT: {allProducts.find(p => p.id === activeProductId)?.name || "SELECT PRODUCT"}
+                        <ChevronDown className={`w-3 h-3 transition-transform ${isProductSelectorOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isProductSelectorOpen && (
+                        <div className="absolute left-0 mt-2 w-56 bg-[#111111] border border-white/10 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden backdrop-blur-xl">
+                            {allProducts.map(p => (
                                 <button
-                                    key={option.value}
-                                    onClick={() => setScanWindow(option.value)}
-                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${scanWindow === option.value
-                                        ? 'bg-[#3EEA9A] text-black shadow-lg shadow-[#3EEA9A]/20'
-                                        : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
-                                        }`}
+                                    key={p.id}
+                                    onClick={() => handleSwitchProduct(p.id)}
+                                    className="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-sm text-gray-400 hover:text-white transition-all flex items-center justify-between group"
                                 >
-                                    {option.label}
+                                    {p.name}
+                                    {p.id === activeProductId && <Check className="w-4 h-4 text-[#3EEA9A]" />}
                                 </button>
                             ))}
                         </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Condensed Discovery Console */}
+            <div className="glass-panel p-6 sm:p-8 space-y-8">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div className="space-y-0.5">
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">Strategic Discovery</h3>
+                        <p className="text-[10px] text-zinc-600 font-medium uppercase tracking-widest">Select lookback window and scan for high-intent signals.</p>
                     </div>
-
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-                        <button
-                            onClick={() => setShowForm(true)}
-                            className="group relative glass-card p-3 sm:p-6 transition-all hover:bg-white/[0.05] disabled:opacity-50 text-left flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4"
-                        >
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
-                                <Plus className="w-4 h-4 sm:w-6 sm:h-6" />
-                            </div>
-                            <span className="font-bold text-gray-400 group-hover:text-white uppercase tracking-wider text-[8px] sm:text-xs text-center sm:text-left">Add Manual Signal</span>
-                        </button>
-
-                        <button
-                            onClick={() => handleDiscovery('x')}
-                            disabled={discovering}
-                            className="group relative bg-[#111111] border border-white/5 hover:border-emerald-500/40 p-3 sm:p-6 rounded-[20px] sm:rounded-3xl transition-all hover:bg-[#151515] disabled:opacity-50 text-left flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4"
-                        >
-                            <div className="relative z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-500/5 flex items-center justify-center text-emerald-500">
-                                {discovering ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>}
-                            </div>
-                            <span className="font-bold text-gray-400 group-hover:text-white uppercase tracking-wider text-[8px] sm:text-xs text-center sm:text-left">Discover X Signals</span>
-                        </button>
-
-                        <button
-                            onClick={() => handleDiscovery('reddit')}
-                            disabled={discoveringReddit}
-                            className="group relative bg-[#111111] border border-white/5 hover:border-orange-500/40 p-3 sm:p-6 rounded-[20px] sm:rounded-3xl transition-all hover:bg-[#151515] disabled:opacity-50 text-left flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4"
-                        >
-                            <div className="relative z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-orange-500/5 flex items-center justify-center text-orange-500">
-                                {discoveringReddit ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />}
-                            </div>
-                            <span className="font-bold text-gray-400 group-hover:text-white uppercase tracking-wider text-[8px] sm:text-xs text-center sm:text-left">Discover Reddit Signals</span>
-                        </button>
-
-                        <button
-                            onClick={() => handleDiscovery('linkedin')}
-                            disabled={discoveringLinkedIn}
-                            className="group relative bg-[#111111] border border-white/5 hover:border-blue-500/40 p-3 sm:p-6 rounded-[20px] sm:rounded-3xl transition-all hover:bg-[#151515] disabled:opacity-50 text-left flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4"
-                        >
-                            <div className="relative z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-500/5 flex items-center justify-center text-blue-500">
-                                {discoveringLinkedIn ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>}
-                            </div>
-                            <span className="font-bold text-gray-400 group-hover:text-white uppercase tracking-wider text-[8px] sm:text-xs text-center sm:text-left">Discover LinkedIn Signals</span>
-                        </button>
+                    <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 w-fit overflow-x-auto no-scrollbar">
+                        {SCAN_WINDOW_OPTIONS.map(option => (
+                            <button
+                                key={option.value}
+                                onClick={() => setScanWindow(option.value)}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${scanWindow === option.value
+                                    ? 'bg-primary text-black shadow-lg shadow-primary/20'
+                                    : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
                     </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <DiscoveryButton
+                        label="Manual Signal"
+                        sublabel="Import target source"
+                        icon={<Plus />}
+                        onClick={() => setShowForm(true)}
+                    />
+
+                    <DiscoveryButton
+                        platform="x"
+                        icon={<svg viewBox="0 0 24 24" className="w-8 h-8" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>}
+                        loading={discovering}
+                        color="text-[#3EEA9A]"
+                        glow="from-[#3EEA9A]/20 to-transparent"
+                        onClick={() => handleDiscovery('x')}
+                        label="Scout X Feed"
+                        sublabel="Network Intelligence"
+                    />
+
+                    <DiscoveryButton
+                        platform="reddit"
+                        icon={<MessageCircle className="w-8 h-8" />}
+                        loading={discoveringReddit}
+                        color="text-orange-500"
+                        glow="from-orange-500/20 to-transparent"
+                        onClick={() => handleDiscovery('reddit')}
+                        label="Scout r/Feed"
+                        sublabel="Community Signals"
+                    />
+
+                    <DiscoveryButton
+                        platform="linkedin"
+                        icon={<svg viewBox="0 0 24 24" className="w-8 h-8" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>}
+                        loading={discoveringLinkedIn}
+                        color="text-blue-500"
+                        glow="from-blue-500/20 to-transparent"
+                        onClick={() => handleDiscovery('linkedin')}
+                        label="Scout LinkedIn"
+                        sublabel="Enterprise Signals"
+                    />
                 </div>
             </div>
 
             {/* Filter Bar */}
             <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5 relative z-40">
-                <div className="flex flex-nowrap items-center justify-start gap-3 sm:gap-4 shrink-0 w-full lg:w-auto overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <div className="flex items-center gap-0 glass-card p-1 shrink-0">
+                <div className="flex flex-nowrap items-center justify-start gap-4 shrink-0 w-full lg:w-auto overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                    <div className="flex items-center gap-1.5 bg-black/40 p-1.5 rounded-2xl border border-white/5 shrink-0">
                         <button
                             onClick={() => setShowArchived(false)}
-                            className={`px-4 sm:px-8 py-2.5 rounded-xl text-[10px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${!showArchived ? 'bg-white text-black shadow-lg shadow-white/10' : 'text-gray-500 hover:text-gray-300'}`}
+                            className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${!showArchived ? 'bg-white text-black shadow-white/10' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
                         >
-                            <span className="sm:hidden">ACTIVE</span>
-                            <span className="hidden sm:inline">ACTIVE INBOX</span>
+                            Active Intelligence
                         </button>
                         <button
                             onClick={() => setShowArchived(true)}
-                            className={`px-4 sm:px-8 py-2.5 rounded-xl text-[10px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${showArchived ? 'bg-white text-black shadow-lg shadow-white/10' : 'text-gray-500 hover:text-gray-300'}`}
+                            className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${showArchived ? 'bg-white text-black shadow-white/10' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
                         >
-                            ARCHIVED
+                            Historical Archive
                         </button>
                     </div>
 
@@ -505,30 +503,50 @@ export default function OpportunitiesPage() {
             </div>
 
             {/* List Results */}
-            <div className="flex flex-col gap-4">
-                {loading ? (
-                    <div className="py-20 flex flex-col items-center justify-center text-gray-500 gap-4">
-                        <Loader2 className="w-12 h-12 animate-spin text-emerald-500" />
-                        <p className="font-medium tracking-wide uppercase text-[10px] tracking-[0.3em]">Scanning deep web for signals...</p>
-                    </div>
-                ) : filteredOpportunities.length > 0 ? (
-                    filteredOpportunities.map(opp => (
-                        <OpportunityCard
-                            key={opp.id}
-                            opportunity={opp}
-                            onStatusUpdate={handleStatusUpdate}
-                            onRefresh={() => fetchOpportunities()}
-                        />
-                    ))
-                ) : (
-                    <div className="py-20 bg-zinc-900/10 rounded-[40px] border border-dashed border-white/5 flex flex-col items-center justify-center text-gray-500 text-center px-10">
-                        <div className="bg-white/5 p-6 rounded-full mb-6">
-                            <Target className="w-12 h-12 text-gray-700" />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-300 mb-2 tracking-tight">Zero demand signals in your inbox.</h3>
-                        <p className="max-w-md text-gray-500 text-sm leading-relaxed font-medium">Use the discovery buttons above or add a manual signal to start building your pipeline.</p>
-                    </div>
-                )}
+            <div className="flex flex-col gap-6">
+                <AnimatePresence mode="popLayout">
+                    {loading ? (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="py-32 flex flex-col items-center justify-center text-zinc-500 gap-6"
+                        >
+                            <div className="relative">
+                                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                                <div className="absolute inset-0 blur-xl bg-primary/20 animate-pulse rounded-full" />
+                            </div>
+                            <p className="font-black tracking-[0.4em] uppercase text-[10px] animate-pulse">Scanning Global Streams...</p>
+                        </motion.div>
+                    ) : filteredOpportunities.length > 0 ? (
+                        filteredOpportunities.map((opp, idx) => (
+                            <motion.div
+                                key={opp.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: Math.min(idx * 0.05, 0.5) }}
+                            >
+                                <OpportunityCard
+                                    opportunity={opp}
+                                    onStatusUpdate={handleStatusUpdate}
+                                    onRefresh={() => fetchOpportunities()}
+                                />
+                            </motion.div>
+                        ))
+                    ) : (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="py-32 bg-white/[0.01] rounded-[48px] border border-dashed border-white/5 flex flex-col items-center justify-center text-center px-10"
+                        >
+                            <div className="bg-white/5 p-8 rounded-full mb-8 border border-white/5">
+                                <Target className="w-12 h-12 text-zinc-700" />
+                            </div>
+                            <h3 className="text-2xl font-black text-white/90 mb-3 tracking-tight uppercase italic">No Signals Found</h3>
+                            <p className="max-w-md text-zinc-500 text-base leading-relaxed font-medium">Your strategic radar is clear. Use the discovery tools above to scan for new demand signals.</p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Manual Signal Modal */}
@@ -538,7 +556,7 @@ export default function OpportunitiesPage() {
                         <div className="bg-[#0A0A0A] border border-white/10 w-full max-w-xl rounded-[40px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
                             <div className="p-10 space-y-8">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-4">
+                                    <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-4">
                                         <Plus className="w-8 h-8 text-emerald-500" /> Add Manual Signal
                                     </h2>
                                     <button onClick={() => setShowForm(false)} className="p-3 hover:bg-white/5 rounded-full transition-colors group">
@@ -620,6 +638,25 @@ export default function OpportunitiesPage() {
                     </div>
                 )
             }
-        </div >
+        </div>
+    );
+}
+
+function DiscoveryButton({ platform, icon, loading, color, glow, onClick, label, sublabel }: any) {
+    return (
+        <button
+            onClick={onClick}
+            disabled={loading}
+            className="group relative flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-black/40 border border-white/5 hover:border-primary/20 transition-all overflow-hidden disabled:opacity-50"
+        >
+            <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors" />
+            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-500 group-hover:text-primary transition-all group-hover:scale-105 border border-white/5 group-hover:border-primary/20">
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
+            </div>
+            <div className="text-center">
+                <div className="text-[9px] font-black text-zinc-400 uppercase tracking-widest group-hover:text-white transition-colors">{label}</div>
+                {sublabel && <div className="text-[7px] text-zinc-600 uppercase tracking-[0.2em] mt-0.5">{sublabel}</div>}
+            </div>
+        </button>
     );
 }

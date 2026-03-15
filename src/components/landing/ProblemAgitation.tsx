@@ -1,101 +1,99 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { XCircle, ArrowRight } from "lucide-react";
-
-const pains = [
-    "Wasting 4+ hours a day on manual lead hunting",
-    "Sending cold DMs that get marked as spam",
-    "Struggling to find 'High Intent' buyers",
-    "High churn due to low-quality lead sources"
-];
+import { AlertCircle, XCircle, TrendingDown, Layers } from "lucide-react";
 
 export function ProblemAgitation() {
-    return (
-        <section className="pt-12 pb-24 px-6 relative z-40 border-y border-white/5 bg-[#050a14]">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                <div>
-                    <motion.h2
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        className="text-2xl md:text-6xl font-black text-white mb-8 leading-tight uppercase tracking-tight"
-                    >
-                        Cold outreach is <br />
-                        <span className="text-red-500">slowly killing</span> <br />
-                        your startup.
-                    </motion.h2>
-                    <p className="text-gray-400 text-[10px] md:text-xl mb-10 leading-relaxed max-w-xl">
-                        Founders spend 40% of their week hunting for leads instead of building. Most of that time is spent talking to people who don't care.
-                    </p>
+    const spring = {
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+    };
 
-                    <div className="space-y-4 mb-10">
-                        {pains.map((pain, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                className="flex items-center gap-4 text-[10px] text-gray-500 font-medium"
-                            >
-                                <XCircle className="w-4 h-4 text-red-500/50 shrink-0" />
-                                {pain}
-                            </motion.div>
-                        ))}
+    return (
+        <section className="py-44 px-6 relative z-10">
+            <div className="max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
+                    
+                    {/* Visual Evidence Side */}
+                    <div className="relative">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={spring}
+                            className="glass-card p-16 relative overflow-hidden"
+                        >
+                            <div className="relative z-10 space-y-12">
+                                <div className="flex items-center gap-4">
+                                    <Layers className="w-8 h-8 text-[#4ADE80]" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Efficiency Gap</span>
+                                </div>
+                                
+                                <div className="space-y-8">
+                                    {[
+                                        { l: "High-latency prospecting", v: "92%" },
+                                        { l: "Manual noise filtration", v: "14h / wk" },
+                                        { l: "Lost intent conversion", v: "64%" }
+                                    ].map((item, i) => (
+                                        <motion.div 
+                                            key={i}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            whileInView={{ opacity: 1, x: 0 }}
+                                            transition={{ ...spring, delay: i * 0.1 }}
+                                            className="flex items-end justify-between border-b border-white/[0.05] pb-6"
+                                        >
+                                            <span className="text-zinc-500 font-bold text-sm uppercase tracking-wide">{item.l}</span>
+                                            <span className="text-white font-bold text-lg">{item.v}</span>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                                
+                                <div className="pt-10 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Active Audit</span>
+                                    </div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-[#4ADE80]">Critical Risk</div>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
 
-                    <motion.div
-                        whileHover={{ x: 10 }}
-                        className="inline-flex items-center gap-2 text-primary font-black uppercase tracking-widest text-sm cursor-pointer"
-                    >
-                        There is a better way <ArrowRight className="w-5 h-5" />
-                    </motion.div>
-                </div>
+                    {/* Copy Side */}
+                    <div className="space-y-12">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={spring}
+                        >
+                            <h2 className="heading-serif text-6xl md:text-[100px] font-normal text-white tracking-tight leading-[0.9] mb-12">
+                                Manual scales <br />
+                                <span className="italic opacity-50">at a loss.</span>
+                            </h2>
+                            <p className="text-zinc-500 text-xl font-medium leading-relaxed max-w-lg mb-12">
+                                You shouldn't have to hunt for interest. The demand is constant—it's your visibility that's limited.
+                            </p>
+                        </motion.div>
 
-                <div className="relative">
-                    <div className="absolute inset-0 bg-primary/10 blur-[100px] rounded-full" />
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        className="glass-card p-10 border-red-500/20 relative z-10 overflow-hidden"
-                    >
-                        <div className="absolute top-0 right-0 p-4">
-                            <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-                        </div>
-                        <h3 className="text-base md:text-2xl font-black text-white mb-6 uppercase tracking-tight">The "Founder Burnout" Cycle</h3>
-                        <div className="space-y-6">
-                            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 pt-12 border-t border-white/[0.05]">
+                            {[
+                                { title: "Latent Signals", desc: "Buyers are screaming for solutions while you're offline." },
+                                { title: "Market Blindness", desc: "Pipeline velocity drops as noise increases." }
+                            ].map((item, i) => (
                                 <motion.div
-                                    initial={{ width: 0 }}
-                                    whileInView={{ width: "95%" }}
-                                    viewport={{ once: true }}
-                                    className="h-full bg-red-500"
-                                />
-                            </div>
-                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
-                                <span>Prospecting</span>
-                                <span className="text-red-500">95% Waste</span>
-                            </div>
-
-                            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    whileInView={{ width: "5%" }}
-                                    viewport={{ once: true }}
-                                    className="h-full bg-primary"
-                                />
-                            </div>
-                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
-                                <span>Building Product</span>
-                                <span className="text-primary">5% Actual Progress</span>
-                            </div>
+                                    key={i}
+                                    initial={{ opacity: 0, y: 15 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ ...spring, delay: 0.2 + i * 0.1 }}
+                                >
+                                    <h4 className="text-white font-bold uppercase text-[10px] tracking-[0.3em] mb-4">{item.title}</h4>
+                                    <p className="text-zinc-600 text-sm font-medium leading-relaxed">{item.desc}</p>
+                                </motion.div>
+                            ))}
                         </div>
-                        <p className="mt-8 text-[10px] md:text-sm text-gray-500 leading-relaxed italic">
-                            "I spent 3 weeks manually searching keywords on X. 80% was noise. The other 20% already had a solution. I almost gave up."
-                        </p>
-                    </motion.div>
+                    </div>
                 </div>
             </div>
         </section>
