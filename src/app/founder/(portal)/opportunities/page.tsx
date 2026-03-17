@@ -228,18 +228,18 @@ export default function OpportunitiesPage() {
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                 <div className="space-y-1">
-                    <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white uppercase italic">
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase">
                         Demand Signals
                     </h1>
-                    <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-widest">Capture high-intent leads from across the web.</p>
+                    <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">Capture high-intent leads from across the web.</p>
                 </div>
 
                 <div className="relative">
                     <button
                         onClick={() => setIsProductSelectorOpen(!isProductSelectorOpen)}
-                        className="bg-[#3EEA9A]/10 border border-[#3EEA9A]/20 text-[#3EEA9A] px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-[#3EEA9A]/20 transition-all group"
+                        className="bg-white/5 border border-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-white/10 transition-all group"
                     >
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#3EEA9A] animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(54,34,34,0.6)]" />
                         CONTEXT: {allProducts.find(p => p.id === activeProductId)?.name || "SELECT PRODUCT"}
                         <ChevronDown className={`w-3 h-3 transition-transform ${isProductSelectorOpen ? 'rotate-180' : ''}`} />
                     </button>
@@ -253,7 +253,7 @@ export default function OpportunitiesPage() {
                                     className="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-sm text-gray-400 hover:text-white transition-all flex items-center justify-between group"
                                 >
                                     {p.name}
-                                    {p.id === activeProductId && <Check className="w-4 h-4 text-[#3EEA9A]" />}
+                                    {p.id === activeProductId && <Check className="w-4 h-4 text-white" />}
                                 </button>
                             ))}
                         </div>
@@ -265,16 +265,16 @@ export default function OpportunitiesPage() {
             <div className="glass-panel p-6 sm:p-8 space-y-8">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="space-y-0.5">
-                        <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">Strategic Discovery</h3>
-                        <p className="text-[10px] text-zinc-600 font-medium uppercase tracking-widest">Select lookback window and scan for high-intent signals.</p>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-white">Strategic Discovery</h3>
+                        <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Select lookback window and scan for high-intent signals.</p>
                     </div>
-                    <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 w-fit overflow-x-auto no-scrollbar">
+                    <div className="flex bg-black/40 p-1 rounded-3xl border border-white/5 w-fit overflow-x-auto no-scrollbar">
                         {SCAN_WINDOW_OPTIONS.map(option => (
                             <button
                                 key={option.value}
                                 onClick={() => setScanWindow(option.value)}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${scanWindow === option.value
-                                    ? 'bg-primary text-black shadow-lg shadow-primary/20'
+                                className={`px-4 py-2 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${scanWindow === option.value
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                     : 'text-zinc-500 hover:text-white hover:bg-white/5'
                                     }`}
                             >
@@ -296,8 +296,8 @@ export default function OpportunitiesPage() {
                         platform="x"
                         icon={<svg viewBox="0 0 24 24" className="w-8 h-8" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>}
                         loading={discovering}
-                        color="text-[#3EEA9A]"
-                        glow="from-[#3EEA9A]/20 to-transparent"
+                        color="text-white"
+                        glow="from-white/10 to-transparent"
                         onClick={() => handleDiscovery('x')}
                         label="Scout X Feed"
                         sublabel="Network Intelligence"
@@ -330,23 +330,23 @@ export default function OpportunitiesPage() {
             {/* Filter Bar */}
             <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5 relative z-40">
                 <div className="flex flex-nowrap items-center justify-start gap-4 shrink-0 w-full lg:w-auto overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <div className="flex items-center gap-1.5 bg-black/40 p-1.5 rounded-2xl border border-white/5 shrink-0">
+                    <div className="flex items-center gap-1.5 bg-black/40 p-1.5 rounded-3xl border border-white/5 shrink-0">
                         <button
                             onClick={() => setShowArchived(false)}
-                            className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${!showArchived ? 'bg-white text-black shadow-white/10' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                            className={`px-8 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${!showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
                         >
                             Active Intelligence
                         </button>
                         <button
                             onClick={() => setShowArchived(true)}
-                            className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${showArchived ? 'bg-white text-black shadow-white/10' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                            className={`px-8 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
                         >
                             Historical Archive
                         </button>
                     </div>
 
                     {/* Mobile Only Session Selector BUTTON */}
-                    <div className="lg:hidden flex items-center gap-2 text-[10px] font-black text-gray-600 uppercase tracking-widest shrink-0 whitespace-nowrap">
+                    <div className="lg:hidden flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest shrink-0 whitespace-nowrap">
                         SESS:
                         <div className="relative group/session">
                             <button
@@ -354,7 +354,7 @@ export default function OpportunitiesPage() {
                                 className="flex items-center gap-2 bg-[#111111] border border-white/5 rounded-xl px-3 py-2 hover:border-white/10 transition-all text-[10px] font-bold text-white uppercase tracking-widest min-w-[100px] justify-between"
                             >
                                 {activeRunId ? new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleDateString() : "ALL"}
-                                <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform ${showSessionMenuMobile ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${showSessionMenuMobile ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
                     </div>
@@ -408,7 +408,7 @@ export default function OpportunitiesPage() {
 
                 <div className="flex flex-wrap lg:flex-nowrap items-center gap-4 xl:ml-auto w-full xl:w-auto justify-center xl:justify-end">
                     {/* Desktop Only Session Selector */}
-                    <div className="hidden lg:flex items-center gap-2 text-[10px] font-black text-gray-600 uppercase tracking-widest shrink-0 relative">
+                    <div className="hidden lg:flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest shrink-0 relative">
                         SESSION:
                         <div className="relative group/session">
                             <button
@@ -417,7 +417,7 @@ export default function OpportunitiesPage() {
                             >
                                 {activeRunId ? (
                                     <span className="flex items-center gap-2">
-                                        <span className="text-[#3EEA9A] w-1.5 h-1.5 rounded-full animate-pulse shadow-[0_0_8px_rgba(62,234,154,0.5)]" />
+                                        <span className="text-primary w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
                                         {new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleDateString()}
                                     </span>
                                 ) : "All Time"}
@@ -433,7 +433,7 @@ export default function OpportunitiesPage() {
                                                 setActiveRunId(null);
                                                 setShowSessionMenu(false);
                                             }}
-                                            className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 ${!activeRunId ? 'bg-white text-black shadow-lg shadow-white/10' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                                            className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 ${!activeRunId ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
                                         >
                                             All Time Results
                                         </button>
@@ -448,7 +448,7 @@ export default function OpportunitiesPage() {
                                                             setActiveRunId(run.id);
                                                             setShowSessionMenu(false);
                                                         }}
-                                                        className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 flex items-center justify-between group ${activeRunId === run.id ? 'bg-white text-black' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                                                    className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 flex items-center justify-between group ${activeRunId === run.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
                                                     >
                                                         <div className="flex flex-col">
                                                             <span className="text-[10px]">{new Date(run.started_at).toLocaleDateString()}</span>
@@ -457,7 +457,7 @@ export default function OpportunitiesPage() {
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`text-[10px] font-black ${activeRunId === run.id ? 'text-black' : 'text-emerald-500/80'}`}>
+                                                            <span className={`text-[10px] font-bold ${activeRunId === run.id ? 'text-black' : 'text-white'}`}>
                                                                 {run.leads_found || 0}
                                                             </span>
                                                             <div className={`w-1.5 h-1.5 rounded-full ${activeRunId === run.id ? 'bg-black/20' : 'bg-white/5'}`} />
@@ -486,12 +486,12 @@ export default function OpportunitiesPage() {
                                     setActiveTab(tab.id as TabFilter);
                                     setActiveRunId(null);
                                 }}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 whitespace-nowrap ${activeTab === tab.id
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shrink-0 whitespace-nowrap ${activeTab === tab.id
                                     ? tab.color === 'orange' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
                                         : tab.color === 'blue' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                            : tab.color === 'emerald' ? 'bg-[#3EEA9A] text-black shadow-lg shadow-[#3EEA9A]/20'
+                                            : tab.color === 'emerald' ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                                 : 'bg-zinc-800 text-white'
-                                    : 'text-gray-500 hover:text-gray-300'
+                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 {tab.icon}
@@ -513,10 +513,10 @@ export default function OpportunitiesPage() {
                             className="py-32 flex flex-col items-center justify-center text-zinc-500 gap-6"
                         >
                             <div className="relative">
-                                <Loader2 className="w-12 h-12 animate-spin text-primary" />
-                                <div className="absolute inset-0 blur-xl bg-primary/20 animate-pulse rounded-full" />
+                                <Loader2 className="w-12 h-12 animate-spin text-white" />
+                                <div className="absolute inset-0 blur-xl bg-white/10 animate-pulse rounded-full" />
                             </div>
-                            <p className="font-black tracking-[0.4em] uppercase text-[10px] animate-pulse">Scanning Global Streams...</p>
+                            <p className="font-bold tracking-widest uppercase text-[10px] animate-pulse">Scanning Global Streams...</p>
                         </motion.div>
                     ) : filteredOpportunities.length > 0 ? (
                         filteredOpportunities.map((opp, idx) => (
@@ -542,8 +542,8 @@ export default function OpportunitiesPage() {
                             <div className="bg-white/5 p-8 rounded-full mb-8 border border-white/5">
                                 <Target className="w-12 h-12 text-zinc-700" />
                             </div>
-                            <h3 className="text-2xl font-black text-white/90 mb-3 tracking-tight uppercase italic">No Signals Found</h3>
-                            <p className="max-w-md text-zinc-500 text-base leading-relaxed font-medium">Your strategic radar is clear. Use the discovery tools above to scan for new demand signals.</p>
+                            <h3 className="text-2xl font-bold text-white/90 mb-3 tracking-tight uppercase">No Signals Found</h3>
+                            <p className="max-w-md text-zinc-400 text-base leading-relaxed font-normal">Your strategic radar is clear. Use the discovery tools above to scan for new demand signals.</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -628,7 +628,7 @@ export default function OpportunitiesPage() {
                                     <button
                                         type="submit"
                                         disabled={adding}
-                                        className="w-full bg-[#3EEA9A] hover:bg-emerald-400 text-black py-5 rounded-[24px] font-black uppercase tracking-widest transition-all disabled:opacity-50 mt-4 shadow-2xl shadow-emerald-500/20 active:scale-95"
+                                        className="w-full bg-primary hover:bg-[#423F3E] text-white py-5 rounded-2xl font-bold uppercase tracking-widest transition-all disabled:opacity-50 mt-4 shadow-2xl shadow-primary/20 active:scale-95"
                                     >
                                         {adding ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : "Save Signal to Pipeline"}
                                     </button>
@@ -647,15 +647,15 @@ function DiscoveryButton({ platform, icon, loading, color, glow, onClick, label,
         <button
             onClick={onClick}
             disabled={loading}
-            className="group relative flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-black/40 border border-white/5 hover:border-primary/20 transition-all overflow-hidden disabled:opacity-50"
+            className="group relative flex flex-col items-center justify-center gap-2 p-6 rounded-[24px] bg-black/40 border border-white/5 hover:border-white/20 transition-all overflow-hidden disabled:opacity-50 text-white"
         >
-            <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors" />
-            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-500 group-hover:text-primary transition-all group-hover:scale-105 border border-white/5 group-hover:border-primary/20">
+            <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors" />
+            <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white transition-all group-hover:scale-105 border border-white/5 group-hover:border-white/20">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
             </div>
             <div className="text-center">
-                <div className="text-[9px] font-black text-zinc-400 uppercase tracking-widest group-hover:text-white transition-colors">{label}</div>
-                {sublabel && <div className="text-[7px] text-zinc-600 uppercase tracking-[0.2em] mt-0.5">{sublabel}</div>}
+                <div className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest group-hover:text-white transition-colors">{label}</div>
+                {sublabel && <div className="text-[8px] text-zinc-400 uppercase tracking-wider mt-0.5">{sublabel}</div>}
             </div>
         </button>
     );

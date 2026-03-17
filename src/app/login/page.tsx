@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { User, Mail, Lock, Loader2 } from "lucide-react";
+import { Briefcase, Palette, Mail, Lock, Loader2, Radar, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 type Role = "founder" | "creator";
@@ -11,11 +12,33 @@ type Role = "founder" | "creator";
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [role, setRole] = useState<Role>("founder");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
     const supabase = createClient();
+
+    // Mouse tracking for 3D parallax
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+
+    const springConfig = { damping: 25, stiffness: 150 };
+    const rotateX = useSpring(useTransform(mouseY, [-300, 300], [10, -10]), springConfig);
+    const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-10, 10]), springConfig);
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        mouseX.set(x);
+        mouseY.set(y);
+    };
+
+    const handleMouseLeave = () => {
+        mouseX.set(0);
+        mouseY.set(0);
+    };
 
     useEffect(() => {
         const checkSession = async () => {
@@ -120,98 +143,296 @@ export default function LoginPage() {
         }
     };
 
+    const handleGoogleLogin = async () => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/auth/callback`
+                }
+            });
+            if (error) throw error;
+        } catch (error: any) {
+            setError(error.message);
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-[#050a14] flex flex-col items-center justify-center p-6 text-white font-sans">
-            {/* Background elements to match landing page */}
-            <div className="fixed inset-0 cyber-grid opacity-10 pointer-events-none" />
-            <div className="fixed inset-0 bg-background/60 pointer-events-none" />
+        <div className="min-h-screen bg-[#0A0A0A] flex flex-col md:flex-row text-white font-sans overflow-hidden">
+            {/* Background elements */}
+            <div className="fixed inset-0 cyber-grid opacity-[0.03] pointer-events-none" />
+                        {/* Left Panel: Marketing Content */}
+            <div className="hidden md:flex md:w-1/2 lg:w-[60%] relative flex-col justify-center gap-16 p-12 overflow-hidden border-r border-white/5 bg-[#0A0A0A]">
+                {/* Background Animation Elements */}
+                <div className="absolute inset-0 pointer-events-none z-0">
+                    {/* Animated Grid Parallax */}
+                    <motion.div 
+                        animate={{ 
+                            x: [-10, 10],
+                            y: [-10, 10]
+                        }}
+                        transition={{ 
+                            duration: 20, 
+                            repeat: Infinity, 
+                            repeatType: "reverse", 
+                            ease: "linear" 
+                        }}
+                        className="absolute inset-[-20%] cyber-grid opacity-[0.03]" 
+                    />
 
-            <div className="w-full max-w-[440px] z-10 animate-fade-up">
-                <div className="bg-[#0a0f1a]/80 backdrop-blur-xl rounded-[24px] sm:rounded-[40px] p-6 sm:p-12 border border-white/5 shadow-2xl relative overflow-hidden">
-                    {/* Glowing Orb behind icon */}
-                    <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 blur-[80px] -translate-y-1/2 opacity-30 transition-all duration-700 ${role === 'founder' ? 'bg-primary' : 'bg-zinc-600'}`} />
+                    {/* Atmospheric Glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] opacity-30" />
 
-                    {/* Role Icon */}
-                    <div className="flex justify-center mb-10 relative">
-                        <div className={`w-20 h-20 rounded-[28px] flex items-center justify-center shadow-2xl transition-all duration-700 ${role === 'founder'
-                            ? 'bg-gradient-to-br from-zinc-400 to-zinc-600 shadow-primary/20'
-                            : 'bg-gradient-to-br from-zinc-500 to-slate-600 shadow-zinc-600/20'
-                            }`}>
-                            <User className={`w-10 h-10 ${role === 'founder' ? 'text-black' : 'text-white'}`} />
-                        </div>
-                    </div>
+                    {/* Refined Radar Ripples */}
+                    {[...Array(3)].map((_, i) => (
+                        <motion.div 
+                            key={`ripple-${i}`}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ 
+                                opacity: [0, 0.1, 0],
+                                scale: [0.8, 2.2],
+                            }}
+                            transition={{ 
+                                duration: 6,
+                                delay: i * 2,
+                                repeat: Infinity,
+                                ease: [0.2, 0, 0.4, 1]
+                            }}
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-white/10 rounded-full blur-[2px]"
+                        />
+                    ))}
 
-                    <div className="text-center mb-6 sm:mb-10">
-                        <h1 className="text-3xl sm:text-4xl font-black mb-3 tracking-tight">Welcome Back</h1>
-                        <p className="text-gray-400 text-sm font-medium">
-                            Logging in as <span className={`font-bold transition-colors ${role === 'founder' ? 'text-primary' : 'text-primary'}`}>
-                                {role === 'founder' ? 'Founder' : 'Creator'}
+                    {/* Denser Floating Nodes */}
+                    {[...Array(12)].map((_, i) => (
+                        <motion.div
+                            key={`node-${i}`}
+                            initial={{ 
+                                opacity: 0,
+                                x: Math.random() * 400 - 200,
+                                y: Math.random() * 400 - 200
+                            }}
+                            animate={{
+                                y: [0, Math.random() * -100 - 50, 0],
+                                x: [0, Math.random() * 40 - 20, 0],
+                                opacity: [0.05, 0.15, 0.05]
+                            }}
+                            transition={{
+                                duration: 8 + Math.random() * 10,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                                delay: Math.random() * 5
+                            }}
+                            className="absolute bg-white/20 rounded-full blur-[1.5px]"
+                            style={{
+                                width: `${Math.random() * 3 + 1}px`,
+                                height: `${Math.random() * 3 + 1}px`,
+                                top: `${15 + Math.random() * 70}%`,
+                                left: `${15 + Math.random() * 70}%`
+                            }}
+                        />
+                    ))}
+                </div>
+
+
+                {/* Large Background Text */}
+                <div className="absolute top-1/2 left-0 -translate-y-1/2 pointer-events-none select-none z-0">
+                    <motion.span 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 0.015, x: 0 }}
+                        transition={{ duration: 1.5 }}
+                        className="text-[20vw] font-bold text-white tracking-tighter uppercase leading-none block -rotate-90 origin-left translate-x-12"
+                    >
+                        MarketingX
+                    </motion.span>
+                </div>
+
+                <div className="relative z-10">
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <Link href="/" className="flex items-center gap-3 mb-10">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-2xl">
+                                <Radar className="h-5 w-5 text-white" />
+                            </div>
+                            <span className="text-xl font-bold tracking-tight text-white uppercase">
+                                Marketing<span className="text-primary">X</span>
                             </span>
-                            <button
-                                onClick={() => setRole(role === 'founder' ? 'creator' : 'founder')}
-                                className="ml-2 text-[10px] text-gray-500 hover:text-white underline decoration-gray-500/50 underline-offset-4 uppercase tracking-widest font-black transition-all"
-                            >
-                                (Switch)
-                            </button>
-                        </p>
-                    </div>
+                        </Link>
+                    </motion.div>
 
-                    {error && (
-                        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold mb-8 animate-shake text-center">
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleLogin} className="space-y-8">
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Email</label>
-                            <div className="relative group">
-                                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-white transition-colors" />
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="your@email.com"
-                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-6 text-white text-sm font-medium focus:outline-none focus:border-white/10 focus:bg-white/[0.05] transition-all placeholder:text-gray-600"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Password</label>
-                            <div className="relative group">
-                                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-white transition-colors" />
-                                <input
-                                    type="password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-6 text-white text-sm font-medium focus:outline-none focus:border-white/10 focus:bg-white/[0.05] transition-all placeholder:text-gray-600"
-                                />
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className={`w-full py-5 font-black rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98] text-sm uppercase tracking-widest ${role === 'founder'
-                                ? 'bg-primary hover:bg-zinc-200 text-black shadow-primary/20'
-                                : 'bg-zinc-600 hover:bg-primary text-white shadow-zinc-600/20'
-                                }`}
+                    <div className="space-y-4 max-w-xl">
+                        <motion.h2 
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1, delay: 0.2 }}
+                            className="text-3xl lg:text-5xl font-bold tracking-tight leading-[1.1]"
                         >
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In"}
-                        </button>
-                    </form>
+                            Capture market share <br />
+                            <span className="text-zinc-400">with intelligence.</span>
+                        </motion.h2>
+                        <motion.p 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                            className="text-zinc-400 text-sm font-medium leading-relaxed max-w-md"
+                        >
+                            The standard for high-growth founder stacks. Monitor demand signals, automate outreach, and dominate your niche.
+                        </motion.p>
+                    </div>
+                </div>
 
-                    <div className="text-center mt-12">
-                        <p className="text-xs text-gray-500 font-medium tracking-tight">
-                            Don&apos;t have an account?{" "}
-                            <Link href="/signup" className="text-white font-black hover:underline decoration-white/30 underline-offset-4 transition-all">
-                                Create one
-                            </Link>
+                <div className="relative z-10 grid grid-cols-2 gap-8 mt-12 pt-8 border-t border-white/5">
+
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.8 }}
+                        className="space-y-4"
+                    >
+                        <div className="w-10 h-0.5 rounded-full bg-primary" />
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-white">Demand Signals</h3>
+                        <p className="text-zinc-400 text-[11px] font-medium leading-relaxed uppercase tracking-widest">
+                            Real-time scanning for high-intent conversations across global networks.
                         </p>
+                    </motion.div>
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 1 }}
+                        className="space-y-4"
+                    >
+                        <div className="w-10 h-0.5 rounded-full bg-zinc-800" />
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">AI Enrichment</h3>
+                        <p className="text-zinc-400 text-[11px] font-medium leading-relaxed uppercase tracking-widest">
+                            Contextualized lead scoring and automated engagement personalized for your brand.
+                        </p>
+                    </motion.div>
+                </div>
+            </div>
+
+            {/* Right Panel: Auth Card */}
+            <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col items-center justify-center p-4 sm:p-8 relative z-10 bg-[#0A0A0A]">
+                <div className="w-full max-w-[380px] animate-fade-up">
+                    <div className="glass-panel p-6 sm:p-8 border-white/5 shadow-2xl relative overflow-hidden rounded-[32px]">
+                        {/* Role Icon */}
+                        <div className="flex justify-center mb-6 relative">
+                            <div className={`w-14 h-14 rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-700 bg-primary/10 border border-primary/20`}>
+                                {role === 'founder' ? <Briefcase className="w-7 h-7 text-white" /> : <Palette className="w-7 h-7 text-white" />}
+                            </div>
+                        </div>
+
+                <div className="text-center mb-6">
+                    <h1 className="text-lg sm:text-xl font-bold mb-1 tracking-tight uppercase">Welcome Back</h1>
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+                        Role: <span className="text-white">{role}</span>
+                        <button
+                            onClick={() => setRole(role === 'founder' ? 'creator' : 'founder')}
+                            className="ml-2 text-[10px] text-zinc-400/50 hover:text-white transition-all underline underline-offset-4"
+                        >
+                            (Switch)
+                        </button>
+                    </p>
+                </div>
+
+                        {error && (
+                            <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/10 text-red-400 text-[10px] font-bold mb-8 text-center uppercase tracking-widest">
+                                {error}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleLogin} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Identity</label>
+                                <div className="relative group">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-white transition-colors" />
+                                    <input
+                                        type="email"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="your@email.com"
+                                        className="w-full bg-white/[0.02] border border-white/10 rounded-2xl py-3 pl-12 pr-6 text-white text-sm font-medium focus:outline-none focus:border-white/30 transition-all placeholder:text-zinc-600"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Access Key</label>
+                                <div className="relative group">
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-primary transition-colors" />
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="••••••••"
+                                        className="w-full bg-[#0D0D0D] border border-white/5 rounded-xl py-3 pl-12 pr-10 text-white text-sm font-medium focus:outline-none focus:border-primary/20 transition-all placeholder:text-zinc-800"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400 transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-4 bg-primary hover:bg-[#423E3E] text-white font-bold rounded-2xl transition-all shadow-[0_0_20px_rgba(54,34,34,0.3)] active:scale-[0.98] text-[10px] uppercase tracking-widest disabled:opacity-50"
+                            >
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Authorize Access"}
+                            </button>
+                        </form>
+
+                        <div className="mt-6">
+                            <div className="relative mb-6">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-white/5"></div>
+                                </div>
+                                <div className="relative flex justify-center text-[10px] uppercase tracking-tighter">
+                                    <span className="bg-[#0A0A0A] px-4 text-zinc-500 font-bold">Or continue with</span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleGoogleLogin}
+                                className="w-full py-4 bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 text-white font-bold rounded-2xl transition-all active:scale-[0.98] text-[10px] uppercase tracking-widest flex items-center justify-center gap-3"
+                            >
+                                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                                    <path
+                                        fill="currentColor"
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                    />
+                                    <path
+                                        fill="currentColor"
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                    />
+                                    <path
+                                        fill="currentColor"
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                                    />
+                                    <path
+                                        fill="currentColor"
+                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                    />
+                                </svg>
+                                Google Identity
+                            </button>
+                        </div>
+
+                            <div className="text-center mt-6">
+                            <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+                                No access key?{" "}
+                                <Link href="/signup" className="text-white hover:text-primary transition-colors underline underline-offset-4">
+                                    Initialize Account
+                                </Link>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -220,21 +441,15 @@ export default function LoginPage() {
                 .cyber-grid {
                     background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
                                     linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
-                    background-size: 40px 40px;
+                    background-size: 80px 80px;
                 }
                 .animate-fade-up {
                     animation: fadeUp 0.8s cubic-bezier(0.2, 1, 0.3, 1) both;
                 }
                 @keyframes fadeUp {
-                    from { opacity: 0; transform: translateY(30px); }
+                    from { opacity: 0; transform: translateY(20px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    25% { transform: translateX(-6px); }
-                    75% { transform: translateX(6px); }
-                }
-                .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
             `}</style>
         </div>
     );

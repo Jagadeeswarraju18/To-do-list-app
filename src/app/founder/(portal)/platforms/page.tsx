@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -46,18 +46,18 @@ export default function PlatformStrategyPage() {
     };
 
     const tabs = [
-        { id: "x" as const, label: "X (Twitter)", icon: Twitter, activeColor: "bg-white/10 border-white/50 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]" },
-        { id: "linkedin" as const, label: "LinkedIn", icon: Linkedin, activeColor: "bg-slate-600/10 border-secondary/50 text-slate-400 shadow-[0_0_20px_rgba(14,165,233,0.1)]" },
-        { id: "reddit" as const, label: "Reddit", icon: MessageSquare, activeColor: "bg-orange-600/10 border-orange-500/50 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.1)]" },
+        { id: "x" as const, label: "X (Twitter)", icon: Twitter, activeColor: "bg-primary text-white shadow-lg shadow-primary/20 border-primary/20" },
+        { id: "linkedin" as const, label: "LinkedIn", icon: Linkedin, activeColor: "bg-slate-700 text-white shadow-lg shadow-slate-900/40 border-slate-600" },
+        { id: "reddit" as const, label: "Reddit", icon: MessageSquare, activeColor: "bg-orange-600 text-white shadow-lg shadow-orange-900/40 border-orange-500" },
     ];
 
     return (
         <div className="w-full space-y-10 animate-fade-up">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-2">Brand Command</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2 text-white">Brand Command</h1>
                     <div className="flex items-center gap-3">
-                        <p className="text-gray-400 font-medium tracking-tight text-sm">
+                        <p className="text-zinc-400 font-normal tracking-tight text-sm">
                             Manage your founder persona and platform distribution.
                         </p>
                         <div className="h-4 w-px bg-white/10 hidden sm:block" />
@@ -67,11 +67,11 @@ export default function PlatformStrategyPage() {
                             <button
                                 onClick={() => setIsProductSelectorOpen(!isProductSelectorOpen)}
                                 disabled={switchingProduct}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/20 transition-all group cursor-pointer"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all group cursor-pointer"
                             >
                                 <Target className="w-3.5 h-3.5 text-primary" />
-                                <span className="text-primary hidden sm:inline">Context:</span>
-                                <span className="text-primary">{product?.name || "Select Product"}</span>
+                                <span className="text-zinc-300 hidden sm:inline">Context:</span>
+                                <span className="text-white">{product?.name || "Select Product"}</span>
                                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isProductSelectorOpen ? 'rotate-180' : ''}`} />
                             </button>
 
@@ -85,10 +85,10 @@ export default function PlatformStrategyPage() {
                                                 <button
                                                     key={p.id}
                                                     onClick={() => handleSwitchProduct(p.id)}
-                                                    className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between group ${product?.id === p.id ? 'bg-primary text-black' : 'text-primary hover:bg-white/5 hover:text-white'}`}
+                                                    className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between group ${product?.id === p.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
                                                 >
                                                     {p.name}
-                                                    {product?.id === p.id && <Check className="w-3.5 h-3.5" />}
+                                                    {product?.id === p.id && <Check className="w-3.5 h-3.5 text-white" />}
                                                 </button>
                                             ))}
                                         </div>

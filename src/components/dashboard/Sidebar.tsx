@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -57,16 +59,16 @@ export function Sidebar() {
             <div className="p-6 flex items-center justify-between border-b border-white/8">
                 <div className="flex items-center gap-3">
                     <div className="relative group/logo">
-                        <div className={`absolute -inset-1 ${isCreatorView ? 'bg-zinc-600/50' : 'bg-primary/50'} blur rounded-lg opacity-0 group-hover/logo:opacity-100 transition-opacity`} />
-                        <div className={`relative w-9 h-9 rounded-xl flex items-center justify-center border border-white/10 ${isCreatorView ? 'bg-zinc-800' : 'bg-primary text-black'}`}>
-                            {isCreatorView ? <UserCircle className="w-5 h-5" /> : <Radar className="w-5 h-5 shadow-[0_0_10px_rgba(0,0,0,0.5)]" />}
+                        <div className={`absolute -inset-1 ${isCreatorView ? 'bg-zinc-600/50' : 'bg-white/30'} blur rounded-lg opacity-0 group-hover/logo:opacity-100 transition-opacity`} />
+                        <div className={`relative w-9 h-9 rounded-xl flex items-center justify-center border border-white/10 ${isCreatorView ? 'bg-zinc-800' : 'bg-primary text-white shadow-lg shadow-primary/20'}`}>
+                            {isCreatorView ? <UserCircle className="w-5 h-5" /> : <Radar className="w-5 h-5 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />}
                         </div>
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-black text-lg tracking-tighter leading-none text-white uppercase italic">
+                        <span className="font-bold text-lg tracking-tight leading-none text-white">
                             {isCreatorView ? 'Creator Hub' : 'MarketingX'}
                         </span>
-                        <span className="text-[9px] font-black tracking-[0.3em] uppercase text-zinc-500 mt-0.5">Strategy Alpha</span>
+                        <span className="text-[10px] font-medium tracking-widest text-zinc-500 mt-1">Strategy Alpha</span>
                     </div>
                 </div>
                 {/* Close button - mobile only */}
@@ -106,7 +108,7 @@ export function Sidebar() {
                 <button
                     onClick={handleSignOut}
                     disabled={isSignOutLoading}
-                    className="flex items-center gap-3 px-4 py-3 w-full text-[10px] font-black text-zinc-500 hover:text-white hover:bg-white/5 rounded-xl transition-all uppercase tracking-[0.2em]"
+                    className="flex items-center gap-3 px-4 py-3 w-full text-xs font-medium text-zinc-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                 >
                     <LogOut className="w-4 h-4" />
                     {isSignOutLoading ? "Leaving..." : "Terminate Session"}
@@ -121,10 +123,10 @@ export function Sidebar() {
             <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-[#141416]/95 backdrop-blur-xl border-b border-white/8 flex items-center justify-between px-4">
                 <div className="flex items-center gap-2">
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isCreatorView ? 'bg-zinc-600' : 'bg-primary'}`}>
-                        {isCreatorView ? <UserCircle className="w-3.5 h-3.5 text-white" /> : <Radar className="w-3.5 h-3.5 text-black" />}
+                        {isCreatorView ? <UserCircle className="w-3.5 h-3.5 text-white" /> : <Radar className="w-3.5 h-3.5 text-white" />}
                     </div>
                     <span className="font-bold text-sm tracking-tight text-white">
-                        {isCreatorView ? 'Creator Hub' : 'DemandRadar'}
+                        {isCreatorView ? 'Creator Hub' : 'MarketingX'}
                     </span>
                 </div>
                 <button
@@ -145,7 +147,7 @@ export function Sidebar() {
 
             {/* Mobile Drawer */}
             <aside className={`
-                md:hidden fixed inset-y-0 left-0 z-[70] w-72 bg-[#141416] border-r border-white/8 flex flex-col
+                md:hidden fixed inset-y-0 left-0 z-[70] w-72 bg-[#0D0D0D] border-r border-white/8 flex flex-col
                 transform transition-transform duration-300 ease-in-out
                 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
@@ -153,7 +155,7 @@ export function Sidebar() {
             </aside>
 
             {/* Desktop Sidebar (unchanged) */}
-            <aside className="w-72 border-r border-white/5 bg-[#0A0A0B] hidden md:flex flex-col fixed inset-y-0 z-50">
+            <aside className="w-72 border-r border-white/5 bg-[#0D0D0D] hidden md:flex flex-col fixed inset-y-0 z-50">
                 {navContent}
             </aside>
         </>
@@ -161,19 +163,18 @@ export function Sidebar() {
 }
 
 function NavItem({ href, icon, label, active = false, role }: { href: string; icon: React.ReactNode; label: string; active?: boolean; role: 'founder' | 'creator' }) {
-    const activeClass = role === 'founder'
-        ? "bg-primary text-black shadow-[0_0_20px_rgba(16,185,129,0.2)]"
-        : "bg-zinc-100 text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]";
-
     return (
         <Link
             href={href}
-            className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl text-[11px] font-black transition-all group uppercase tracking-widest ${active
-                ? activeClass
+            className={`relative flex items-center gap-4 px-5 py-3 rounded-xl text-sm font-medium transition-all group ${active
+                ? "text-white"
                 : "text-zinc-500 hover:bg-white/[0.03] hover:text-white"
                 }`}
         >
-            <span className={`transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 [&>svg]:w-4 [&>svg]:h-4`}>
+            {active && (
+                <motion.div layoutId="activeNav" className="absolute inset-0 bg-primary/20 border border-primary/30 rounded-xl -z-10 cocoa-glow" />
+            )}
+            <span className={`transition-transform duration-500 group-hover:scale-105 [&>svg]:w-4 [&>svg]:h-4`}>
                 {icon}
             </span>
             {label}

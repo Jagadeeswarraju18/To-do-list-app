@@ -118,32 +118,32 @@ export default function DashboardPage() {
         <div className="space-y-12 pb-20">
             {/* Command Center Header */}
             <div className="relative group/header overflow-visible">
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-emerald-600/10 rounded-[40px] blur-2xl opacity-50 group-hover/header:opacity-100 transition duration-1000" />
-                <div className="relative glass-panel p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 border-primary/10">
-                    <div className="relative z-10 flex items-start gap-6">
+                <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-transparent rounded-[40px] blur-2xl opacity-50 group-hover/header:opacity-100 transition duration-1000" />
+                <div className="relative glass-panel p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 border-white/5">
+                <div className="relative z-10 flex items-start gap-6">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
-                            <div className="relative w-16 h-16 rounded-2xl bg-primary text-black flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-                                <Radar className="w-8 h-8" />
+                            <div className="absolute inset-0 bg-white/10 blur-xl rounded-full" />
+                            <div className="relative w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-[0_0_35px_rgba(54,34,34,0.3)]">
+                                <Radar className="w-8 h-8 shadow-[0_0_5px_rgba(0,0,0,0.1)]" />
                             </div>
                         </div>
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white uppercase italic">
-                    Command Center
-                </h1>
-                <Link href="/founder/opportunities" className="hidden sm:flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-all">
-                                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Autopilot Active</span>
+                                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                                    Command Center
+                                </h1>
+                                <Link href="/founder/opportunities" className="hidden sm:flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-all">
+                                    <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(54,34,34,0.8)] animate-pulse" />
+                                    <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Autopilot Active</span>
                                 </Link>
                             </div>
-                            <p className="text-zinc-400 font-medium tracking-tight text-base">
-                                Accelerating growth for <span className="text-white font-black">{product?.name || "Global Assets"}</span> through founder-led signals.
+                            <p className="text-zinc-400 font-normal tracking-tight text-base">
+                                Accelerating growth for <span className="text-white font-semibold">{product?.name || "Global Assets"}</span> through founder-led signals.
                             </p>
                         </div>
                     </div>
                     <Link href="/founder/platforms">
-                        <button className="group relative px-6 py-3 bg-white hover:bg-zinc-200 text-black font-black rounded-xl transition-all shadow-xl active:scale-95 flex items-center gap-2 uppercase tracking-widest text-[10px]">
+                        <button className="group relative px-6 py-3 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-xl transition-all shadow-xl shadow-primary/10 active:scale-95 flex items-center gap-2 text-xs">
                             Configure Identity <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </button>
                     </Link>
@@ -157,7 +157,7 @@ export default function DashboardPage() {
                     value={stats.strategyVelocity}
                     subtext="Daily Signal Conversion"
                     icon={<Zap className="w-5 h-5" />}
-                    accentColor="emerald"
+                    accentColor="cocoa"
                     delay={0}
                 />
                 <MetricCard
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                     value={`${stats.brandResonance}%`}
                     subtext="Market Persona Strength"
                     icon={<Brain className="w-5 h-5" />}
-                    accentColor="sky"
+                    accentColor="cocoa"
                     delay={0.1}
                 />
                 <MetricCard
@@ -173,7 +173,7 @@ export default function DashboardPage() {
                     value={`${stats.personaHealth}%`}
                     subtext="Profile Integrity"
                     icon={<ShieldCheck className="w-5 h-5" />}
-                    accentColor="orange"
+                    accentColor="cocoa"
                     delay={0.2}
                 />
                 <MetricCard
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                     value={stats.activeBridges}
                     subtext="Converting Pain → Product"
                     icon={<Sparkles className="w-5 h-5" />}
-                    accentColor="emerald"
+                    accentColor="cocoa"
                     delay={0.3}
                 />
             </div>
@@ -195,15 +195,15 @@ export default function DashboardPage() {
             >
                 <div className="flex items-center justify-between text-white px-2">
                     <div className="space-y-1">
-                        <h2 className="text-lg md:text-xl font-black italic tracking-tighter uppercase flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-primary" />
+                        <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-white" />
                             Intelligence Funnel
                         </h2>
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Forensic Signal Filtering Pipeline</p>
+                        <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-[0.15em]">Forensic Signal Filtering Pipeline</p>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-                        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Real-time Stream</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                        <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Real-time Stream</span>
                     </div>
                 </div>
                 <div className="glass-panel p-2">
@@ -220,29 +220,29 @@ export default function DashboardPage() {
                 >
                     {/* Distribution Roadmap */}
                     <div className="glass-panel p-8 relative overflow-hidden group/brief">
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none group-hover/brief:bg-primary/10 transition-colors duration-1000" />
+                        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] pointer-events-none group-hover/brief:bg-white/10 transition-colors duration-1000" />
                         <div className="flex items-center justify-between mb-10">
                             <div className="flex items-center gap-4">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                    <Target className="w-6 h-6 text-primary" />
+                                <div className="p-2 bg-white/10 rounded-lg">
+                                    <Target className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">Strategy Brief</h3>
-                                    <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Target: High Intent Distribution</p>
+                                    <h3 className="text-sm font-bold uppercase tracking-widest text-white">Strategy Brief</h3>
+                                    <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">Target: High Intent Distribution</p>
                                 </div>
                             </div>
                             <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full">
-                                <span className="text-[8px] text-zinc-400 font-black uppercase tracking-widest">Updated 2m ago</span>
+                                <span className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider">Updated 2m ago</span>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-1 h-4 bg-primary rounded-full" />
-                                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Dynamic Strategy Brief</h4>
+                                    <div className="w-1 h-3 bg-white rounded-full" />
+                                    <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Dynamic Strategy Brief</h4>
                                 </div>
-                                <div className="p-6 bg-black/40 border border-white/5 rounded-3xl relative group/card transition-all hover:border-primary/20 min-h-[140px] flex items-center">
+                                <div className="p-6 bg-black/40 border border-white/5 rounded-3xl relative group/card transition-all hover:border-white/20 min-h-[140px] flex items-center">
                                     <p className="text-[13px] text-zinc-300 leading-relaxed italic font-medium">
                                         &quot;{recentSignals.length > 0 ? (() => {
                                             const categories = recentSignals.map(s => s.intent_category || 'Other');
@@ -257,14 +257,14 @@ export default function DashboardPage() {
                                             return `Double down on **The Market Leader** archetype. Signals indicate a broad need for professional solutions. Use your founder story of building ${product?.name || 'this product'} as the definitive standard.`;
                                         })() : `Scanning for strategic shifts in the market... Analyze your first batch of signals to unlock tactical archetypes.`}&quot;
                                     </p>
-                                    <Sparkles className="absolute -top-2 -right-2 w-5 h-5 text-primary/40 group-hover/card:scale-110 transition-transform" />
+                                    <Sparkles className="absolute -top-2 -right-2 w-5 h-5 text-white/40 group-hover/card:scale-110 transition-transform" />
                                 </div>
                             </div>
 
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-1 h-4 bg-primary rounded-full" />
-                                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Priority Channels</h4>
+                                    <div className="w-1 h-3 bg-white rounded-full" />
+                                    <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Priority Channels</h4>
                                 </div>
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between p-4 bg-black/40 border border-white/5 rounded-2xl group/channel hover:border-emerald-500/20 transition-all">
@@ -277,7 +277,7 @@ export default function DashboardPage() {
                                             <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">High Flow</span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center justify-between p-4 bg-black/40 border border-white/5 rounded-2xl group/channel hover:border-orange-500/20 shadow-none transition-all">
+                                    <div className="flex items-center justify-between p-4 bg-black/40 border border-white/5 rounded-2xl group/channel hover:border-white/20 shadow-none transition-all">
                                         <div className="flex items-center gap-4">
                                             <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 group-hover/channel:text-white transition-colors">
                                                 <MessageSquare className="w-4 h-4" />
@@ -292,7 +292,7 @@ export default function DashboardPage() {
 
                         <div className="mt-10">
                             <Link href="/founder/opportunities">
-                                <button className="w-full py-5 bg-primary hover:bg-zinc-200 text-black rounded-[20px] font-black uppercase tracking-[0.2em] text-[11px] transition-all flex items-center justify-center gap-4 shadow-2xl shadow-primary/20 hover:scale-[1.01] active:scale-95">
+                                <button className="w-full py-5 bg-primary hover:bg-[#423F3E] text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] transition-all flex items-center justify-center gap-4 shadow-2xl shadow-primary/20 hover:scale-[1.01] active:scale-95">
                                     Execute Tactical Openings
                                     <Zap className="w-4 h-4 fill-current" />
                                 </button>
@@ -306,16 +306,16 @@ export default function DashboardPage() {
                     transition={{ delay: 0.6 }}
                     className="glass-panel p-8 flex flex-col space-y-8 relative overflow-hidden group h-fit border-zinc-500/10"
                 >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[40px] pointer-events-none group-hover:bg-primary/5 transition-colors duration-1000" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[40px] pointer-events-none group-hover:bg-white/10 transition-colors duration-1000" />
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col">
-                            <div className="text-[9px] font-black uppercase tracking-[0.2em] text-primary italic">Live Feed</div>
-                            <h3 className="text-sm font-black uppercase tracking-widest text-white flex items-center gap-2">
+                            <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">Live Feed</div>
+                            <h3 className="text-sm font-bold text-white flex items-center gap-2">
                                 Tactical Openings
                             </h3>
                         </div>
-                        <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:rotate-12 group-hover:bg-primary/10 transition-all">
-                            <Radar className="w-5 h-5 text-primary" />
+                        <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:bg-white/10 transition-all">
+                            <Radar className="w-5 h-5 text-white" />
                         </div>
                     </div>
 
@@ -341,23 +341,23 @@ export default function DashboardPage() {
                                     >
                                         <div className="flex justify-between items-center px-1">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                                                <span className="text-[9px] font-black text-white uppercase tracking-[0.2em] italic">Tactical Opening</span>
+                                                <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(180,83,9,0.8)]" />
+                                                <span className="text-[10px] font-bold text-white uppercase tracking-wider">Tactical Opening</span>
                                             </div>
-                                            <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{signal.source === 'reddit_post' ? 'Reddit' : signal.source === 'linkedin_post' ? 'LinkedIn' : 'X'} Stream</span>
+                                            <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{signal.source === 'reddit_post' ? 'Reddit' : signal.source === 'linkedin_post' ? 'LinkedIn' : 'X'} Stream</span>
                                         </div>
-                                        <div className="p-6 bg-black/40 border border-white/5 rounded-2xl group-hover/signal:border-primary/20 group-hover/signal:bg-white/[0.02] transition-all relative overflow-hidden">
+                                        <div className="p-6 bg-black/40 border border-white/5 rounded-2xl group-hover/signal:border-white/20 group-hover/signal:bg-white/[0.02] transition-all relative overflow-hidden">
                                             <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover/signal:bg-primary transition-colors duration-500" />
-                                            <p className="text-[13px] text-zinc-300 leading-relaxed font-medium italic line-clamp-3 mb-4 group-hover/signal:text-white transition-colors duration-500">
+                                            <p className="text-[13px] text-zinc-300 leading-relaxed font-medium mb-4 group-hover/signal:text-white transition-colors duration-500">
                                                 &quot;{signal.tweet_content}&quot;
                                             </p>
                                             <div className="flex items-center gap-3 pt-4 border-t border-white/5">
-                                                <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10">
-                                                    <Brain className="w-4 h-4 text-primary" />
+                                                <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                                                    <Brain className="w-4 h-4 text-white" />
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em] italic">Strategy Bridge</span>
-                                                    <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest group-hover/signal:text-zinc-300 transition-colors uppercase">Mistake Archetype</span>
+                                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest" style={{ letterSpacing: '0.2em' }}>Strategy Bridge</span>
+                                                    <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider group-hover/signal:text-zinc-300 transition-colors">Mistake Archetype</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -374,7 +374,7 @@ export default function DashboardPage() {
                         </AnimatePresence>
                     </div>
 
-                    <Link href="/founder/opportunities" className="group/link text-center text-primary text-[10px] font-black uppercase tracking-[0.3em] hover:text-white transition-all pt-6 decoration-zinc-400/30 underline-offset-8 border-t border-white/5 flex items-center justify-center gap-2">
+                    <Link href="/founder/opportunities" className="group/link text-center text-white text-[10px] font-bold uppercase tracking-widest hover:text-zinc-400 transition-all pt-6 border-t border-white/5 flex items-center justify-center gap-2">
                         Command Matrix 
                         <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />
                     </Link>
@@ -394,10 +394,8 @@ export default function DashboardPage() {
 
 function MetricCard({ title, value, subtext, icon, accentColor, delay }: any) {
     const accents: any = {
-        emerald: "border-emerald-500/10 hover:border-emerald-500/30 text-emerald-400 shadow-emerald-500/5",
-        sky: "border-sky-500/10 hover:border-sky-500/30 text-sky-400 shadow-sky-500/5",
-        orange: "border-orange-500/10 hover:border-orange-500/30 text-orange-400 shadow-orange-500/5",
-        primary: "border-primary/10 hover:border-primary/30 text-primary shadow-primary/5"
+        cocoa: "border-primary/10 hover:border-primary/30 text-white shadow-primary/5",
+        gold: "border-primary/10 hover:border-primary/30 text-white shadow-primary/5"
     };
 
     return (
@@ -407,19 +405,19 @@ function MetricCard({ title, value, subtext, icon, accentColor, delay }: any) {
             transition={{ delay, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className={`glass-card p-6 group cursor-default relative overflow-hidden ${accents[accentColor] || accents.primary}`}
         >
-            <div className="flex items-start justify-between mb-2">
-                <div className="p-2 bg-white/5 rounded-xl border border-white/5 group-hover:scale-105 group-hover:bg-white/10 transition-all duration-500">
+            <div className="flex items-start justify-between mb-4">
+                <div className="p-2 bg-white/5 rounded-xl border border-white/5 transition-all duration-500">
                     {icon}
                 </div>
-                <div className="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500 group-hover:text-zinc-300 transition-colors">{title}</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{title}</div>
             </div>
             
             <div className="space-y-1">
-                <div className="text-2xl font-black italic tracking-tighter">{value}</div>
-                <div className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-zinc-400 transition-colors">{subtext}</div>
+                <div className="text-2xl font-bold tracking-tight text-white">{value}</div>
+                <div className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">{subtext}</div>
             </div>
 
-            <div className="absolute bottom-0 left-0 h-1 w-0 bg-primary group-hover:w-full transition-all duration-700" />
+            <div className="absolute bottom-0 left-0 h-1 w-0 bg-white group-hover:w-full transition-all duration-700" />
         </motion.div>
     );
 }

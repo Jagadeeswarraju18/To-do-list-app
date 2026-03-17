@@ -52,17 +52,17 @@ export default function FindCreatorsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#050a14] font-sans">
+        <div className="min-h-screen bg-[#0D0D0D]">
             <div className="max-w-7xl mx-auto space-y-6 md:space-y-10 animate-fade-up">
                 {/* Header Section */}
                 <div className="flex flex-col gap-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                            <Users className="w-6 h-6 text-primary" />
+                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                            <Users className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase">Find Creators</h1>
-                            <p className="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-widest leading-none">
+                            <h1 className="text-2xl md:text-3xl font-bold text-white uppercase tracking-tight">Find Creators</h1>
+                            <p className="text-zinc-500 text-xs md:text-sm font-medium uppercase tracking-widest mt-1">
                                 Discover creators to promote your product.
                             </p>
                         </div>
@@ -72,35 +72,35 @@ export default function FindCreatorsPage() {
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                             <div className="flex-1 relative group">
-                                <Search className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 w-4 md:w-5 h-4 md:h-5 text-gray-500 group-focus-within:text-primary transition-colors" />
+                                <Search className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 w-4 md:w-5 h-4 md:h-5 text-gray-500 group-focus-within:text-white transition-colors" />
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Search creators by name, niche..."
-                                    className="w-full bg-[#0a0f1a] border border-white/5 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-11 md:pl-14 pr-4 md:pr-6 text-white text-sm font-bold focus:outline-none focus:border-primary/30 focus:bg-[#0d1425] transition-all placeholder:text-gray-600 shadow-2xl"
+                                    className="w-full bg-zinc-900/50 border border-white/5 rounded-2xl py-4 pl-14 pr-6 text-white text-sm font-medium focus:outline-none focus:border-white/30 transition-all placeholder:text-zinc-600"
                                 />
                             </div>
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`px-5 py-3.5 md:px-6 md:py-5 border rounded-xl md:rounded-2xl transition-all flex items-center justify-center gap-3 font-black text-xs uppercase tracking-widest shadow-2xl ${showFilters ? 'bg-primary text-black border-primary' : 'bg-[#0a0f1a] border-white/5 text-gray-400 hover:text-white'}`}
+                                className={`px-8 py-4 border rounded-2xl transition-all flex items-center justify-center gap-3 font-bold text-[10px] uppercase tracking-widest shadow-2xl ${showFilters ? 'bg-primary text-white border-primary shadow-primary/20' : 'bg-zinc-900/50 border-white/5 text-zinc-400 hover:text-white hover:bg-[#423F3E]/20'}`}
                             >
-                                <ListFilter className="w-4 md:w-5 h-4 md:h-5" />
+                                <ListFilter className="w-4 h-4" />
                                 {showFilters ? 'Hide Filters' : 'Filters'}
                             </button>
                         </div>
 
                         {/* Expanded Filters */}
                         {showFilters && (
-                            <div className="p-6 bg-[#0a0f1a] border border-white/5 rounded-2xl grid md:grid-cols-3 gap-8 animate-in slide-in-from-top-4 duration-300">
+                            <div className="p-8 bg-zinc-900 border border-white/10 rounded-[32px] grid md:grid-cols-3 gap-10 animate-in slide-in-from-top-4 duration-300">
                                 <div>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4 block">Primary Niche</label>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4 block">Primary Niche</label>
                                     <div className="flex flex-wrap gap-2">
                                         {NICHES.map(niche => (
                                             <button
                                                 key={niche}
                                                 onClick={() => setSelectedNiche(niche)}
-                                                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${selectedNiche === niche ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-white/5 text-gray-500 hover:text-white'}`}
+                                                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all ${selectedNiche === niche ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white/5 border-white/5 text-zinc-500 hover:text-white'}`}
                                             >
                                                 {niche}
                                             </button>
@@ -109,30 +109,30 @@ export default function FindCreatorsPage() {
                                 </div>
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">Min. Reach (Followers)</label>
-                                        <span className="text-[10px] font-black text-primary">{(minFollowers / 1000).toFixed(0)}K+</span>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block">Min. Reach (Followers)</label>
+                                        <span className="text-[10px] font-bold text-white">{(minFollowers / 1000).toFixed(0)}K+</span>
                                     </div>
                                     <input
                                         type="range" min="0" max="500000" step="5000"
                                         value={minFollowers} onChange={(e) => setMinFollowers(parseInt(e.target.value))}
                                         className="w-full accent-primary"
                                     />
-                                    <div className="flex justify-between text-[8px] font-black text-gray-700">
+                                    <div className="flex justify-between text-[10px] font-bold text-zinc-700">
                                         <span>0</span>
                                         <span>500K+</span>
                                     </div>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">Max Budget ($)</label>
-                                        <span className="text-[10px] font-black text-primary">${maxBudget}</span>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block">Max Budget ($)</label>
+                                        <span className="text-[10px] font-bold text-white">${maxBudget}</span>
                                     </div>
                                     <input
                                         type="range" min="50" max="10000" step="50"
                                         value={maxBudget} onChange={(e) => setMaxBudget(parseInt(e.target.value))}
                                         className="w-full accent-primary"
                                     />
-                                    <div className="flex justify-between text-[8px] font-black text-gray-700">
+                                    <div className="flex justify-between text-[10px] font-bold text-zinc-700">
                                         <span>$50</span>
                                         <span>$10K</span>
                                     </div>
@@ -141,7 +141,7 @@ export default function FindCreatorsPage() {
                         )}
                     </div>
 
-                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2">
+                    <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest ml-2">
                         {loading ? "Scanning for voices..." : `${creators.length} creator${creators.length === 1 ? '' : 's'} found`}
                     </div>
                 </div>
@@ -149,7 +149,7 @@ export default function FindCreatorsPage() {
                 {/* Creators List */}
                 {loading ? (
                     <div className="py-20 flex flex-col items-center justify-center space-y-4">
-                        <Loader2 className="animate-spin text-primary w-10 h-10" />
+                        <Loader2 className="animate-spin text-white w-10 h-10" />
                         <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Accessing Creator Network...</span>
                     </div>
                 ) : (
@@ -234,7 +234,7 @@ function CreatorCard({ creator, index, onClick }: { creator: any, index: number,
         <div
             ref={cardRef}
             onClick={onClick}
-            className="group bg-[#0a0f1a] border border-white/5 rounded-2xl p-4 cursor-pointer hover:border-primary/20 transition-all duration-300 animate-fade-up flex flex-col gap-3 hover:bg-white/[0.02]"
+            className="group glass-panel p-6 cursor-pointer hover:border-white/20 transition-all duration-300 animate-fade-up flex flex-col gap-4"
             style={{ animationDelay: `${index * 100}ms` }}
         >
             <div className="flex items-start gap-4">
@@ -249,25 +249,25 @@ function CreatorCard({ creator, index, onClick }: { creator: any, index: number,
                     </div>
                     {/* Status Dot */}
                     {creator.is_upgraded ? (
-                        <div className="absolute bottom-0 right-0 bg-gradient-to-tr from-yellow-400 to-amber-600 border-2 border-[#0a0f1a] w-5 h-5 rounded-full flex items-center justify-center shadow-lg animate-pulse z-20" title="Verified Pro">
-                            <Crown className="w-2.5 h-2.5 text-black fill-current" />
+                        <div className="absolute bottom-0 right-0 bg-gradient-to-tr from-stone-400 to-[#362222] border-2 border-[#362222] w-5 h-5 rounded-full flex items-center justify-center shadow-lg animate-pulse z-20" title="Verified Pro">
+                            <Crown className="w-2.5 h-2.5 text-white fill-current" />
                         </div>
                     ) : (
                         <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#0a0f1a] rounded-full flex items-center justify-center z-20">
-                            <div className="w-2 h-2 bg-primary rounded-full border border-[#0a0f1a]" />
+                            <div className="w-2 h-2 bg-white rounded-full border border-[#0a0f1a]" />
                         </div>
                     )}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0 py-0.5">
-                    <div className="flex items-center justify-between mb-1.5">
-                        <h3 className="font-black text-white text-base truncate group-hover:text-primary transition-colors">{creator.display_name}</h3>
-                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10 font-black uppercase tracking-widest group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20 transition-all">
+                    <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-bold text-white text-base truncate group-hover:text-white/80 transition-colors">{creator.display_name}</h3>
+                        <span className="text-[10px] px-2.5 py-1 rounded-xl bg-white/5 text-zinc-500 border border-white/10 font-bold uppercase tracking-widest group-hover:bg-primary group-hover:text-white group-hover:border-primary/20 transition-all">
                             {creator.niche}
                         </span>
                     </div>
-                    <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-zinc-500 font-normal line-clamp-2 leading-relaxed">
                         {creator.bio || "Building and helping founders to market their products effectively."}
                     </p>
                 </div>
@@ -286,7 +286,7 @@ function CreatorCard({ creator, index, onClick }: { creator: any, index: number,
                     <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                         Start <span className="text-white ml-1">${creator.min_budget || 100}</span>
                     </div>
-                    <div className="p-1.5 rounded-full bg-white/5 text-gray-400 group-hover:bg-primary group-hover:text-black transition-all">
+                    <div className="p-1.5 rounded-full bg-white/5 text-gray-400 group-hover:bg-primary group-hover:text-white transition-all">
                         <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                 </div>

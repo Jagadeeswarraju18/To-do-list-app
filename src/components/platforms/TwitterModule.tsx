@@ -250,7 +250,7 @@ export default function TwitterModule({ product }: { product: any }) {
                                             <CheckCheck className="w-3.5 h-3.5" /> Mark Sent
                                         </button>
                                     )}
-                                    <button onClick={() => handleCopy(draft.body, draft.id)} className={`px-4 py-2 bg-black/50 active:scale-95 rounded-lg border border-white/10 text-xs font-medium flex items-center gap-2 justify-center w-full transition-all ${copiedIdx === draft.id ? "text-primary border-primary/30 bg-primary/10" : "text-muted-foreground hover:bg-violet-500/10 hover:text-violet-400 hover:border-violet-500/20"}`}>
+                                    <button onClick={() => handleCopy(draft.body, draft.id)} className={`px-4 py-2 bg-black/50 active:scale-95 rounded-lg border border-white/10 text-xs font-medium flex items-center gap-2 justify-center w-full transition-all ${copiedIdx === draft.id ? "text-primary border-primary/30 bg-primary/10" : "text-muted-foreground hover:bg-[#423F3E]/20 hover:text-white hover:border-[#423F3E]/30"}`}>
                                         {copiedIdx === draft.id ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />} {copiedIdx === draft.id ? "Copied!" : "Copy"}
                                     </button>
                                     <DeleteButton

@@ -59,12 +59,12 @@ export function OutreachStrategist({ isOpen, onClose, opportunityId, tweetConten
                 {/* Header */}
                 <div className="p-6 border-b border-white/5 bg-gradient-to-r from-primary/5 to-transparent flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/20 rounded-xl border border-primary/30">
-                            <Sparkles className="w-5 h-5 text-primary" />
+                        <div className="p-2 bg-white/10 rounded-xl border border-white/20">
+                            <Sparkles className="w-5 h-5 text-white" />
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-white italic tracking-tight">OUTREACH STRATEGIST</h2>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60">Grok-Powered Sales Angles</p>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-white/60">Grok-Powered Sales Angles</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
@@ -82,10 +82,10 @@ export function OutreachStrategist({ isOpen, onClose, opportunityId, tweetConten
                         </div>
 
                         {authorBio && (
-                            <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl flex gap-2 items-start animate-in zoom-in-95">
-                                <Target className="w-3.5 h-3.5 text-primary mt-0.5" />
+                            <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex gap-2 items-start animate-in zoom-in-95">
+                                <Target className="w-3.5 h-3.5 text-white mt-0.5" />
                                 <p className="text-[10px] text-zinc-400 leading-relaxed">
-                                    <span className="text-primary font-bold uppercase mr-1">Background Dossier:</span>
+                                    <span className="text-white font-bold uppercase mr-1">Background Dossier:</span>
                                     {authorBio}
                                 </p>
                             </div>
@@ -94,7 +94,7 @@ export function OutreachStrategist({ isOpen, onClose, opportunityId, tweetConten
 
                     {loading ? (
                         <div className="py-20 flex flex-col items-center justify-center space-y-4">
-                            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                            <Loader2 className="w-10 h-10 animate-spin text-white" />
                             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Drafting personalized angles...</p>
                         </div>
                     ) : (
@@ -102,12 +102,12 @@ export function OutreachStrategist({ isOpen, onClose, opportunityId, tweetConten
                             {angles.map((angle, idx) => (
                                 <div
                                     key={idx}
-                                    className="group relative bg-[#111] border border-white/5 hover:border-primary/30 rounded-2xl p-5 transition-all duration-300"
+                                    className="group relative bg-[#111] border border-white/5 hover:border-white/30 rounded-2xl p-5 transition-all duration-300"
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className={`p-1.5 rounded-lg ${idx === 0 ? 'bg-blue-500/20 text-blue-400' :
-                                                idx === 1 ? 'bg-purple-500/20 text-purple-400' :
+                                                idx === 1 ? 'bg-primary/20 text-white border-primary/30' :
                                                     'bg-emerald-500/20 text-emerald-400'
                                                 }`}>
                                                 {idx === 0 ? <Zap className="w-3.5 h-3.5" /> : idx === 1 ? <Target className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
@@ -116,7 +116,7 @@ export function OutreachStrategist({ isOpen, onClose, opportunityId, tweetConten
                                         </div>
                                         <button
                                             onClick={() => handleCopy(angle.content, idx)}
-                                            className="p-2 hover:bg-primary/10 rounded-lg transition-all text-zinc-500 hover:text-primary"
+                                            className="p-2 hover:bg-white/10 rounded-lg transition-all text-zinc-500 hover:text-white"
                                         >
                                             {copiedIndex === idx ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                                         </button>

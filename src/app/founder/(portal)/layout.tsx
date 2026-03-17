@@ -13,11 +13,11 @@ export default function DashboardLayout({
 
     return (
         <UserProvider>
-            <div className="min-h-screen bg-background flex">
+            <div className="min-h-screen bg-[#0D0D0D] flex">
                 <Sidebar />
                 <main className="flex-1 md:ml-72 p-4 pt-20 md:p-8 md:pt-8 relative overflow-hidden">
                     {/* Background Gradients */}
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] pointer-events-none opacity-40" />
 
                     <div className="w-full px-4 sm:px-6 md:px-0 relative z-10 transition-all duration-300">
                         {children}

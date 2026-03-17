@@ -29,7 +29,7 @@ export function Hero() {
             <div className="max-w-[1400px] w-full mx-auto relative z-20 flex flex-col items-center text-center">
                 
                 {/* Atmospheric Glow behind Heading */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[120%] w-[1000px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)] pointer-events-none z-[-1]" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[120%] w-[1000px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(80,49,49,0.08)_0%,transparent_70%)] pointer-events-none z-[-1]" />
 
                 {/* Heading - Forensic Obsidian Typography */}
                 <motion.div
@@ -39,12 +39,12 @@ export function Hero() {
                     className="mb-12 relative"
                 >
                     <h1 className="heading-serif text-white mb-8 max-w-5xl mx-auto leading-[0.95] tracking-[-0.04em]">
-                        The all-in-one platform <br />
-                        for financial advisers
+                        The all-in-one execution <br />
+                        platform for founders
                     </h1>
-                    <p className="text-zinc-500 text-lg md:text-[22px] max-w-2xl mx-auto font-normal leading-[1.4] tracking-tight mb-16 px-4">
-                        AI-powered practice management available now — with <br className="hidden md:block" />
-                        integrated custody and execution launching soon.
+                    <p className="text-zinc-400 text-lg md:text-[22px] max-w-2xl mx-auto font-normal leading-[1.4] tracking-tight mb-16 px-4">
+                        AI-powered demand signals available now — with <br className="hidden md:block" />
+                        automated outreach and market intelligence.
                     </p>
                 </motion.div>
 
@@ -59,9 +59,9 @@ export function Hero() {
                         <motion.button 
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="px-10 py-4 bg-white text-black font-semibold rounded-full text-[15px] transition-all hover:bg-zinc-100"
+                            className="px-10 py-4 bg-primary text-white font-bold rounded-full text-[15px] transition-all hover:bg-[#423E3E] shadow-[0_0_30px_rgba(54,34,34,0.4)] border border-primary/20"
                         >
-                            Get Started For Free
+                            Deploy Engine For Free
                         </motion.button>
                     </Link>
                 </motion.div>
@@ -78,12 +78,13 @@ export function Hero() {
                     style={{
                         rotateX: tiltX,
                         rotateY: tiltY,
-                        perspective: 2500,
-                        transformStyle: "preserve-3d"
-                    }}
-                    className="relative w-full max-w-7xl h-[680px] rounded-[24px] border border-white/10 bg-white/[0.08] backdrop-blur-[34px] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)] group"
-                >
-                    <div className="absolute inset-0 obsidian-noise opacity-10" />
+                    perspective: 2500,
+                    transformStyle: "preserve-3d"
+                }}
+                className="relative w-full max-w-7xl h-[680px] rounded-[32px] border border-white/[0.08] bg-[#121212]/40 backdrop-blur-[34px] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)] group"
+            >
+                <div className="absolute inset-0 obsidian-noise opacity-10" />
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
                     
                     {/* DemandRadar Signal Ingest Interface */}
                     <div className="absolute inset-0 flex flex-col text-left overflow-hidden">
@@ -143,24 +144,23 @@ export function Hero() {
                                     />
                                 ))}
 
-                                {/* Processed Insight Node (Center to Right) */}
-                                <motion.div
-                                    initial={{ x: "50%", y: "45%", opacity: 0, scale: 0.5 }}
-                                    animate={{ 
-                                        x: ["50%", "85%"],
-                                        opacity: [0, 1, 1, 0],
-                                        scale: [0.5, 1.2, 1, 0.5]
-                                    }}
-                                    transition={{ 
-                                        duration: 3, 
-                                        delay: 2, 
-                                        repeat: Infinity,
-                                        ease: "circOut"
-                                    }}
-                                    className="absolute left-0 z-50 w-10 h-10 rounded-full bg-white/20 border border-white/30 backdrop-blur-xl flex items-center justify-center text-white shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-                                >
-                                    <Sparkles className="w-4 h-4" />
-                                </motion.div>
+                                    <motion.div
+                                        initial={{ x: "50%", y: "45%", opacity: 0, scale: 0.5 }}
+                                        animate={{ 
+                                            x: ["50%", "85%"],
+                                            opacity: [0, 1, 1, 0],
+                                            scale: [0.5, 1.2, 1, 0.5]
+                                        }}
+                                        transition={{ 
+                                            duration: 3, 
+                                            delay: 2, 
+                                            repeat: Infinity,
+                                            ease: "circOut"
+                                        }}
+                                        className="absolute left-0 z-50 w-10 h-10 rounded-2xl bg-primary border border-white/20 backdrop-blur-xl flex items-center justify-center text-white shadow-[0_0_30px_rgba(54,34,34,0.4)]"
+                                    >
+                                        <Sparkles className="w-4 h-4" />
+                                    </motion.div>
                             </AnimatePresence>
 
                             {/* Left Panel: Signals Flow */}

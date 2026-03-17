@@ -245,7 +245,7 @@ function UserSettingsContent() {
         }
     };
 
-    if (loading) return <div className="flex items-center justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+    if (loading) return <div className="flex items-center justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-white" /></div>;
 
     const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Unknown';
 
@@ -261,17 +261,17 @@ function UserSettingsContent() {
     return (
         <div className="space-y-10 animate-fade-up">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Account Settings</h1>
-                <p className="text-muted-foreground">Manage your personal profile and account security.</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-white uppercase tracking-tight">Account Settings</h1>
+                <p className="text-zinc-500 text-sm font-medium">Manage your profile, billing, and platform integrations.</p>
             </div>
 
             {/* Premium Profile Card */}
-            <div className="relative group overflow-hidden rounded-3xl bg-[#0A0A0A] border border-white/10 shadow-2xl transition-all duration-500 hover:shadow-primary/10">
+            <div className="relative group overflow-hidden rounded-3xl bg-[#0A0A0A] border border-white/10 shadow-2xl transition-all duration-500 hover:shadow-white/5">
 
                 {/* Banner / Header */}
                 <div className="h-48 bg-gradient-to-r from-zinc-900/40 via-black to-zinc-900/40 relative overflow-hidden">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
-                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
+                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
+                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#423F3E]/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
                     <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
                 </div>
 
@@ -283,17 +283,17 @@ function UserSettingsContent() {
                                 {profile.avatar_url ? (
                                     <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110" />
                                 ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-zinc-900/20 flex items-center justify-center">
-                                        <User className="w-12 h-12 text-primary" />
+                                    <div className="w-full h-full bg-gradient-to-br from-white/10 to-zinc-900/10 flex items-center justify-center">
+                                        <User className="w-12 h-12 text-white" />
                                     </div>
                                 )}
                             </div>
-                            <div className="absolute bottom-2 right-2 w-4 h-4 rounded-full bg-primary border-2 border-black" title="Online" />
+                            <div className="absolute bottom-2 right-2 w-4 h-4 rounded-full bg-white border-2 border-black" title="Online" />
                         </div>
 
                         <button
                             onClick={() => setIsEditing(true)}
-                            className="bg-white text-black px-6 py-2.5 rounded-full font-bold text-sm tracking-wide flex items-center gap-2 hover:bg-zinc-200 transition-all shadow-lg active:scale-95"
+                            className="bg-primary text-white px-6 py-2.5 rounded-2xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-[#423F3E] transition-all shadow-xl active:scale-95 shadow-primary/20"
                         >
                             <PenSquare className="w-4 h-4" />
                             Edit Profile
@@ -302,27 +302,26 @@ function UserSettingsContent() {
 
                     {/* Content */}
                     <div className="grid md:grid-cols-3 gap-8">
-                        <div className="md:col-span-2 space-y-4">
+                        <div className="md:col-span-2 space-y-3 pt-2">
                             <div>
-                                <h2 className="text-3xl font-bold text-white tracking-tight">{profile.full_name || "Founder"}</h2>
-                                <p className="text-muted-foreground font-medium">{profile.email}</p>
+                                <h2 className="text-3xl font-bold text-white tracking-tight uppercase">{profile.full_name || "Founder"}</h2>
+                                <p className="text-zinc-500 text-sm font-medium">{profile.email}</p>
                             </div>
-
-                            <div className="flex flex-wrap gap-3 pt-2">
-                                <Badge icon={<Calendar className="w-3 h-3" />} text={`Member since ${memberSince}`} />
-                                <Badge icon={<Shield className="w-3 h-3" />} text="Founder Account" color="emerald" />
+                            <div className="flex flex-wrap gap-2 pt-1">
+                                <Badge icon={<Calendar className="w-3.5 h-3.5" />} text={`Member since ${memberSince}`} />
+                                <Badge icon={<Shield className="w-3.5 h-3.5" />} text="Founder Privilege" color="silver" />
                             </div>
                         </div>
 
                         {/* Social Stack */}
                         <div className="flex flex-col gap-3 justify-center">
-                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">Online Presence</p>
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Online Presence</p>
                             <div className="flex flex-wrap gap-2">
                                 {Object.entries(profile.social_links).map(([key, url]) => (
-                                    url && <SocialButton key={key} href={url} icon={getSocialIcon(key)} type={key.toLowerCase()} label={key} />
+                                    url &&                                    <SocialButton key={key} href={url} icon={getSocialIcon(key)} type={key.toLowerCase()} label={key} />
                                 ))}
                                 {Object.keys(profile.social_links).length === 0 && (
-                                    <span className="text-sm text-muted-foreground italic">No social links added yet.</span>
+                                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest italic">No links linked</span>
                                 )}
                             </div>
                         </div>
@@ -331,107 +330,105 @@ function UserSettingsContent() {
             </div>
 
             <div className="mt-8 space-y-8">
-                <Section title="Plans & Billing" icon={<CreditCard className="w-5 h-5 text-primary" />}>
+                <Section title="Plans & Billing" icon={<CreditCard className="w-5 h-5 text-white" />}>
                     <div className="grid lg:grid-cols-4 gap-6 mb-8 mt-14">
                         {/* Free Plan */}
-                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 group flex flex-col ${currentPlan === 'Free' ? 'bg-white/[0.03] border-primary/30 ring-1 ring-primary/20' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                        <div className={`relative p-8 rounded-[32px] border transition-all duration-500 group flex flex-col ${currentPlan === 'Free' ? 'bg-white/[0.03] border-zinc-500/30' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
                             {currentPlan === 'Free' && (
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-primary text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-2xl shadow-zinc-500/40 z-10">
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-br from-secondary to-secondary/60 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg shadow-primary/20 z-10">
                                     Active Plan
                                 </div>
                             )}
                             <div className="flex items-center justify-between mb-6">
-                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em]">Free</span>
+                                <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest text-[#999]">Legacy</span>
                             </div>
                             <div className="mb-8">
                                 <div className="flex items-baseline gap-1 mb-2">
-                                    <span className="text-4xl font-medium text-white tracking-tighter">$0</span>
-                                    <span className="text-zinc-500 text-sm font-medium">/mo</span>
+                                    <span className="text-3xl font-bold text-white tracking-tight">$0</span>
+                                    <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">/month</span>
                                 </div>
-                                <p className="text-zinc-500 text-xs font-medium">Essential for solo builders.</p>
+                                <p className="text-zinc-500 text-xs font-medium">Standard search capabilities.</p>
                             </div>
-                            <ul className="space-y-4 mb-10 flex-grow">
-                                <FeatureItem text="1 Product Slot" />
-                                <FeatureItem text="10 Signals / mo" />
-                                <FeatureItem text="20 Post Drafts / mo" />
-                                <FeatureItem text="Basic Intent Filter" />
+                            <ul className="space-y-3.5 mb-10 flex-grow">
+                                <FeatureItem text="1 Active Product" />
+                                <FeatureItem text="Basic Signal Scanning" />
+                                <FeatureItem text="Limited AI Drafts" />
                             </ul>
-                            <button className="w-full py-4 rounded-xl bg-white/5 text-white/50 font-bold text-[13px] border border-white/10 transition-all cursor-default mt-auto" disabled>
+                            <button className="w-full py-3.5 rounded-2xl bg-white/5 text-zinc-500 font-bold text-[10px] uppercase tracking-widest border border-white/5 mt-auto" disabled>
                                 Currently Active
                             </button>
                         </div>
 
                         {/* Starter Plan */}
-                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 group flex flex-col ${currentPlan === 'Starter' ? 'bg-white/[0.03] border-primary/30 ring-1 ring-primary/20' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                        <div className={`relative p-8 rounded-[32px] border transition-all duration-500 group flex flex-col ${currentPlan === 'Starter' ? 'bg-white/[0.03] border-zinc-500/30' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
                             <div className="flex items-center justify-between mb-6">
-                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em]">Starter</span>
+                                <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Growth</span>
                             </div>
                             <div className="mb-8">
-                                <div className="flex items-baseline gap-1.5 mb-1">
-                                    <span className="text-4xl font-medium text-white tracking-tighter">$15</span>
-                                    <span className="text-zinc-500 text-sm font-medium">/mo</span>
-                                    <span className="text-zinc-700 line-through text-lg ml-2 font-light">$19</span>
+                                <div className="flex items-baseline gap-2 mb-1">
+                                    <span className="text-3xl font-bold text-white tracking-tight">$15</span>
+                                    <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">/month</span>
                                 </div>
-                                <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2">First 10 spots only</div>
-                                <p className="text-zinc-500 text-xs font-medium">Scaling for active makers.</p>
+                                <div className="text-[9px] font-bold text-white uppercase tracking-widest mb-2">Early Adopter Pricing</div>
+                                <p className="text-zinc-500 text-xs font-medium">Enhanced discovery tools.</p>
                             </div>
-                            <ul className="space-y-4 mb-10 flex-grow">
-                                <FeatureItem text="3 Product Slots" />
-                                <FeatureItem text="150 Signals / mo" />
-                                <FeatureItem text="300 Post Drafts / mo" />
-                                <FeatureItem text="6 Refreshes / day" />
+                            <ul className="space-y-3.5 mb-10 flex-grow">
+                                <FeatureItem text="3 Active Products" />
+                                <FeatureItem text="Deep Signal Analysis" />
+                                <FeatureItem text="Priority AI Features" />
+                                <FeatureItem text="Full Platform Access" />
                             </ul>
-                            <button className="w-full py-4 rounded-xl bg-white text-black font-bold text-[13px] hover:bg-zinc-200 transition-all shadow-xl shadow-white/5 active:scale-95 mt-auto">
-                                Level Up →
+                            <button className="w-full py-3.5 rounded-2xl bg-primary text-white font-bold text-[10px] uppercase tracking-widest hover:bg-[#423F3E] transition-all shadow-xl active:scale-95 mt-auto shadow-primary/20">
+                                Upgrade Plan
                             </button>
                         </div>
 
                         {/* Pro Plan */}
-                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 group flex flex-col ${currentPlan === 'Pro' ? 'bg-white/[0.03] border-primary/30 ring-1 ring-primary/20' : 'bg-white/[0.03] border-white/[0.06] hover:border-white/20'}`}>
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-white/10 text-white text-[9px] font-bold uppercase tracking-wider rounded-full border border-white/20 z-10 whitespace-nowrap">
-                                Most Popular
+                        <div className={`relative p-8 rounded-[32px] border transition-all duration-500 group flex flex-col bg-zinc-900 border-white/20 hover:border-white/40`}>
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-br from-secondary to-secondary/60 text-white text-[9px] font-bold uppercase tracking-widest rounded-full border border-primary/20 z-10 whitespace-nowrap shadow-xl shadow-primary/20">
+                                Recommended
                             </div>
                             <div className="flex items-center justify-between mb-6 mt-1">
-                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em]">Pro</span>
+                                <span className="text-white text-[10px] font-bold uppercase tracking-widest">Enterprise</span>
                             </div>
                             <div className="mb-8">
                                 <div className="flex items-baseline gap-1 mb-2">
-                                    <span className="text-4xl font-medium text-white tracking-tighter">$39</span>
-                                    <span className="text-zinc-500 text-sm font-medium">/mo</span>
+                                    <span className="text-3xl font-bold text-white tracking-tight">$39</span>
+                                    <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">/month</span>
                                 </div>
-                                <p className="text-zinc-500 text-xs font-medium">Growth for rising startups.</p>
+                                <p className="text-zinc-500 text-xs font-medium">Full automation suite.</p>
                             </div>
-                            <ul className="space-y-4 mb-10 flex-grow">
-                                <FeatureItem text="10 Product Slots" />
-                                <FeatureItem text="500 Signals / mo" />
-                                <FeatureItem text="1,000 Post Drafts / mo" />
-                                <FeatureItem text="12 Refreshes / day" />
+                            <ul className="space-y-3.5 mb-10 flex-grow">
+                                <FeatureItem text="10 Active Products" />
+                                <FeatureItem text="Automated Engagement" />
+                                <FeatureItem text="Team Collaboration" />
+                                <FeatureItem text="Priority Scanning" />
                             </ul>
-                            <button className="w-full py-4 rounded-xl glass-pill text-white font-bold text-[13px] hover:bg-white/10 transition-all active:scale-95 mt-auto">
-                                Go Pro →
-                            </button>
+                                <button className="w-full py-3.5 rounded-2xl bg-gradient-to-br from-secondary to-secondary/60 text-white font-bold text-[10px] uppercase tracking-widest hover:border-white/30 transition-all shadow-lg active:scale-95 mt-auto shadow-primary/20">
+                                    Get Pro Now
+                                </button>
                         </div>
 
                         {/* Ultra Plan */}
-                        <div className={`relative p-8 rounded-[2.5rem] border transition-all duration-500 group flex flex-col ${currentPlan === 'Ultra' ? 'bg-white/[0.03] border-primary/30 ring-1 ring-primary/20' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
+                        <div className={`relative p-8 rounded-[32px] border transition-all duration-500 group flex flex-col bg-black/40 border-white/5 hover:border-white/10`}>
                             <div className="flex items-center justify-between mb-6">
-                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em]">Ultra</span>
+                                <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Unlimited</span>
                             </div>
                             <div className="mb-8">
                                 <div className="flex items-baseline gap-1 mb-2">
-                                    <span className="text-4xl font-medium text-white tracking-tighter">$69</span>
-                                    <span className="text-zinc-500 text-sm font-medium">/mo</span>
+                                    <span className="text-3xl font-bold text-white tracking-tight">$69</span>
+                                    <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">/month</span>
                                 </div>
-                                <p className="text-zinc-500 text-xs font-medium">Scale for market leaders.</p>
+                                <p className="text-zinc-500 text-xs font-medium">Strategic market control.</p>
                             </div>
-                            <ul className="space-y-4 mb-10 flex-grow">
-                                <FeatureItem text="25 Product Slots" />
-                                <FeatureItem text="1,500 Signals / mo" />
-                                <FeatureItem text="3,000 Post Drafts / mo" />
-                                <FeatureItem text="Hourly Refresh" />
+                            <ul className="space-y-3.5 mb-10 flex-grow">
+                                <FeatureItem text="Unlimited Products" />
+                                <FeatureItem text="Custom AI Models" />
+                                <FeatureItem text="White-label Reports" />
+                                <FeatureItem text="API Access" />
                             </ul>
-                            <button className="w-full py-4 rounded-xl glass-pill text-white font-bold text-[13px] hover:bg-white/10 transition-all active:scale-95 mt-auto">
-                                Scale Now →
+                            <button className="w-full py-3.5 rounded-2xl bg-white/5 text-white font-bold text-[10px] uppercase tracking-widest border border-white/5 hover:bg-white/10 transition-all active:scale-95 mt-auto">
+                                Contact Sales
                             </button>
                         </div>
                     </div>
@@ -439,14 +436,14 @@ function UserSettingsContent() {
 
                     {/* Billing Support Note */}
                     <p className="text-center text-xs text-muted-foreground pb-4">
-                        Secure payments powered by Stripe. All plans are billed monthly. Need a custom plan for your agency? <span className="text-primary hover:underline cursor-pointer">Contact us.</span>
+                        Secure payments powered by Stripe. All plans are billed monthly. Need a custom plan for your agency? <span className="text-white hover:underline cursor-pointer">Contact us.</span>
                     </p>
                 </Section>
 
                 {/* Platform Connections */}
-                <Section title="Platform Connections" icon={<Globe className="w-5 h-5 text-primary" />}>
+                <Section title="Platform Connections" icon={<Globe className="w-5 h-5 text-white" />}>
                     <div className="grid gap-6">
-                        <div className="p-4 bg-black/40 rounded-xl border border-white/10 flex items-center justify-between group hover:border-primary/30 transition-all shadow-inner">
+                        <div className="p-4 bg-black/40 rounded-xl border border-white/10 flex items-center justify-between group hover:border-white/30 transition-all shadow-inner">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shadow-lg">
                                     <XLogo className="w-6 h-6 text-white" />
@@ -456,13 +453,13 @@ function UserSettingsContent() {
                                         X / Twitter
                                         {xIntegration ? (
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-primary/20">Connected</span>
-                                                <span className="text-[10px] bg-secondary/10 text-slate-400 px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-secondary/10 flex items-center gap-1">
-                                                    <Shield className="w-2.5 h-2.5" /> Authority Active
+                                                <span className="text-[10px] bg-white/10 text-white px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-white/20">Active</span>
+                                                <span className="text-[10px] bg-white/5 text-zinc-500 px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-white/5 flex items-center gap-1">
+                                                    <Shield className="w-2.5 h-2.5" /> Authority
                                                 </span>
                                             </div>
                                         ) : (
-                                            <span className="text-[10px] bg-white/5 text-muted-foreground px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-white/5">Not Linked</span>
+                                            <span className="text-[10px] bg-white/5 text-zinc-600 px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-white/5">Disconnected</span>
                                         )}
                                     </h3>
                                     <p className="text-xs text-muted-foreground mt-1 max-w-md leading-relaxed">
@@ -477,7 +474,7 @@ function UserSettingsContent() {
                                 {xIntegration ? (
                                     <div className="text-right">
                                         <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                                            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
                                             <p className="text-xs font-bold text-white uppercase tracking-wider">@{xIntegration.external_username}</p>
                                         </div>
                                         <button
@@ -494,10 +491,10 @@ function UserSettingsContent() {
                                         type="button"
                                         disabled={connectingX}
                                         onClick={handleConnectX}
-                                        className="px-6 py-2.5 bg-white text-black text-xs font-bold rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-xl hover:shadow-primary/20 active:scale-95 disabled:opacity-50"
+                                        className="px-6 py-3 bg-gradient-to-br from-secondary to-secondary/60 text-white text-[10px] font-bold uppercase tracking-widest rounded-2xl hover:border-white/30 transition-all flex items-center gap-2 shadow-xl active:scale-95 disabled:opacity-50 shadow-primary/20"
                                     >
-                                        {connectingX ? <Loader2 className="w-4 h-4 animate-spin" /> : <XLogo className="w-4 h-4" />}
-                                        Connect X Account
+                                        {connectingX ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XLogo className="w-3.5 h-3.5" />}
+                                        Link X Account
                                     </button>
                                 )}
                             </div>
@@ -525,7 +522,7 @@ function UserSettingsContent() {
                         <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 custom-scrollbar">
                             <form id="profile-form" onSubmit={handleSubmit} className="space-y-8">
                                 {/* Profile Info */}
-                                <Section title="Profile Information" icon={<User className="w-5 h-5 text-primary" />}>
+                                <Section title="Profile Information" icon={<User className="w-5 h-5 text-white" />}>
                                     <div className="flex flex-col md:flex-row gap-8 items-start">
                                         <div className="flex flex-col items-center gap-4">
                                             <div className="relative group w-32 h-32">
@@ -573,7 +570,7 @@ function UserSettingsContent() {
 
 
                                 {/* Socials */}
-                                <Section title="Social Connections" icon={<LinkIcon className="w-5 h-5 text-primary" />}>
+                                <Section title="Social Connections" icon={<LinkIcon className="w-5 h-5 text-white" />}>
                                     <div className="grid md:grid-cols-2 gap-6">
                                         {/* Standard Socials */}
                                         <Input label="X / Twitter" icon={<XLogo className="w-4 h-4" />} value={profile.social_links.twitter || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, twitter: v } })} placeholder="@username or URL" />
@@ -613,7 +610,7 @@ function UserSettingsContent() {
                                             <button
                                                 type="button"
                                                 onClick={() => setIsAddingSocial(true)}
-                                                className="text-sm text-primary hover:text-zinc-300 flex items-center gap-2 font-medium transition-colors"
+                                                className="text-sm text-white hover:text-zinc-300 flex items-center gap-2 font-medium transition-colors"
                                             >
                                                 <Plus className="w-4 h-4" /> Add Custom Link
                                             </button>
@@ -638,7 +635,7 @@ function UserSettingsContent() {
                                                 <button
                                                     type="button"
                                                     onClick={handleAddSocial}
-                                                    className="p-3 bg-primary hover:bg-zinc-200 text-black rounded-xl mb-[2px]"
+                                                    className="p-3 bg-white hover:bg-zinc-200 text-black rounded-xl mb-[2px]"
                                                 >
                                                     <Plus className="w-5 h-5" />
                                                 </button>
@@ -655,12 +652,12 @@ function UserSettingsContent() {
                                 </Section>
 
                                 {/* Security */}
-                                <Section title="Security" icon={<Shield className="w-5 h-5 text-primary" />}>
+                                <Section title="Security" icon={<Shield className="w-5 h-5 text-white" />}>
                                     {!showPasswordFields ? (
                                         <div className="flex items-center justify-between p-4 bg-black/40 rounded-xl border border-white/10">
                                             <div className="space-y-1">
                                                 <h3 className="font-medium flex items-center gap-2 text-white">
-                                                    <Lock className="w-4 h-4 text-primary" /> Password
+                                                    <Lock className="w-4 h-4 text-white" /> Password
                                                 </h3>
                                                 <p className="text-sm text-muted-foreground">Secure your account with a strong password.</p>
                                             </div>
@@ -675,7 +672,7 @@ function UserSettingsContent() {
                                     ) : (
                                         <div className="space-y-4 bg-black/40 p-6 rounded-xl border border-white/10 animate-in fade-in slide-in-from-top-2">
                                             <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-medium text-primary">Set New Password</h3>
+                                                <h3 className="font-medium text-white">Set New Password</h3>
                                                 <button type="button" onClick={() => setShowPasswordFields(false)} className="text-xs text-muted-foreground hover:text-white">Cancel</button>
                                             </div>
                                             <Input label="New Password" type="password" icon={<Lock className="w-4 h-4" />} value={passwords.new} onChange={(v: string) => setPasswords({ ...passwords, new: v })} placeholder="Enter new password" />
@@ -705,7 +702,7 @@ function UserSettingsContent() {
 
 export default function UserSettingsPage() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+        <Suspense fallback={<div className="flex items-center justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-white" /></div>}>
             <UserSettingsContent />
         </Suspense>
     );
@@ -725,7 +722,7 @@ function SocialButton({ href, icon, type, label }: any) {
     return (
         <a
             href={link} target="_blank" rel="noopener noreferrer"
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:bg-primary/20 hover:text-primary hover:border-primary/50 transition-all active:scale-95 group relative"
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:bg-white/20 hover:text-white hover:border-white/50 transition-all active:scale-95 group relative"
         >
             {icon}
             <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/90 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
@@ -736,12 +733,12 @@ function SocialButton({ href, icon, type, label }: any) {
 }
 
 function Badge({ icon, text, color = "default" }: any) {
-    const styles = color === "emerald"
-        ? "bg-primary/10 text-primary border-primary/20"
-        : "bg-white/5 text-muted-foreground border-white/5";
+    const styles = color === "silver"
+        ? "bg-white/10 text-white border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.05)]"
+        : "bg-white/5 text-zinc-500 border-white/5";
 
     return (
-        <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-2 border ${styles}`}>
+        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 border ${styles}`}>
             {icon} {text}
         </span>
     );
@@ -749,8 +746,9 @@ function Badge({ icon, text, color = "default" }: any) {
 
 function Section({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) {
     return (
-        <div className="glass-card p-6 md:p-8 border-white/5 relative">
-            <h2 className="text-lg font-bold mb-6 flex items-center gap-3 pb-4 border-b border-white/5 text-zinc-100">
+        <div className="glass-card p-6 md:p-8 border-white/5 relative overflow-hidden group/section">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-3xl rounded-full -z-10 transition-all group-hover/section:bg-primary/10" />
+            <h2 className="text-lg font-bold mb-6 flex items-center gap-3 pb-4 border-b border-white/5 text-zinc-100 uppercase tracking-tight">
                 <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">{icon}</div>
                 {title}
             </h2>
@@ -769,7 +767,7 @@ function Input({ label, value, onChange, placeholder, required, icon, className 
             </label>
             <div className="relative group">
                 {icon && (
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-white transition-colors pointer-events-none">
                         {icon}
                     </div>
                 )}
@@ -777,7 +775,7 @@ function Input({ label, value, onChange, placeholder, required, icon, className 
                     type={type}
                     value={value || ""}
                     onChange={e => onChange(e.target.value)}
-                    className={`w-full p-3 ${icon ? "pl-10" : ""} bg-black/40 border border-white/10 rounded-xl focus:border-primary/50 focus:ring-1 focus:ring-zinc-500/50 transition-all text-white placeholder:text-muted-foreground/50 pointer-events-auto ${className}`}
+                    className={`w-full p-3 ${icon ? "pl-10" : ""} bg-black/40 border border-white/10 rounded-xl focus:border-white/50 focus:ring-1 focus:ring-zinc-500/50 transition-all text-white placeholder:text-muted-foreground/50 pointer-events-auto ${className}`}
                     placeholder={placeholder} required={required}
                 />
             </div>
@@ -785,25 +783,25 @@ function Input({ label, value, onChange, placeholder, required, icon, className 
     );
 }
 
-function FeatureItem({ text, color = "emerald", icon }: { text: string; color?: string; icon?: React.ReactNode }) {
+function FeatureItem({ text, color = "cocoa", icon }: { text: string; color?: string; icon?: React.ReactNode }) {
     const colorMap: Record<string, string> = {
-        emerald: "text-primary",
+        cocoa: "text-white",
         cyan: "text-cyan-400",
-        purple: "text-primary font-medium"
+        stone: "text-white font-medium"
     };
 
     const iconBgMap: Record<string, string> = {
-        emerald: "bg-primary/10 border-primary/20",
+        cocoa: "bg-primary/10 border-primary/20 shadow-lg shadow-primary/10",
         cyan: "bg-cyan-500/10 border-cyan-500/20",
-        purple: "bg-primary/20 border-primary/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]"
+        stone: "bg-stone-500/15 border-stone-500/30 shadow-[0_0_10px_rgba(255,255,255,0.05)]"
     };
 
     return (
         <li className="flex items-center gap-3 group/item">
-            <div className={`flex-shrink-0 p-1 rounded-lg border transition-all duration-300 group-hover/item:scale-110 ${iconBgMap[color] || iconBgMap.emerald}`}>
-                {icon || <Check className={`w-3.5 h-3.5 ${colorMap[color] || "text-primary"}`} />}
+            <div className={`flex-shrink-0 p-1 rounded-lg border transition-all duration-300 group-hover/item:scale-110 ${iconBgMap[color] || iconBgMap.cocoa}`}>
+                {icon || <Check className="w-3.5 h-3.5 text-white" />}
             </div>
-            <span className={`text-sm transition-colors duration-300 ${color === 'emerald' ? 'text-muted-foreground group-hover/item:text-white' : 'text-gray-300 group-hover/item:text-white'}`}>
+            <span className={`text-xs ${colorMap[color] || colorMap.cocoa}`}>
                 {text}
             </span>
         </li>

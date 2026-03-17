@@ -45,21 +45,20 @@ export function Navbar() {
                     <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 transition-transform group-hover:rotate-12">
                         <Radar className="h-4.5 w-4.5 text-white" />
                     </div>
-                    <span className="text-xl font-medium tracking-tight text-white lowercase">
-                        obsidian
+                    <span className="text-xl font-bold tracking-tight text-white uppercase group-hover:tracking-[0.1em] transition-all">
+                        Marketing<span className="text-primary">X</span>
                     </span>
                 </Link>
 
-                {/* Deskrop Nav Pill */}
                 <div className={`
-                    hidden md:flex items-center gap-1 p-1 bg-white/[0.03] backdrop-blur-3xl rounded-full border border-white/[0.08] shadow-2xl transition-all duration-500
+                    hidden md:flex items-center gap-1 p-1 bg-white/[0.03] backdrop-blur-3xl rounded-3xl border border-white/[0.08] shadow-2xl transition-all duration-500
                     ${isScrolled ? "px-2 py-1" : "px-3 py-1.5"}
                 `}>
                     {navLinks.map((link) => (
                         <Link key={link.name} href={link.href}>
                             <motion.div
                                 whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
-                                className="px-5 py-2 text-[13px] font-light text-zinc-400 hover:text-white transition-all rounded-full cursor-pointer"
+                                className="px-5 py-2 text-[13px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all rounded-2xl cursor-pointer"
                             >
                                 {link.name}
                             </motion.div>
@@ -77,7 +76,7 @@ export function Navbar() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             transition={spring}
-                            className="px-6 py-2.5 bg-white text-black font-bold text-[13px] rounded-full shadow-lg"
+                            className="px-6 py-2.5 bg-primary text-white font-bold text-[11px] uppercase tracking-widest rounded-2xl shadow-lg shadow-primary/20 border border-primary/20"
                         >
                             Get Started
                         </motion.button>

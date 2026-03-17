@@ -82,8 +82,8 @@ export default function BattlefieldPage() {
         return (
             <div className="flex flex-col items-center justify-center p-20 space-y-4">
                 <div className="relative">
-                    <Loader2 className="w-12 h-12 animate-spin text-red-500" />
-                    <Swords className="w-6 h-6 text-red-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    <Loader2 className="w-12 h-12 animate-spin text-white" />
+                    <Swords className="w-6 h-6 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
                 <p className="text-zinc-500 font-black uppercase tracking-widest text-xs animate-pulse">Entering the Battlefield...</p>
             </div>
@@ -102,31 +102,32 @@ export default function BattlefieldPage() {
         <div className="space-y-10 pb-20 animate-fade-up">
             {/* Header Area */}
             <div className="relative group/header">
-                <div className="absolute -inset-1 bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-[40px] blur-2xl opacity-50 group-hover/header:opacity-100 transition duration-1000" />
-                <div className="relative glass-panel p-8 md:p-12 overflow-hidden border-red-500/10">
-                    <div className="absolute -top-24 -right-24 opacity-10 pointer-events-none group-hover/header:rotate-12 transition-transform duration-1000">
-                        <Swords className="w-96 h-96 text-red-500" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-transparent rounded-[40px] blur-2xl opacity-50 transition duration-1000" />
+                <div className="relative glass-panel p-8 md:p-12 overflow-hidden border-white/5">
+                    <div className="absolute -top-24 -right-24 opacity-5 pointer-events-none transition-transform duration-1000">
+                        <Swords className="w-96 h-96 text-white" />
                     </div>
 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
-                                <div className="bg-red-500/10 text-red-500 p-3 rounded-2xl border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                                <div className="bg-white/10 text-white p-3 rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                                     <Swords className="w-8 h-8" />
                                 </div>
                                 <div>
-                                    <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white uppercase italic">
-                    The Battlefield
-                </h1>                    <div className="h-1 w-12 bg-red-500 rounded-full mt-1" />
+                                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase">
+                                        The Battlefield
+                                    </h1>
+                                    <div className="h-1 w-12 bg-white rounded-full mt-1" />
                                 </div>
                             </div>
-                            <p className="text-zinc-400 text-lg max-w-2xl font-medium leading-relaxed">
-                                Deploy hunter-bot strategy to track leads who are actively looking to <span className="text-white font-bold">switch from your competitors</span>.
+                            <p className="text-zinc-400 text-lg max-w-2xl font-normal leading-relaxed">
+                                Deploy hunter-bot strategy to track leads who are actively looking to <span className="text-white font-semibold">switch from your competitors</span>.
                             </p>
                             <div className="flex flex-wrap gap-4">
-                                <div className="flex items-center gap-2 px-5 py-2.5 bg-red-500/5 border border-red-500/10 rounded-full">
-                                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_#ef4444]" />
-                                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-red-400">
+                                <div className="flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 rounded-full">
+                                    <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_#FFFFFF]" />
+                                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
                                         {opportunities.length} High-Intent Signals
                                     </span>
                                 </div>
@@ -136,9 +137,9 @@ export default function BattlefieldPage() {
                         <button
                             onClick={handleDiscover}
                             disabled={discovering}
-                            className="group relative px-10 py-5 bg-white hover:bg-zinc-200 text-black font-black rounded-[24px] transition-all shadow-2xl shadow-red-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-4 overflow-hidden uppercase tracking-widest text-xs"
+                            className="group relative px-10 py-5 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-2xl transition-all shadow-2xl shadow-primary/20 active:scale-95 disabled:opacity-50 flex items-center gap-4 overflow-hidden text-xs tracking-[0.2em] uppercase"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/20 to-red-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                             {discovering ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />}
                             Execute Strategic Scout
                         </button>
@@ -149,16 +150,16 @@ export default function BattlefieldPage() {
             {/* Main Content Area */}
             <div className="space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 w-fit">
-                        <button onClick={() => setActiveTab('all')} className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'all' ? 'bg-red-500 text-black shadow-lg shadow-red-500/20' : 'text-zinc-500 hover:text-white'}`}>Tactical View</button>
-                        <button onClick={() => setActiveTab('x')} className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'x' ? 'bg-red-500 text-black shadow-lg shadow-red-500/20' : 'text-zinc-500 hover:text-white'}`}>X Intelligence</button>
-                        <button onClick={() => setActiveTab('reddit')} className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'reddit' ? 'bg-red-500 text-black shadow-lg shadow-red-500/20' : 'text-zinc-500 hover:text-white'}`}>Reddit Intelligence</button>
-                        <button onClick={() => setActiveTab('linkedin')} className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'linkedin' ? 'bg-red-500 text-black shadow-lg shadow-red-500/20' : 'text-zinc-500 hover:text-white'}`}>LinkedIn Intelligence</button>
+                    <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/5 w-fit">
+                        <button onClick={() => setActiveTab('all')} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>Tactical View</button>
+                        <button onClick={() => setActiveTab('x')} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'x' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>X Intelligence</button>
+                        <button onClick={() => setActiveTab('reddit')} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'reddit' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>Reddit Intelligence</button>
+                        <button onClick={() => setActiveTab('linkedin')} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'linkedin' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>LinkedIn Intelligence</button>
                     </div>
 
                     <div className="flex items-center gap-3 text-zinc-500">
                         <ListFilter className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Intercepting {filteredOpportunities.length} high-intent signals</span>
+                        <span className="text-xs font-bold uppercase tracking-widest">Intercepting {filteredOpportunities.length} high-intent signals</span>
                     </div>
                 </div>
 
@@ -168,23 +169,23 @@ export default function BattlefieldPage() {
                             <motion.div 
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="text-center py-32 glass-panel border-dashed border-primary/20 flex flex-col items-center justify-center space-y-10"
+                                className="text-center py-32 glass-panel border-dashed border-white/10 flex flex-col items-center justify-center space-y-10"
                             >
                                 <div className="relative">
-                                    <div className="absolute -inset-8 bg-primary/10 blur-3xl rounded-full animate-pulse" />
-                                    <div className="p-10 bg-zinc-900 rounded-full border border-primary/20 relative z-10">
-                                        <Radar className="w-16 h-16 text-primary" />
+                                    <div className="absolute -inset-8 bg-white/5 blur-3xl rounded-full animate-pulse" />
+                                    <div className="p-10 bg-zinc-900 rounded-full border border-white/10 relative z-10">
+                                        <Radar className="w-16 h-16 text-white" />
                                     </div>
                                 </div>
                                 <div className="space-y-4 max-w-lg mx-auto">
                                     <h2 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter">Strategic Radar Offline</h2>
                                     <p className="text-zinc-400 text-lg leading-relaxed font-medium">
-                                        We cannot intercept competitor-switching signals without identifying your rivals. Add them in <span className="text-primary font-bold underline">Product Settings</span>.
+                                        We cannot intercept competitor-switching signals without identifying your rivals. Add them in <span className="text-white font-bold underline">Product Settings</span>.
                                     </p>
                                 </div>
                                 <a
                                     href="/founder/products"
-                                    className="px-10 py-5 bg-primary hover:bg-zinc-200 text-black font-black rounded-[24px] transition-all shadow-2xl shadow-primary/20 active:scale-95 flex items-center gap-3 uppercase text-xs tracking-widest"
+                                    className="px-10 py-5 bg-primary hover:bg-[#423F3E] text-white font-black rounded-[24px] transition-all shadow-2xl shadow-primary/20 active:scale-95 flex items-center gap-3 uppercase text-xs tracking-widest"
                                 >
                                     <Settings className="w-5 h-5" />
                                     Configure Strategic Rivals
@@ -196,8 +197,8 @@ export default function BattlefieldPage() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="text-center py-32 glass-panel border-dashed border-red-500/10 flex flex-col items-center justify-center space-y-8"
                             >
-                                <div className="p-10 bg-red-500/5 rounded-full border border-red-500/10">
-                                    <Swords className="w-16 h-16 text-red-500/20" />
+                                <div className="p-10 bg-white/5 rounded-full border border-white/5">
+                                    <Swords className="w-16 h-16 text-zinc-500/20" />
                                 </div>
                                 <div className="space-y-3">
                                     <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">The Battlefield is Quiet</h2>
@@ -205,7 +206,7 @@ export default function BattlefieldPage() {
                                         No active competitor-switching signals detected in the current intercept window.
                                     </p>
                                 </div>
-                                <button onClick={handleDiscover} className="text-red-500 font-black uppercase text-xs tracking-[0.3em] hover:text-white transition-all flex items-center gap-3 bg-red-500/5 px-8 py-3 rounded-full border border-red-500/10 hover:bg-red-500/10">
+                                <button onClick={handleDiscover} className="text-white font-black uppercase text-xs tracking-[0.3em] hover:text-zinc-400 transition-all flex items-center gap-3 bg-white/5 px-8 py-3 rounded-full border border-white/5">
                                     <Sparkles className="w-4 h-4" /> Run Tactical Scout
                                 </button>
                             </motion.div>
