@@ -31,6 +31,16 @@ export default function SignupPage() {
             setError(error.message);
             setLoading(false);
         } else if (data.user) {
+            // Send Welcome Email (Non-blocking)
+            fetch("/api/notifications/welcome", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: data.user.email,
+                    userName: email.split("@")[0], // Fallback name from email
+                    role: role
+                })
+            }).catch(err => console.error("Failed to send welcome email:", err));
+
             // Check if user has a profile for the selected role
             if (role === "founder") {
                 router.push("/founder/onboarding");

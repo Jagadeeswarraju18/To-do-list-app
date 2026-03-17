@@ -131,10 +131,11 @@ export default function DashboardPage() {
                             <div className="flex items-center gap-3 mb-2">
                                 <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white uppercase italic">
                     Command Center
-                </h1>                <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
+                </h1>
+                <Link href="/founder/opportunities" className="hidden sm:flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-all">
                                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Strategic Active</span>
-                                </div>
+                                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Autopilot Active</span>
+                                </Link>
                             </div>
                             <p className="text-zinc-400 font-medium tracking-tight text-base">
                                 Accelerating growth for <span className="text-white font-black">{product?.name || "Global Assets"}</span> through founder-led signals.
@@ -239,11 +240,22 @@ export default function DashboardPage() {
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2">
                                     <div className="w-1 h-4 bg-primary rounded-full" />
-                                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Current Archetype</h4>
+                                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Dynamic Strategy Brief</h4>
                                 </div>
-                                <div className="p-6 bg-black/40 border border-white/5 rounded-3xl relative group/card transition-all hover:border-primary/20">
+                                <div className="p-6 bg-black/40 border border-white/5 rounded-3xl relative group/card transition-all hover:border-primary/20 min-h-[140px] flex items-center">
                                     <p className="text-[13px] text-zinc-300 leading-relaxed italic font-medium">
-                                        &quot;Double down on <strong>The Hidden Toxicity</strong> archetype. Users are frustrated with the complexity of existing solutions. Use your founder story of building {product?.name || "this product"} out of necessity.&quot;
+                                        &quot;{recentSignals.length > 0 ? (() => {
+                                            const categories = recentSignals.map(s => s.intent_category || 'Other');
+                                            const counts: any = {};
+                                            categories.forEach(c => counts[c] = (counts[c] || 0) + 1);
+                                            const topCategory = Object.entries(counts).sort((a: any, b: any) => b[1] - a[1])[0]?.[0] || 'Interest';
+                                            
+                                            if (topCategory === 'Switching') return `Accelerate **The Competitor Displacement** archetype. Multiple users are expressing friction with rivals. Position ${product?.name || 'your product'} as the frictionless sanctuary for frustrated teams.`;
+                                            if (topCategory === 'Problem/Pain') return `Focus on **The Direct Hit** archetype. High volume of explicit frustration detected. Your messaging should lead with the visceral pain point and your immediate resolution.`;
+                                            if (topCategory === 'Recommendation') return `Leverage **The Trusted Advisor** archetype. Users are actively seeking alternatives. Focus on social proof and the 'no-brainer' transition path for new users.`;
+                                            
+                                            return `Double down on **The Market Leader** archetype. Signals indicate a broad need for professional solutions. Use your founder story of building ${product?.name || 'this product'} as the definitive standard.`;
+                                        })() : `Scanning for strategic shifts in the market... Analyze your first batch of signals to unlock tactical archetypes.`}&quot;
                                     </p>
                                     <Sparkles className="absolute -top-2 -right-2 w-5 h-5 text-primary/40 group-hover/card:scale-110 transition-transform" />
                                 </div>
@@ -332,7 +344,7 @@ export default function DashboardPage() {
                                                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                                                 <span className="text-[9px] font-black text-white uppercase tracking-[0.2em] italic">Tactical Opening</span>
                                             </div>
-                                            <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{signal.source === 'reddit_post' ? 'Reddit' : 'X'} Stream</span>
+                                            <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{signal.source === 'reddit_post' ? 'Reddit' : signal.source === 'linkedin_post' ? 'LinkedIn' : 'X'} Stream</span>
                                         </div>
                                         <div className="p-6 bg-black/40 border border-white/5 rounded-2xl group-hover/signal:border-primary/20 group-hover/signal:bg-white/[0.02] transition-all relative overflow-hidden">
                                             <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover/signal:bg-primary transition-colors duration-500" />

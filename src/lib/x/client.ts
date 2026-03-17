@@ -131,7 +131,7 @@ Also search for casual expressions like:
 
 RETURN FORMAT (raw JSON only, no markdown):
 {
-  "tweets": [
+    "tweets": [
     {
       "id": "post_id_or_url",
       "text": "exact full post text (include image/video descriptions if text is minimal)",

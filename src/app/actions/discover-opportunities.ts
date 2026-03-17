@@ -17,11 +17,12 @@ import {
 import { searchRedditOpportunities } from "@/lib/reddit/client";
 import { searchLinkedInOpportunities } from "@/lib/linkedin/client";
 
-async function getProductContext(supabase: any, user: any) {
+async function getProductContext(supabase: any, userOrId: any) {
+    const userId = typeof userOrId === 'string' ? userOrId : userOrId.id;
     const { data: profile } = await supabase
         .from("profiles")
         .select("active_product_id")
-        .eq("id", user.id)
+        .eq("id", userId)
         .single();
 
     let productId = profile?.active_product_id;
@@ -29,7 +30,7 @@ async function getProductContext(supabase: any, user: any) {
         const { data: latestProduct } = await supabase
             .from("products")
             .select("id")
-            .eq("user_id", user.id)
+            .eq("user_id", userId)
             .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -118,18 +119,23 @@ async function scoreAndVerifyCandidates(product: any, candidates: any[]) {
     return { scoredMap, verifiedMap, relevant };
 }
 
-export async function discoverOpportunitiesAction(scanWindow?: string) {
+export async function discoverOpportunitiesAction(scanWindow?: string, userIdOverride?: string) {
     try {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return { error: "Not authenticated" };
+        let targetUserId = userIdOverride;
+        
+        if (!targetUserId) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return { error: "Not authenticated" };
+            targetUserId = user.id;
+        }
 
-        const product = await getProductContext(supabase, user);
+        const product = await getProductContext(supabase, targetUserId);
         if (!product) return { error: "Product setup missing." };
 
         const { data: run } = await supabase
             .from("discovery_runs")
-            .insert({ user_id: user.id, product_id: product.id, platform: 'x', status: 'running' })
+            .insert({ user_id: targetUserId, product_id: product.id, platform: 'x', status: 'running' })
             .select().single();
 
         const { keywords, painPhrases } = await prepareKeywords(product);
@@ -161,7 +167,7 @@ export async function discoverOpportunitiesAction(scanWindow?: string) {
         const { data: existing } = await supabase
             .from("opportunities")
             .select("tweet_url")
-            .eq("user_id", user.id)
+            .eq("user_id", targetUserId)
             .in("tweet_url", tweetUrls);
         const existingUrls = new Set(existing?.map(o => o.tweet_url.toLowerCase()) || []);
         const newTweets = relevant.filter(t => !existingUrls.has(`https://x.com/${t.author_username}/status/${t.id}`.toLowerCase()));
@@ -193,7 +199,7 @@ export async function discoverOpportunitiesAction(scanWindow?: string) {
             const author = t.author_username || "unknown";
             const dm = dms.get(author) || fallbackDM(t.author_name || author, t.text || "", product.name);
             return {
-                user_id: user.id,
+                user_id: targetUserId,
                 product_id: product.id,
                 run_id: run?.id,
                 tweet_url: `https://x.com/${author}/status/${t.id}`,
@@ -228,18 +234,23 @@ export async function discoverOpportunitiesAction(scanWindow?: string) {
     }
 }
 
-export async function discoverRedditAction(scanWindow?: string) {
+export async function discoverRedditAction(scanWindow?: string, userIdOverride?: string) {
     try {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return { error: "Not authenticated" };
+        let targetUserId = userIdOverride;
 
-        const product = await getProductContext(supabase, user);
+        if (!targetUserId) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return { error: "Not authenticated" };
+            targetUserId = user.id;
+        }
+
+        const product = await getProductContext(supabase, targetUserId);
         if (!product) return { error: "Product setup missing." };
 
         const { data: run } = await supabase
             .from("discovery_runs")
-            .insert({ user_id: user.id, product_id: product.id, platform: 'reddit', status: 'running' })
+            .insert({ user_id: targetUserId, product_id: product.id, platform: 'reddit', status: 'running' })
             .select().single();
 
         const { keywords, painPhrases } = await prepareKeywords(product);
@@ -252,7 +263,7 @@ export async function discoverRedditAction(scanWindow?: string) {
         }
 
         const posts = searchResult.tweets;
-        const { data: existing } = await supabase.from("opportunities").select("tweet_url").eq("user_id", user.id);
+        const { data: existing } = await supabase.from("opportunities").select("tweet_url").eq("user_id", targetUserId);
         const existingUrls = new Set(existing?.map(e => e.tweet_url) || []);
         const newPosts = posts.filter(p => !existingUrls.has(p.post_url));
 
@@ -279,7 +290,7 @@ export async function discoverRedditAction(scanWindow?: string) {
             const author = p.author || "unknown";
             const reply = replies.get(author) || fallbackRedditReply(author, p.text || "", product.name);
             return {
-                user_id: user.id, product_id: product.id, run_id: run?.id,
+                user_id: targetUserId, product_id: product.id, run_id: run?.id,
                 tweet_url: p.post_url, tweet_content: p.text || "No content", tweet_author: `u/${author}`,
                 source: 'reddit_post', subreddit: p.subreddit,
                 tweet_posted_at: p.created_at || null,
@@ -309,18 +320,23 @@ export async function discoverRedditAction(scanWindow?: string) {
     }
 }
 
-export async function discoverLinkedInAction(scanWindow?: string) {
+export async function discoverLinkedInAction(scanWindow?: string, userIdOverride?: string) {
     try {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return { error: "Not authenticated" };
+        let targetUserId = userIdOverride;
 
-        const product = await getProductContext(supabase, user);
+        if (!targetUserId) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return { error: "Not authenticated" };
+            targetUserId = user.id;
+        }
+
+        const product = await getProductContext(supabase, targetUserId);
         if (!product) return { error: "Product setup missing." };
 
         const { data: run } = await supabase
             .from("discovery_runs")
-            .insert({ user_id: user.id, product_id: product.id, platform: 'linkedin', status: 'running' })
+            .insert({ user_id: targetUserId, product_id: product.id, platform: 'linkedin', status: 'running' })
             .select().single();
 
         const { keywords, painPhrases } = await prepareKeywords(product);
@@ -333,7 +349,7 @@ export async function discoverLinkedInAction(scanWindow?: string) {
         }
 
         const posts = searchResult.tweets;
-        const { data: existing } = await supabase.from("opportunities").select("tweet_url").eq("user_id", user.id);
+        const { data: existing } = await supabase.from("opportunities").select("tweet_url").eq("user_id", targetUserId);
         const existingUrls = new Set(existing?.map(e => e.tweet_url) || []);
         const newPosts = posts.filter(p => !existingUrls.has(p.post_url));
 
@@ -360,7 +376,7 @@ export async function discoverLinkedInAction(scanWindow?: string) {
             const author = p.author || "unknown";
             const reply = replies.get(author) || fallbackLinkedInReply(author, product.name);
             return {
-                user_id: user.id, product_id: product.id, run_id: run?.id,
+                user_id: targetUserId, product_id: product.id, run_id: run?.id,
                 tweet_url: p.post_url, tweet_content: p.text || "No content", tweet_author: author,
                 source: 'linkedin_post',
                 tweet_posted_at: p.created_at || null,
@@ -491,10 +507,45 @@ export async function archiveOpportunity(id: string) {
     return updateStatus(id, 'archived');
 }
 
+import { generateOutreachAngles as getAngles, fetchLeadBio as getBio } from "@/lib/ai/lead-enrichment";
+
+// ... existing code ...
+
 export async function generateOutreachAngles(opportunityId: string): Promise<{ success: boolean; error?: string; angles?: any[] }> {
-    return { success: false, error: "Not implemented" };
+    try {
+        const supabase = createClient();
+        const { data: opp } = await supabase.from("opportunities").select("*, products(*)").eq("id", opportunityId).single();
+        if (!opp) return { success: false, error: "Opportunity not found" };
+
+        const product = opp.products;
+        const angles = await getAngles({
+            postText: opp.tweet_content,
+            productName: product.name,
+            productDescription: product.description,
+            painSolved: product.pain_solved
+        });
+
+        return { success: true, angles };
+    } catch (e: any) {
+        console.error("Error generating angles:", e);
+        return { success: false, error: e.message };
+    }
 }
 
 export async function fetchLeadBio(opportunityId: string) {
-    return { success: false, error: "Not implemented" };
+    try {
+        const supabase = createClient();
+        const { data: opp } = await supabase.from("opportunities").select("*").eq("id", opportunityId).single();
+        if (!opp) return { success: false, error: "Opportunity not found" };
+
+        const bio = await getBio(opp.tweet_author, opp.source === 'reddit_post' ? 'Reddit' : opp.source === 'linkedin_post' ? 'LinkedIn' : 'X', opp.tweet_content);
+
+        await supabase.from("opportunities").update({ author_bio: bio }).eq("id", opportunityId);
+        revalidatePath("/founder/opportunities");
+        
+        return { success: true, bio };
+    } catch (e: any) {
+        console.error("Error fetching bio:", e);
+        return { success: false, error: e.message };
+    }
 }

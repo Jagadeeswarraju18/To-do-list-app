@@ -30,14 +30,20 @@ const SUBREDDIT_MAP: Record<string, SubredditSuggestion[]> = {
         { name: 'r/startups', members: '1.2m', relevance: 'high', reason: 'Startup ecosystem discussions and advice', rules_summary: ['No self-promotion', 'Share lessons learned', 'Be helpful first'], tone: 'Experienced, mentor-style' },
         { name: 'r/Entrepreneur', members: '2.3m', relevance: 'medium', reason: 'Broad entrepreneurship community', rules_summary: ['Value-first content', 'No affiliate links', 'Engage genuinely'], tone: 'Practical, action-oriented' },
         { name: 'r/microsaas', members: '18k', relevance: 'high', reason: 'Focused on small SaaS products and indie hackers', rules_summary: ['Share revenue transparently', 'Build in public welcome', 'No spam'], tone: 'Indie, transparent' },
+        { name: 'r/SaaSMarketing', members: '8k', relevance: 'high', reason: 'Strategic marketing specifically for SaaS', rules_summary: ['No spam', 'Value-first discussion'], tone: 'Strategic' },
+        { name: 'r/growthhacking', members: '130k', relevance: 'medium', reason: 'Rapid scale tactics and experiments', rules_summary: ['Share data', 'Experiments welcome', 'No vague advice'], tone: 'Experimental' },
+        { name: 'r/ProductManagement', members: '250k', relevance: 'medium', reason: 'SaaS product strategy and user feedback', rules_summary: ['Professional focus', 'No low-effort posts'], tone: 'Professional' },
         { name: 'r/EntrepreneurRideAlong', members: '125k', relevance: 'medium', reason: 'Building businesses from scratch', rules_summary: ['Detailed updates welcome', 'Data-driven posts preferred', 'No low-effort posts'], tone: 'Data-heavy, transparent' },
     ],
     'marketing': [
         { name: 'r/marketing', members: '450k', relevance: 'high', reason: 'General marketing strategy and tactics', rules_summary: ['No self-promo', 'Case studies welcome', 'Source your claims'], tone: 'Professional, strategic' },
         { name: 'r/digital_marketing', members: '180k', relevance: 'high', reason: 'Digital-first marketing discussions', rules_summary: ['No link dropping', 'Share real results', 'Help others first'], tone: 'Tactical, results-driven' },
+        { name: 'r/SEO', members: '350k', relevance: 'high', reason: 'Organic search visibility and strategy', rules_summary: ['No self-promotion', 'Include context'], tone: 'Data-driven' },
+        { name: 'r/PPC', members: '150k', relevance: 'high', reason: 'Paid acquisition and ad strategy', rules_summary: ['Professional discussion only'], tone: 'ROI-focused' },
         { name: 'r/socialmedia', members: '320k', relevance: 'medium', reason: 'Social media strategy and trends', rules_summary: ['No self-promotion', 'Share strategies, not tools', 'Be specific with advice'], tone: 'Trend-aware, practical' },
         { name: 'r/content_marketing', members: '65k', relevance: 'medium', reason: 'Content strategy discussions', rules_summary: ['Quality over quantity', 'Case studies preferred', 'No blog spam'], tone: 'Long-form, analytical' },
-        { name: 'r/GrowthHacking', members: '130k', relevance: 'medium', reason: 'Growth tactics and experiments', rules_summary: ['Share data', 'Experiments welcome', 'No vague advice'], tone: 'Experimental, metric-obsessed' },
+        { name: 'r/Affiliatemarketing', members: '120k', relevance: 'high', reason: 'Affiliate network and strategy talk', rules_summary: ['No affiliate links'], tone: 'Tactical' },
+        { name: 'r/AskMarketing', members: '100k', relevance: 'medium', reason: 'Beginner-friendly marketing advice', rules_summary: ['Be helpful', 'No broad spam'], tone: 'Educational' },
     ],
     'ai': [
         { name: 'r/artificial', members: '420k', relevance: 'high', reason: 'AI news, research, and discussion', rules_summary: ['No clickbait', 'Cite sources', 'Technical discussion encouraged'], tone: 'Academic, curious' },
@@ -49,11 +55,23 @@ const SUBREDDIT_MAP: Record<string, SubredditSuggestion[]> = {
         { name: 'r/personalfinance', members: '18m', relevance: 'high', reason: 'Personal money management', rules_summary: ['No self-promotion', 'Be specific', 'No referral links'], tone: 'Helpful, detailed' },
         { name: 'r/FinancialPlanning', members: '250k', relevance: 'high', reason: 'Long-term financial strategy', rules_summary: ['Professional advice welcome', 'Cite credentials', 'No spam'], tone: 'Professional, advisory' },
         { name: 'r/Bogleheads', members: '450k', relevance: 'medium', reason: 'Index fund investing community', rules_summary: ['Evidence-based only', 'Simple > complex', 'No active trading advice'], tone: 'Conservative, evidence-based' },
+        { name: 'r/money', members: '1.5m', relevance: 'medium', reason: 'General discussions about money, budgeting, and saving', rules_summary: ['No spam', 'Respectful debate', 'No affiliate links'], tone: 'General, helpful' },
+        { name: 'r/PFtools', members: '12k', relevance: 'high', reason: 'Specifically for personal finance apps and tools', rules_summary: ['Tool focus', 'No spam'], tone: 'Tool-oriented' },
+        { name: 'r/budget', members: '45k', relevance: 'high', reason: 'Daily budget planning and saving tips', rules_summary: ['Helpful, non-judgmental'], tone: 'Practical' },
+        { name: 'r/investing', members: '2.5m', relevance: 'low', reason: 'Broad market trends and insights', rules_summary: ['Follow formatting', 'No penny stocks'], tone: 'Serious' },
+        { name: 'r/passive_income', members: '350k', relevance: 'medium', reason: 'Building alternative revenue streams', rules_summary: ['No scams', 'Real methods only'], tone: 'Opportunity-focused' },
+        { name: 'r/povertyfinance', members: '1.2m', relevance: 'medium', reason: 'Budgeting and financial advice for those struggling', rules_summary: ['Be supportive', 'No judgment', 'Practical advice only'], tone: 'Supportive, practical' },
     ],
     'productivity': [
         { name: 'r/productivity', members: '2.1m', relevance: 'high', reason: 'General productivity tips and tools', rules_summary: ['Value-first', 'No tool spam', 'Personal experiences welcome'], tone: 'Practical, relatable' },
         { name: 'r/getdisciplined', members: '980k', relevance: 'high', reason: 'Building discipline and habits', rules_summary: ['Be supportive', 'Share methods', 'No judgment'], tone: 'Supportive, honest' },
         { name: 'r/Notion', members: '350k', relevance: 'medium', reason: 'Notion-specific productivity', rules_summary: ['Templates welcome', 'Share setups', 'Be helpful'], tone: 'Technical, creative' },
+        { name: 'r/productivityapps', members: '15k', relevance: 'high', reason: 'Software and apps to boost efficiency', rules_summary: ['Tool reviews welcome', 'No spam'], tone: 'Software-focused' },
+        { name: 'r/pomodoro', members: '25k', relevance: 'medium', reason: 'Time management technique specialists', rules_summary: ['Pomodoro focus'], tone: 'Focused' },
+        { name: 'r/gtd', members: '40k', relevance: 'medium', reason: 'Getting Things Done methodology', rules_summary: ['GTD focus'], tone: 'Methodical' },
+        { name: 'r/bujo', members: '200k', relevance: 'low', reason: 'Bullet journaling and organization', rules_summary: ['No low effort'], tone: 'Creative' },
+        { name: 'r/ZenHabits', members: '500k', relevance: 'medium', reason: 'Mindfulness and simple productivity', rules_summary: ['Quality content only'], tone: 'Minimalist' },
+        { name: 'r/selfimprovement', members: '3.1m', relevance: 'medium', reason: 'Holistic self-growth and habit building', rules_summary: ['Personal growth focus', 'No self-promotion', 'Supportive community'], tone: 'Encouraging, personal' },
     ],
     'design': [
         { name: 'r/design', members: '620k', relevance: 'high', reason: 'General design discussions', rules_summary: ['Critique welcome', 'Show your work', 'Be constructive'], tone: 'Creative, critical' },
@@ -65,51 +83,105 @@ const SUBREDDIT_MAP: Record<string, SubredditSuggestion[]> = {
         { name: 'r/nutrition', members: '4.2m', relevance: 'high', reason: 'Nutrition science and diet', rules_summary: ['Cite studies', 'No fad diet promotion', 'Be balanced'], tone: 'Scientific, measured' },
         { name: 'r/loseit', members: '3.8m', relevance: 'medium', reason: 'Weight loss support community', rules_summary: ['Be supportive', 'Share your journey', 'No pills/supplements promotion'], tone: 'Supportive, community-driven' },
     ],
+    'solopreneur': [
+        { name: 'r/SideProject', members: '180k', relevance: 'high', reason: 'Showcase and feedback for side projects', rules_summary: ['No low-effort spam', 'Show your progress', 'Feedback-oriented'], tone: 'Supportive, constructive' },
+        { name: 'r/solopreneur', members: '8k', relevance: 'high', reason: 'One-person business builders', rules_summary: ['Founder-led discussions', 'No spam', 'Value-first'], tone: 'Determined, practical' },
+        { name: 'r/SmallBusiness', members: '1.2m', relevance: 'medium', reason: 'General small business and agency talk', rules_summary: ['No referral links', 'Be helpful', 'No broad spam'], tone: 'Practical, professional' },
+        { name: 'r/indiehackers', members: '20k', relevance: 'high', reason: 'Indie builders building in public', rules_summary: ['Show your work', 'No spam', 'Help others'], tone: 'Transparent, indie' },
+        { name: 'r/IndieHackers', members: '20k', relevance: 'high', reason: 'The primary home for indie builders', rules_summary: ['Show your work', 'No spam'], tone: 'Transparent' },
+        { name: 'r/RoastMyStartup', members: '15k', relevance: 'high', reason: 'Brutally honest feedback on your venture', rules_summary: ['Be thick-skinned', 'Be constructive'], tone: 'Critical' },
+        { name: 'r/AlphaandBetausers', members: '35k', relevance: 'medium', reason: 'Early adopters for new tools', rules_summary: ['No referral links', 'Follow format'], tone: 'Early-adopter' },
+    ],
+    'dev': [
+        { name: 'r/webdev', members: '1.6m', relevance: 'medium', reason: 'Web development news and tutorials', rules_summary: ['No self-promotion', 'Ask technical questions', 'Be professional'], tone: 'Professional, technical' },
+        { name: 'r/programming', members: '6m', relevance: 'low', reason: 'General software development topics', rules_summary: ['Strictly no promotion', 'Technical depth required', 'No low-effort posts'], tone: 'Critical, technical' },
+        { name: 'r/softwareengineering', members: '150k', relevance: 'medium', reason: 'Software design and architecture', rules_summary: ['Technical focus', 'No career questions', 'Respectful debate'], tone: 'Academic, professional' },
+        { name: 'r/nocode', members: '45k', relevance: 'high', reason: 'Building without traditional coding', rules_summary: ['No low-quality spam'], tone: 'Inclusive' },
+        { name: 'r/devops', members: '250k', relevance: 'medium', reason: 'CI/CD and infrastructure management', rules_summary: ['Technical only'], tone: 'Technical' },
+        { name: 'r/javascript', members: '2m', relevance: 'medium', reason: 'JS ecosystem and coding', rules_summary: ['No beginners questions'], tone: 'Technical' },
+    ]
 };
 
 // --- Fuzzy Subreddit Matching ---
 export function findSubreddits(niche: string): SubredditSuggestion[] {
     const normalized = niche.toLowerCase().trim();
     const words = normalized.split(/\s+/);
+    const results: SubredditSuggestion[] = [];
+    const matchedCategories = new Set<string>();
 
-    // Direct match
-    for (const [key, subs] of Object.entries(SUBREDDIT_MAP)) {
-        if (normalized.includes(key) || key.includes(normalized)) {
-            return subs;
+    // Keyword synonym mapping
+    const synonyms: Record<string, string[]> = {
+        'startup': ['saas', 'solopreneur'], 
+        'software': ['saas', 'dev'], 
+        'app': ['saas', 'dev', 'solopreneur', 'productivity', 'finance'], 
+        'tool': ['saas', 'productivity', 'dev', 'finance'],
+        'advertis': ['marketing'], 'growth': ['marketing', 'saas'], 'seo': ['marketing'], 'content': ['marketing'],
+        'social': ['marketing'], 'branding': ['marketing'], 'ads': ['marketing'],
+        'ml': ['ai'], 'machine': ['ai'], 'deep learning': ['ai'], 'gpt': ['ai'], 'llm': ['ai'],
+        'money': ['finance'], 'invest': ['finance'], 'budget': ['finance'], 'saving': ['finance'],
+        'subscript': ['finance', 'saas'], 'expense': ['finance'], 'spending': ['finance'], 'tracker': ['finance'],
+        'spend': ['finance'], 'payment': ['finance'], 'bill': ['finance'], 'cash': ['finance'],
+        'habit': ['productivity'], 'focus': ['productivity'], 'time': ['productivity'], 'workflow': ['productivity'],
+        'planning': ['productivity'], 'calendar': ['productivity'],
+        'ui': ['design'], 'ux': ['design'], 'graphic': ['design'], 'figma': ['design'],
+        'fitness': ['health'], 'wellness': ['health'], 'mental health': ['health'], 'sleep': ['health'],
+        'exercise': ['health'], 'diet': ['health'],
+        'indie': ['solopreneur', 'saas'], 'builder': ['solopreneur', 'dev'], 'side project': ['solopreneur'], 'solo': ['solopreneur'],
+        'founder': ['solopreneur', 'saas'], 'agency': ['solopreneur', 'marketing'], 'business': ['solopreneur', 'marketing'],
+        'coding': ['dev'], 'webdev': ['dev'], 'javascript': ['dev'], 'typescript': ['dev'], 'react': ['dev'],
+        'developer': ['dev'], 'api': ['dev'], 'automation': ['dev', 'saas']
+    };
+
+    // 1. Check for category matches via synonyms
+    for (const [synonym, categories] of Object.entries(synonyms)) {
+        if (normalized.includes(synonym)) {
+            categories.forEach(cat => matchedCategories.add(cat));
         }
     }
 
-    // Word-level match
-    for (const [key, subs] of Object.entries(SUBREDDIT_MAP)) {
-        for (const word of words) {
-            if (word.length > 3 && key.includes(word)) {
-                return subs;
+    // 2. Check for direct category name matches
+    for (const category of Object.keys(SUBREDDIT_MAP)) {
+        if (normalized.includes(category)) {
+            matchedCategories.add(category);
+        }
+    }
+
+    // 3. Accumulate subreddits from matched categories
+    matchedCategories.forEach(category => {
+        const subs = SUBREDDIT_MAP[category];
+        if (subs) results.push(...subs);
+    });
+
+    // 4. Word-level fallbacks if no strong category matches, or to add variety
+    if (results.length < 10) {
+        for (const [category, subs] of Object.entries(SUBREDDIT_MAP)) {
+            if (matchedCategories.has(category)) continue; // Already added
+            
+            for (const word of words) {
+                if (word.length > 3 && category.includes(word)) {
+                    results.push(...subs);
+                    matchedCategories.add(category);
+                    break;
+                }
             }
         }
     }
 
-    // Keyword synonym mapping
-    const synonyms: Record<string, string> = {
-        'startup': 'saas', 'software': 'saas', 'app': 'saas', 'tool': 'saas',
-        'advertis': 'marketing', 'growth': 'marketing', 'seo': 'marketing', 'content': 'marketing',
-        'social': 'marketing', 'branding': 'marketing', 'ads': 'marketing',
-        'ml': 'ai', 'machine': 'ai', 'deep learning': 'ai', 'gpt': 'ai', 'llm': 'ai',
-        'money': 'finance', 'invest': 'finance', 'budget': 'finance', 'saving': 'finance',
-        'subscript': 'finance', 'expense': 'finance',
-        'habit': 'productivity', 'focus': 'productivity', 'time': 'productivity', 'workflow': 'productivity',
-        'ui': 'design', 'ux': 'design', 'graphic': 'design', 'figma': 'design',
-        'fitness': 'health', 'wellness': 'health', 'mental health': 'health', 'sleep': 'health',
-        'exercise': 'health', 'diet': 'health',
-    };
-
-    for (const [synonym, key] of Object.entries(synonyms)) {
-        if (normalized.includes(synonym)) {
-            return SUBREDDIT_MAP[key] || [];
-        }
+    // 5. Final Fallback: If still very few results, add saas/solopreneur as they are generally relevant to the product
+    if (results.length < 5) {
+        if (!matchedCategories.has('saas')) results.push(...SUBREDDIT_MAP['saas']);
+        if (!matchedCategories.has('solopreneur')) results.push(...SUBREDDIT_MAP['solopreneur']);
     }
 
-    // Fallback: general startup subreddits
-    return SUBREDDIT_MAP['saas'] || [];
+    // Deduplicate by name and return
+    const uniqueMap = new Map();
+    results.forEach(sub => {
+        if (!uniqueMap.has(sub.name)) {
+            uniqueMap.set(sub.name, sub);
+        }
+    });
+
+    return Array.from(uniqueMap.values()); // Return ALL matches found
 }
 
 // --- Reddit Post Generator ---

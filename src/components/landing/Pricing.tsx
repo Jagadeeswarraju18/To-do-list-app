@@ -48,15 +48,7 @@ const plans = [
 ];
 
 export function Pricing() {
-    let mouseX = useMotionValue(0);
-    let mouseY = useMotionValue(0);
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-
-    function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent) {
-        let { left, top } = currentTarget.getBoundingClientRect();
-        mouseX.set(clientX - left);
-        mouseY.set(clientY - top);
-    }
 
     const handleCheckout = async (planId: string) => {
         if (planId === 'free') {
@@ -87,114 +79,114 @@ export function Pricing() {
     };
 
     return (
-        <section id="pricing" className="py-32 px-6 relative z-10 overflow-hidden bg-background">
+        <section id="pricing" className="py-32 px-6 relative z-10 overflow-hidden bg-black">
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-24">
+                <div className="text-center mb-24 relative">
                     <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8"
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-zinc-400 text-[10px] font-black uppercase tracking-[0.3em] mb-10 backdrop-blur-md"
                     >
-                        <Sparkles className="w-3 h-3 text-zinc-500" />
+                        <Sparkles className="w-3.5 h-3.5 text-zinc-500" />
                         Infrastructure
                     </motion.div>
+                    
                     <motion.h2 
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                        className="heading-serif text-5xl md:text-7xl font-light text-white mb-6 tracking-tight"
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="heading-serif text-6xl md:text-8xl font-light text-white mb-8 tracking-tighter leading-[0.9]"
                     >
-                        Pricing <span className="italic opacity-40">built for leverage.</span>
+                        Leverage <span className="italic text-zinc-500">at scale.</span>
                     </motion.h2>
-                    <p className="text-zinc-500 max-w-2xl mx-auto text-lg">
-                        Simple, transparent plans designed to scale with your growth.
-                    </p>
+                    
+                    <motion.p 
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.4 }}
+                        className="text-zinc-500 max-w-xl mx-auto text-lg leading-relaxed font-medium"
+                    >
+                        Pick a plan that matches your current velocity. Upgrade or downgrade anytime as you grow.
+                    </motion.p>
+
+                    {/* Ambient Glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-white/[0.02] blur-[120px] rounded-full pointer-events-none" />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
                     {plans.map((plan, i) => (
                         <motion.div
                             key={plan.name}
-                            initial={{ opacity: 0, y: 30 }}
+                            initial={{ opacity: 0, y: 40 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
-                            onMouseMove={handleMouseMove}
-                            className={`group relative glass-card p-10 flex flex-col h-full border-white/[0.06] hover:border-white/20 transition-colors duration-500 ${plan.popular ? "bg-white/[0.03]" : ""}`}
+                            transition={{ duration: 0.7, delay: i * 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
+                            className={`group relative p-1 rounded-[32px] transition-all duration-700 ${plan.popular ? "bg-gradient-to-b from-white/20 to-transparent shadow-2xl shadow-white/5" : "bg-white/[0.03] hover:bg-white/[0.05]"}`}
                         >
-                            {/* Interactive Glow */}
-                            <motion.div
-                                className="pointer-events-none absolute -inset-px rounded-[32px] opacity-0 group-hover:opacity-100 transition duration-300"
-                                style={{
-                                    background: useMotionTemplate`
-                                        radial-gradient(
-                                            650px circle at ${mouseX}px ${mouseY}px,
-                                            rgba(255, 255, 255, 0.03),
-                                            transparent 80%
-                                        )
-                                    `,
-                                }}
-                            />
-
-                            <div className="relative z-10 flex flex-col h-full">
-                                <div className="flex items-center justify-between mb-8">
-                                    <span className="text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em]">{plan.name}</span>
-                                    {plan.popular && (
-                                        <span className="px-2.5 py-1 rounded-full bg-white/10 text-white text-[9px] font-bold uppercase tracking-wider border border-white/20">
+                            <div className="relative h-full bg-[#0a0a0a] rounded-[31px] p-10 flex flex-col border border-white/[0.03]">
+                                
+                                {plan.popular && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
+                                        <span className="px-3 py-1 rounded-full bg-white text-black text-[9px] font-black uppercase tracking-widest shadow-xl">
                                             Most Popular
                                         </span>
-                                    )}
-                                </div>
-                                
-                                <div className="mb-10">
-                                    <div className="flex items-baseline gap-1.5 mb-2">
-                                        <span className="text-4xl md:text-5xl font-medium text-white tracking-tighter">
-                                            ${plan.promoPrice ? plan.promoPrice : plan.price}
-                                        </span>
-                                        <span className="text-zinc-500 text-sm font-medium">/mo</span>
-                                        {plan.promoPrice && (
-                                            <span className="text-zinc-700 line-through text-lg ml-2 font-light">${plan.price}</span>
-                                        )}
                                     </div>
-                                    {plan.promoQty && (
-                                        <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-4">
-                                            First {plan.promoQty} spots only
+                                )}
+
+                                <div className="mb-10 text-center lg:text-left">
+                                    <h3 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-6">{plan.name}</h3>
+                                    <div className="flex items-baseline justify-center lg:justify-start gap-1.5 mb-2">
+                                        <span className="text-zinc-500 text-2xl font-light mb-auto mt-1">$</span>
+                                        <span className="text-5xl md:text-6xl font-medium text-white tracking-tighter">
+                                            {plan.promoPrice ? plan.promoPrice : plan.price}
+                                        </span>
+                                        <span className="text-zinc-600 text-sm font-medium">/mo</span>
+                                    </div>
+                                    
+                                    {plan.promoPrice && (
+                                        <div className="flex items-center gap-2 justify-center lg:justify-start mb-4">
+                                            <span className="text-zinc-700 line-through text-sm font-light">${plan.price}</span>
+                                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10">
+                                                Early Bird
+                                            </span>
                                         </div>
                                     )}
-                                    <p className="text-zinc-500 text-xs leading-relaxed font-medium">
+
+                                    <p className="text-zinc-500 text-[11px] leading-relaxed font-semibold min-h-[32px]">
                                         {plan.desc}
                                     </p>
                                 </div>
 
                                 <div className="space-y-4 mb-12 flex-grow">
-                                    {plan.features.map(f => (
+                                    {plan.features.map((f, idx) => (
                                         <div key={f} className="flex items-start gap-3 group/feat">
-                                            <div className="mt-1 w-1 h-1 rounded-full bg-white/20 group-hover/feat:bg-white transition-colors" />
-                                            <span className="text-[11px] text-zinc-500 leading-tight leading-4 font-medium group-hover/feat:text-zinc-300 transition-colors">
+                                            <div className={`mt-1.5 w-1 h-1 rounded-full ${plan.popular ? "bg-white" : "bg-zinc-800 group-hover/feat:bg-zinc-400"} transition-colors`} />
+                                            <span className={`text-[11px] leading-tight font-medium transition-colors ${plan.popular ? "text-zinc-300 group-hover/feat:text-white" : "text-zinc-600 group-hover/feat:text-zinc-400"}`}>
                                                 {f}
                                             </span>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="mt-auto block">
+                                <div className="mt-auto">
                                     <motion.button
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => handleCheckout(plan.id)}
                                         disabled={loadingPlan === plan.id}
-                                        className={`w-full py-4 rounded-xl font-bold text-[13px] tracking-wide transition-all flex items-center justify-center gap-2 ${plan.popular 
-                                            ? "bg-white text-black hover:bg-zinc-200 shadow-xl shadow-white/5" 
-                                            : "glass-pill text-white hover:bg-white/10"}`}
+                                        className={`w-full py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${plan.popular 
+                                            ? "bg-white text-black hover:bg-zinc-200" 
+                                            : "border border-white/10 text-white hover:bg-white/5 hover:border-white/20"}`}
                                     >
                                         {loadingPlan === plan.id ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                         ) : (
                                             <>
                                                 {plan.btn}
-                                                <ArrowRight className="h-3.5 w-3.5 opacity-50" />
+                                                <ArrowRight className={`h-3.5 w-3.5 opacity-50 ${plan.popular ? "text-black" : "text-white"}`} />
                                             </>
                                         )}
                                     </motion.button>
@@ -203,9 +195,17 @@ export function Pricing() {
                         </motion.div>
                     ))}
                 </div>
+
+                <div className="mt-24 text-center">
+                    <p className="text-zinc-600 text-xs font-medium">
+                        Need a custom enterprise solution? <Link href="/contact" className="text-zinc-400 hover:text-white underline underline-offset-4 transition-colors">Contact us</Link>
+                    </p>
+                </div>
             </div>
+
             {/* Background elements */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-white/[0.01] to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1000px] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0,transparent_70%)] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </section>
     );
 }

@@ -17,7 +17,7 @@ export default function BattlefieldPage() {
     const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
     const [loading, setLoading] = useState(true);
     const [discovering, setDiscovering] = useState(false);
-    const [activeTab, setActiveTab] = useState<'all' | 'x' | 'reddit'>('all');
+    const [activeTab, setActiveTab] = useState<'all' | 'x' | 'reddit' | 'linkedin'>('all');
     const supabase = createClient();
 
     const fetchOpportunities = async () => {
@@ -92,8 +92,9 @@ export default function BattlefieldPage() {
 
     const filteredOpportunities = opportunities.filter(opp => {
         if (activeTab === 'all') return true;
-        if (activeTab === 'x') return opp.source !== 'reddit_post';
+        if (activeTab === 'x') return opp.source !== 'reddit_post' && opp.source !== 'linkedin_post';
         if (activeTab === 'reddit') return opp.source === 'reddit_post';
+        if (activeTab === 'linkedin') return opp.source === 'linkedin_post';
         return true;
     });
 
@@ -152,6 +153,7 @@ export default function BattlefieldPage() {
                         <button onClick={() => setActiveTab('all')} className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'all' ? 'bg-red-500 text-black shadow-lg shadow-red-500/20' : 'text-zinc-500 hover:text-white'}`}>Tactical View</button>
                         <button onClick={() => setActiveTab('x')} className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'x' ? 'bg-red-500 text-black shadow-lg shadow-red-500/20' : 'text-zinc-500 hover:text-white'}`}>X Intelligence</button>
                         <button onClick={() => setActiveTab('reddit')} className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'reddit' ? 'bg-red-500 text-black shadow-lg shadow-red-500/20' : 'text-zinc-500 hover:text-white'}`}>Reddit Intelligence</button>
+                        <button onClick={() => setActiveTab('linkedin')} className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'linkedin' ? 'bg-red-500 text-black shadow-lg shadow-red-500/20' : 'text-zinc-500 hover:text-white'}`}>LinkedIn Intelligence</button>
                     </div>
 
                     <div className="flex items-center gap-3 text-zinc-500">
