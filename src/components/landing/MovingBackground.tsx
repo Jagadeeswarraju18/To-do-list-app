@@ -23,12 +23,12 @@ export function MovingBackground() {
     const rockCenter = "https://framerusercontent.com/images/7Ad0iDQ1ukBberjdFFY4ydtrRys.png?width=2000";
 
     return (
-        <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-background">
+        <div className="fixed inset-0 z-[-1] overflow-x-hidden overflow-y-auto pointer-events-none bg-background">
             {/* Forensic Linear Gradient - Using Tailwind to ensure consistency */}
             <div 
                 className="absolute inset-0 h-[200vh] w-full"
                 style={{ 
-                    background: "linear-gradient(180deg, #0f0f0f 0%, #2F2C2A 70%)"
+                    background: "linear-gradient(180deg, #050505 0%, hsl(var(--primary) / 0.1) 70%)"
                 }}
             />
 

@@ -350,6 +350,13 @@ export default function SignupPage() {
                             >
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Initialize Account"}
                             </button>
+
+                            <p className="text-[10px] text-zinc-500 text-center px-4 leading-relaxed">
+                                By clicking "Initialize Account", you agree to our{" "}
+                                <Link href="/terms" className="text-zinc-400 hover:text-white transition-colors underline underline-offset-4">Terms</Link>
+                                {" "}and acknowledge our{" "}
+                                <Link href="/privacy" className="text-zinc-400 hover:text-white transition-colors underline underline-offset-4">Privacy Policy</Link>.
+                            </p>
                         </form>
 
                         <div className="mt-6">

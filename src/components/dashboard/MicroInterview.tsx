@@ -78,10 +78,10 @@ export default function MicroInterview({ productId, onComplete }: MicroInterview
                     </div>
                     <div className="text-left">
                         <div className="text-sm font-bold text-white">Train Your Persona</div>
-                        <div className="text-[10px] text-gray-400 uppercase tracking-widest font-black">Feed the Strategy Engine with real stories</div>
+                        <div className="text-[10px] text-zinc-300 uppercase tracking-widest font-black">Feed the Strategy Engine with real stories</div>
                     </div>
                 </div>
-                <div className="text-primary font-black uppercase tracking-widest text-[10px] flex items-center gap-1">
+                <div className="text-emerald-400 font-black uppercase tracking-widest text-[10px] flex items-center gap-1">
                     Start Interview &rarr;
                 </div>
             </button>

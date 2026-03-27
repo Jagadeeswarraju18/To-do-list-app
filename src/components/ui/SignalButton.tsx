@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Signal, BarChart3, Wifi, Heart } from "lucide-react";
+import { Signal, BarChart3, Wifi, Heart, ChevronUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
@@ -42,10 +42,10 @@ export function SignalButton({ productId, initialUpvotes, size = "md" }: SignalB
         e.stopPropagation();
 
         if (!user) {
-            toast.error("Sign in to support products", {
+            toast.error("Sign in to signal intelligence", {
                 action: {
                     label: "Sign In",
-                    onClick: () => window.location.href = "/login"
+                    onClick: () => window.location.href = `/discover/login?next=${encodeURIComponent(window.location.pathname)}`
                 }
             });
             return;
@@ -72,31 +72,32 @@ export function SignalButton({ productId, initialUpvotes, size = "md" }: SignalB
     return (
         <button
             onClick={handleUpvote}
+            title={isUpvoted ? "Remove signal" : (user ? "Signal intelligence (Upvote)" : "Sign in to signal intelligence")}
             className={`group flex items-center gap-2.5 px-3 py-1.5 rounded-2xl border transition-all duration-300 ${isUpvoted
-                    ? 'bg-blue-600/10 border-blue-500/40 text-blue-400'
-                    : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10 hover:border-white/10'
+                    ? 'bg-white border-white text-black font-black'
+                    : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10 hover:border-white/10'
                 }`}
         >
             <div className="flex flex-col items-start leading-[1] py-0.5">
-                <span className={`text-[13px] font-black tabular-nums transition-colors ${isUpvoted ? 'text-blue-400' : 'text-slate-300'}`}>
+                <span className={`text-[13px] font-black tabular-nums transition-colors ${isUpvoted ? 'text-black' : 'text-gray-300'}`}>
                     {upvotesCount}
                 </span>
-                <span className="text-[7px] font-black uppercase tracking-[0.15em] mt-0.5 text-slate-500">
+                <span className={`text-[7px] font-black uppercase tracking-[0.15em] mt-0.5 ${isUpvoted ? 'text-black/60' : 'text-gray-500'}`}>
                     Signal
                 </span>
             </div>
 
             <div className="flex items-end gap-[1.5px] h-3.5 mb-0.5">
-                <div className={`w-[2.5px] rounded-full transition-all duration-500 ${isUpvoted ? 'bg-blue-400 h-1.5' : 'bg-slate-700 h-1'}`} />
-                <div className={`w-[2.5px] rounded-full transition-all duration-500 delay-75 ${isUpvoted ? 'bg-blue-400 h-3.5' : 'bg-slate-700 h-1.5'}`} />
-                <div className={`w-[2.5px] rounded-full transition-all duration-500 delay-150 ${isUpvoted ? 'bg-blue-400 h-2.5' : 'bg-slate-700 h-2'}`} />
+                <div className={`w-[2.5px] rounded-full transition-all duration-500 ${isUpvoted ? 'bg-black/40 h-1.5' : 'bg-gray-700 h-1'}`} />
+                <div className={`w-[2.5px] rounded-full transition-all duration-500 delay-75 ${isUpvoted ? 'bg-black/40 h-3.5' : 'bg-gray-700 h-1.5'}`} />
+                <div className={`w-[2.5px] rounded-full transition-all duration-500 delay-150 ${isUpvoted ? 'bg-black/40 h-2.5' : 'bg-gray-700 h-2'}`} />
             </div>
 
             <div className={`flex items-center justify-center w-7 h-7 rounded-full border transition-all duration-300 ${isUpvoted
-                    ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]'
-                    : 'bg-slate-800/80 border-white/5 text-slate-400'
+                    ? 'bg-black border-black text-white shadow-[0_0_10px_rgba(255,255,255,0.2)]'
+                    : 'bg-gray-800/80 border-white/5 text-gray-400'
                 }`}>
-                <Wifi className={`w-3.5 h-3.5 ${isUpvoted ? 'animate-pulse' : ''}`} />
+                <ChevronUp className={`w-3.5 h-3.5 premium-icon ${isUpvoted ? 'scale-125' : 'group-hover:-translate-y-0.5'}`} strokeWidth={2.5} />
             </div>
         </button>
     );

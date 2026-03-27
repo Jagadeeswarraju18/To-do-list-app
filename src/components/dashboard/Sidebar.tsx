@@ -54,24 +54,42 @@ export function Sidebar() {
         }
     };
 
-    const navContent = (
-        <>
-            <div className="p-6 flex items-center justify-between border-b border-white/8">
-                <div className="flex items-center gap-3">
-                    <div className="relative group/logo">
-                        <div className={`absolute -inset-1 ${isCreatorView ? 'bg-zinc-600/50' : 'bg-white/30'} blur rounded-lg opacity-0 group-hover/logo:opacity-100 transition-opacity`} />
-                        <div className={`relative w-9 h-9 rounded-xl flex items-center justify-center border border-white/10 ${isCreatorView ? 'bg-zinc-800' : 'bg-primary text-white shadow-lg shadow-primary/20'}`}>
+    const navItems = isCreatorView ? [
+        { href: "/creator/dashboard", icon: <LayoutDashboard />, label: "Dashboard", active: pathname === "/creator/dashboard" },
+        { href: "/creator/platforms", icon: <Share2 />, label: "Platforms", active: pathname === "/creator/platforms" },
+        { href: "/creator/analytics", icon: <PieChart />, label: "Analytics", active: pathname === "/creator/analytics" },
+        { href: "/creator/media-kit", icon: <FolderHeart />, label: "Media Kit", active: pathname === "/creator/media-kit" },
+        { href: "/creator/profile", icon: <UserCircle />, label: "Profile", active: pathname === "/creator/profile" },
+    ] : [
+        { href: "/founder/dashboard", icon: <LayoutDashboard />, label: "Dashboard", active: pathname === "/founder/dashboard" },
+        { href: "/founder/battlefield", icon: <Swords />, label: "Battlefield", active: pathname === "/founder/battlefield" },
+        { href: "/founder/opportunities", icon: <ListFilter />, label: "Opportunities", active: pathname === "/founder/opportunities" },
+        { href: "/founder/platforms", icon: <Share2 />, label: "Strategy", active: pathname === "/founder/platforms" },
+        { href: "/founder/creators", icon: <Users />, label: "Creators", active: pathname === "/founder/creators" },
+    ];
+
+    const systemItems = isCreatorView ? [] : [
+        { href: "/founder/products", icon: <Radar />, label: "Products", active: pathname === "/founder/products" },
+        { href: "/founder/settings", icon: <Settings />, label: "Settings", active: pathname === "/founder/settings" },
+    ];
+
+    const sidebarContent = (
+        <div className="flex flex-col h-full gap-4 p-4 no-scrollbar">
+            {/* Module 1: Brand Pod */}
+            <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-5 shadow-2xl flex items-center justify-between group/brand transition-all hover:bg-black/80">
+                <div className="flex items-center gap-4">
+                    <div className="relative">
+                        <div className={`relative w-10 h-10 rounded-2xl flex items-center justify-center border border-white/10 ${isCreatorView ? 'bg-zinc-800' : 'bg-primary text-white shadow-sm'}`}>
                             {isCreatorView ? <UserCircle className="w-5 h-5" /> : <Radar className="w-5 h-5 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />}
                         </div>
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-bold text-lg tracking-tight leading-none text-white">
+                        <span className="font-bold text-base tracking-tight leading-none text-white whitespace-nowrap">
                             {isCreatorView ? 'Creator Hub' : 'MarketingX'}
                         </span>
-                        <span className="text-[10px] font-medium tracking-widest text-zinc-500 mt-1">Strategy Alpha</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mt-1.5">Alpha Deck</span>
                     </div>
                 </div>
-                {/* Close button - mobile only */}
                 <button
                     onClick={() => setMobileOpen(false)}
                     className="md:hidden p-2 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
@@ -80,104 +98,119 @@ export function Sidebar() {
                 </button>
             </div>
 
-            <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                {isCreatorView ? (
-                    <>
-                        <NavItem href="/creator/dashboard" icon={<LayoutDashboard />} label="Dashboard" active={pathname === "/creator/dashboard"} role="creator" />
-                        <NavItem href="/creator/platforms" icon={<Share2 />} label="Platforms" active={pathname === "/creator/platforms"} role="creator" />
-                        <NavItem href="/creator/analytics" icon={<PieChart />} label="Analytics" active={pathname === "/creator/analytics"} role="creator" />
-                        <NavItem href="/creator/media-kit" icon={<FolderHeart />} label="Media Kit" active={pathname === "/creator/media-kit"} role="creator" />
-                        <NavItem href="/creator/profile" icon={<UserCircle />} label="Profile & Settings" active={pathname === "/creator/profile"} role="creator" />
-                    </>
-                ) : (
-                    <>
-                        <NavItem href="/founder/dashboard" icon={<LayoutDashboard />} label="Dashboard" active={pathname === "/founder/dashboard"} role="founder" />
-                        <NavItem href="/founder/battlefield" icon={<Swords />} label="Battlefield" active={pathname === "/founder/battlefield"} role="founder" />
-                        <NavItem href="/founder/opportunities" icon={<ListFilter />} label="Opportunities" active={pathname === "/founder/opportunities"} role="founder" />
-                        <NavItem href="/founder/platforms" icon={<Share2 />} label="Platform Strategy" active={pathname === "/founder/platforms"} role="founder" />
-                        <NavItem href="/founder/find-creators" icon={<Users />} label="Find Creators" active={pathname === "/founder/find-creators"} role="founder" />
-                        <NavItem href="/founder/deals" icon={<Handshake />} label="Creator Deals" active={pathname === "/founder/deals"} role="founder" />
-                        <div className="h-px bg-white/8 my-4" />
-                        <NavItem href="/founder/products" icon={<Radar />} label="My Products" active={pathname === "/founder/products"} role="founder" />
-                        <NavItem href="/founder/settings" icon={<Settings />} label="Settings" active={pathname === "/founder/settings"} role="founder" />
-                    </>
-                )}
-            </nav>
+            {/* Module 2: Navigation Pod */}
+            <div className="flex-1 bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[40px] p-3 shadow-2xl flex flex-col gap-1 overflow-y-auto no-scrollbar relative overflow-hidden transition-all hover:bg-black/80">
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.05] to-transparent pointer-events-none" />
+                <div className="text-[10px] font-black tracking-[0.3em] text-zinc-400 px-4 py-4 uppercase opacity-60">Command Units</div>
+                {navItems.map((item) => (
+                    <NavItem key={item.href} {...item} />
+                ))}
+            </div>
 
-            <div className="p-4 border-t border-white/5 mx-2 mb-2">
+            {/* Module 3: System & Context Pod */}
+            <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-3 shadow-2xl flex flex-col gap-1 transition-all hover:bg-black/80">
+                {!isCreatorView && systemItems.map((item) => (
+                    <NavItem key={item.href} {...item} />
+                ))}
+                
+                <div className="h-px bg-white/5 my-2 mx-4" />
+                
                 <button
                     onClick={handleSignOut}
                     disabled={isSignOutLoading}
-                    className="flex items-center gap-3 px-4 py-3 w-full text-xs font-medium text-zinc-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    className="flex items-center gap-4 px-5 py-4 w-full text-[11px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all group"
                 >
-                    <LogOut className="w-4 h-4" />
-                    {isSignOutLoading ? "Leaving..." : "Terminate Session"}
+                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-all">
+                        <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    </div>
+                    {isSignOutLoading ? "LEAVING..." : "DISCONNECT"}
                 </button>
             </div>
-        </>
+        </div>
     );
 
     return (
         <>
             {/* Mobile Top Bar */}
-            <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-[#141416]/95 backdrop-blur-xl border-b border-white/8 flex items-center justify-between px-4">
-                <div className="flex items-center gap-2">
-                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isCreatorView ? 'bg-zinc-600' : 'bg-primary'}`}>
-                        {isCreatorView ? <UserCircle className="w-3.5 h-3.5 text-white" /> : <Radar className="w-3.5 h-3.5 text-white" />}
+            <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-black/60 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-6">
+                <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isCreatorView ? 'bg-zinc-800' : 'bg-primary'}`}>
+                        {isCreatorView ? <UserCircle className="w-4 h-4 text-white" /> : <Radar className="w-4 h-4 text-white" />}
                     </div>
-                    <span className="font-bold text-sm tracking-tight text-white">
+                    <span className="font-bold text-sm tracking-tight text-white uppercase italic">
                         {isCreatorView ? 'Creator Hub' : 'MarketingX'}
                     </span>
                 </div>
                 <button
                     onClick={() => setMobileOpen(true)}
-                    className="p-2 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+                    className="p-2.5 rounded-2xl bg-white/5 border border-white/5 text-gray-400 hover:text-white transition-all shadow-xl"
                 >
                     <Menu className="w-5 h-5" />
                 </button>
             </div>
 
-            {/* Mobile Drawer Overlay */}
-            {mobileOpen && (
-                <div
-                    className="md:hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
-                    onClick={() => setMobileOpen(false)}
-                />
-            )}
-
             {/* Mobile Drawer */}
-            <aside className={`
-                md:hidden fixed inset-y-0 left-0 z-[70] w-72 bg-[#0D0D0D] border-r border-white/8 flex flex-col
-                transform transition-transform duration-300 ease-in-out
-                ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-            `}>
-                {navContent}
-            </aside>
+            <AnimatePresence>
+                {mobileOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="md:hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-md"
+                            onClick={() => setMobileOpen(false)}
+                        />
+                        <motion.aside
+                            initial={{ x: "-100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="md:hidden fixed inset-y-0 left-0 z-[70] w-[85%] sm:w-80 flex flex-col"
+                        >
+                            {sidebarContent}
+                        </motion.aside>
+                    </>
+                )}
+            </AnimatePresence>
 
-            {/* Desktop Sidebar (unchanged) */}
-            <aside className="w-72 border-r border-white/5 bg-[#0D0D0D] hidden md:flex flex-col fixed inset-y-0 z-50">
-                {navContent}
+            {/* Desktop Sidebar */}
+            <aside className="w-80 hidden md:flex flex-col fixed inset-y-0 z-50 no-scrollbar">
+                {sidebarContent}
             </aside>
         </>
     );
 }
 
-function NavItem({ href, icon, label, active = false, role }: { href: string; icon: React.ReactNode; label: string; active?: boolean; role: 'founder' | 'creator' }) {
+function NavItem({ href, icon, label, active = false }: { href: string; icon: React.ReactNode; label: string; active?: boolean }) {
     return (
         <Link
             href={href}
-            className={`relative flex items-center gap-4 px-5 py-3 rounded-xl text-sm font-medium transition-all group ${active
+            className={`relative flex items-center gap-4 px-5 py-4 rounded-[22px] text-[11px] font-bold tracking-widest uppercase transition-all group ${active
                 ? "text-white"
-                : "text-zinc-500 hover:bg-white/[0.03] hover:text-white"
+                : "text-zinc-400 hover:text-white hover:bg-white/[0.03]"
                 }`}
         >
             {active && (
-                <motion.div layoutId="activeNav" className="absolute inset-0 bg-primary/20 border border-primary/30 rounded-xl -z-10 cocoa-glow" />
+                <>
+                    <motion.div 
+                        layoutId="activeNavBg" 
+                        className="absolute inset-0 bg-white/[0.05] border border-white/10 rounded-[22px] -z-10 shadow-2xl" 
+                    />
+                    <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none z-10">
+                        <motion.div
+                            layoutId="activeNavLaser"
+                            className="w-1 h-6 bg-white rounded-r-full shadow-lg"
+                        />
+                    </div>
+                </>
             )}
-            <span className={`transition-transform duration-500 group-hover:scale-105 [&>svg]:w-4 [&>svg]:h-4`}>
+            <div className={`transition-all duration-500 flex items-center justify-center w-8 h-8 rounded-xl border ${active ? 'bg-white/10 border-white/20' : 'bg-transparent border-transparent group-hover:bg-white/5 group-hover:border-white/10'} [&>svg]:w-4 [&>svg]:h-4`}>
                 {icon}
-            </span>
-            {label}
+            </div>
+            <span className="flex-1">{label}</span>
+            {active && (
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+            )}
         </Link>
     );
 }

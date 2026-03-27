@@ -19,6 +19,7 @@ export type RedditPost = {
     body: string;
     subreddit: string;
     format: 'story' | 'how-to' | 'discussion' | 'resource';
+    strategy?: string;
     compliance_notes: string[];
     flair?: string;
 };

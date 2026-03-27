@@ -1,21 +1,69 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { ArrowRight, Bot, Check, Linkedin, Play, Sparkles, Search, Plus, Calendar } from "lucide-react";
+import { Bot, Check, Linkedin, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
+import { XLogo } from "@/components/ui/XLogo";
 
-const springLong = { type: "spring", stiffness: 60, damping: 20, mass: 1 };
-const springQuick = { type: "spring", stiffness: 400, damping: 30, mass: 1 };
+const springLong = { type: "spring" as const, stiffness: 60, damping: 20, mass: 1 };
+const springQuick = { type: "spring" as const, stiffness: 400, damping: 30, mass: 1 };
+const redditIcon = (
+    <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10s10-4.477 10-10c0-5.523-4.477-10-10-10zm4.5 13.5c0 1.105-1.343 2-3 2s-3-.895-3-2c0-1.105 1.343-2 3-2s3 .895 3 2zm-1.5-6.5c0 .276-.224.5-.5.5s-.5-.224-.5-.5.224-.5.5-.5.5.224.5.5zm-4 0c0 .276-.224.5-.5.5s-.5-.224-.5-.5.224-.5.5-.5.5.224.5.5z" />
+    </svg>
+);
 
 export function Hero() {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
-
+    const sourceSignals = [
+        {
+            source: "Reddit",
+            icon: redditIcon,
+            time: "2m ago",
+            msg: "Manual prospecting is taking 3-4 hours every day.",
+            nodeY: ["18%", "20%", "28%", "40%", "50%"],
+            delay: 0,
+            curve: "M 136 118 C 270 120, 360 170, 510 206"
+        },
+        {
+            source: "X",
+            icon: <XLogo className="w-3 h-3" />,
+            time: "5m ago",
+            msg: "Teams asking for a clean way to route high-intent posts into outreach.",
+            nodeY: ["34%", "35%", "37%", "43%", "50%"],
+            delay: 0.9,
+            curve: "M 136 214 C 270 214, 358 220, 510 245"
+        },
+        {
+            source: "Reddit",
+            icon: redditIcon,
+            time: "8m ago",
+            msg: "Looking for tools to automate GTM workflows on Reddit.",
+            nodeY: ["50%", "50%", "48%", "46%", "50%"],
+            delay: 1.8,
+            curve: "M 136 310 C 270 310, 352 286, 510 274"
+        },
+        {
+            source: "LinkedIn",
+            icon: <Linkedin className="w-3 h-3" />,
+            time: "2m ago",
+            msg: "Market analysis signals detected in Q3 finance reports.",
+            nodeY: ["66%", "64%", "60%", "54%", "50%"],
+            delay: 2.7,
+            curve: "M 136 406 C 270 400, 360 340, 510 304"
+        }
+    ];
+    const resultNodeIcons = [
+        { icon: redditIcon, delay: 3.5 },
+        { icon: <XLogo className="w-3 h-3" />, delay: 3.8 },
+        { icon: <Linkedin className="w-3 h-3" />, delay: 4.1 }
+    ];
     const tiltX = useSpring(useTransform(mouseY, [-0.5, 0.5], [4, -4]), springLong);
     const tiltY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-6, 6]), springLong);
 
-    const handleMouseMove = (e: React.MouseEvent) => {
+    const handleMouseMove = (e: MouseEvent) => {
         const rect = e.currentTarget.getBoundingClientRect();
         mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
         mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
@@ -23,77 +71,48 @@ export function Hero() {
 
     return (
         <section 
-            className="relative pt-[180px] pb-32 px-6 overflow-hidden flex flex-col items-center"
+            className="relative pt-[120px] pb-12 px-6 overflow-hidden flex flex-col items-center"
             onMouseMove={handleMouseMove}
         >
             <div className="max-w-[1400px] w-full mx-auto relative z-20 flex flex-col items-center text-center">
                 
-                {/* Atmospheric Glow behind Heading */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[120%] w-[1000px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(80,49,49,0.08)_0%,transparent_70%)] pointer-events-none z-[-1]" />
-
                 {/* Heading - Forensic Obsidian Typography */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={springLong}
-                    className="mb-12 relative"
-                >
-                    <h1 className="heading-serif text-white mb-8 max-w-5xl mx-auto leading-[0.95] tracking-[-0.04em]">
+                <div className="mb-8 relative">
+                    <h1 className="heading-serif text-white text-6xl md:text-[100px] mb-6 max-w-5xl mx-auto leading-[0.95] tracking-tighter italic">
                         The all-in-one execution <br />
-                        platform for founders
+                        <span className="not-italic opacity-40">platform for founders.</span>
                     </h1>
-                    <p className="text-zinc-400 text-lg md:text-[22px] max-w-2xl mx-auto font-normal leading-[1.4] tracking-tight mb-16 px-4">
+                    <p className="text-zinc-500 text-lg md:text-[20px] max-w-2xl mx-auto font-medium leading-[1.4] tracking-tight mb-10 px-4">
                         AI-powered demand signals available now — with <br className="hidden md:block" />
                         automated outreach and market intelligence.
                     </p>
-                </motion.div>
-
-                {/* Primary CTA - White Pill */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ ...springQuick, delay: 0.5 }}
-                    className="mb-32"
-                >
-                    <Link href="/signup">
-                        <motion.button 
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="px-10 py-4 bg-primary text-white font-bold rounded-full text-[15px] transition-all hover:bg-[#423E3E] shadow-[0_0_30px_rgba(54,34,34,0.4)] border border-primary/20"
-                        >
-                            Deploy Engine For Free
-                        </motion.button>
-                    </Link>
-                </motion.div>
-
-                {/* Floating UI Elements (Breadcrumbs style) */}
-                <div className="absolute top-[380px] left-1/2 -translate-x-1/2 flex gap-4 pointer-events-none opacity-20">
-                     {[...Array(5)].map((_, i) => (
-                         <div key={i} className="w-1.5 h-1.5 rounded-full bg-white" />
-                     ))}
                 </div>
 
-                {/* Dashboard Viewport - Refined Glassmorphism */}
-                <motion.div
-                    style={{
-                        rotateX: tiltX,
-                        rotateY: tiltY,
-                    perspective: 2500,
-                    transformStyle: "preserve-3d"
-                }}
-                className="relative w-full max-w-7xl h-[680px] rounded-[32px] border border-white/[0.08] bg-[#121212]/40 backdrop-blur-[34px] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)] group"
+                {/* Primary CTA - Obsidian Pill */}
+                <div className="mb-16">
+                    <Link href="/signup">
+                        <button 
+                            className="px-12 py-4 rounded-full bg-white text-black font-black uppercase tracking-[0.2em] text-[15px] shadow-2xl transition-all hover:bg-zinc-200"
+                        >
+                            Deploy Engine
+                        </button>
+                    </Link>
+                </div>
+
+                {/* Dashboard Viewport - Refined Monochrome Engineering */}
+                <div
+                className="relative w-full max-w-[1440px] h-[600px] rounded-[32px] border border-white/[0.08] bg-black overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)] group"
             >
                 <div className="absolute inset-0 obsidian-noise opacity-10" />
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
                     
-                    {/* DemandRadar Signal Ingest Interface */}
+                    {/* MarketingX Signal Ingest Interface */}
                     <div className="absolute inset-0 flex flex-col text-left overflow-hidden">
                         {/* Top Headers */}
                         <div className="flex justify-between items-center px-10 py-6 border-b border-white/5 bg-white/[0.02]">
                             <div className="flex items-center gap-6">
                                 <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-white">Incoming Noise</h3>
                                 <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-white opacity-40 animate-pulse" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-white opacity-40" />
                                     Live Ingest
                                 </div>
                             </div>
@@ -107,92 +126,112 @@ export function Hero() {
 
                         {/* Main Body */}
                         <div className="flex-1 grid grid-cols-12 gap-0 overflow-hidden relative">
-                            {/* Animated Data Nodes (Moving from EACH card to Center) */}
+                            <svg className="pointer-events-none absolute inset-0 z-0 h-full w-full" viewBox="0 0 1060 470" preserveAspectRatio="none" aria-hidden="true">
+                                {sourceSignals.map((signal, i) => (
+                                    <path
+                                        key={`curve-left-${i}`}
+                                        d={signal.curve}
+                                        fill="none"
+                                        stroke="rgba(255,255,255,0.08)"
+                                        strokeWidth="1"
+                                        strokeDasharray="3 7"
+                                    />
+                                ))}
+                                <path
+                                    d="M 510 274 C 620 250, 742 208, 868 170"
+                                    fill="none"
+                                    stroke="rgba(255,255,255,0.08)"
+                                    strokeWidth="1"
+                                    strokeDasharray="3 7"
+                                />
+                            </svg>
+
                             <AnimatePresence>
-                                {[
-                                    { y: "12.5%", delay: 0, icon: <Linkedin className="w-2.5 h-2.5" /> }, // Card 1 center
-                                    { y: "37.5%", delay: 1.5, icon: <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> }, // Card 2 center
-                                    { y: "62.5%", delay: 3, icon: <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10s10-4.477 10-10c0-5.523-4.477-10-10-10zm4.5 13.5c0 1.105-1.343 2-3 2s-3-.895-3-2c0-1.105 1.343-2 3-2s3 .895 3 2zm-1.5-6.5c0 .276-.224.5-.5.5s-.5-.224-.5-.5.224-.5.5-.5.5.224.5.5zm-4 0c0 .276-.224.5-.5.5s-.5-.224-.5-.5.224-.5.5-.5.5.224.5.5z"/></svg> }, // Card 3 center
-                                    { y: "87.5%", delay: 4.5, icon: <Linkedin className="w-2.5 h-2.5" /> }  // Card 4 center
-                                ].map((node, i) => (
+                                {sourceSignals.map((signal, i) => (
                                     <motion.div
-                                        key={`in-${i}`}
-                                        initial={{ x: "20%", y: node.y, opacity: 0, scale: 0.5 }}
-                                        animate={{ 
-                                            x: ["20%", "50%"],
+                                        key={`source-node-${i}`}
+                                        initial={{ left: "34%", top: signal.nodeY[0], opacity: 0, scale: 0.35 }}
+                                        animate={{
+                                            left: ["34%", "39%", "43%", "46%"],
+                                            top: [signal.nodeY[0], signal.nodeY[2], signal.nodeY[3], "50%"],
                                             opacity: [0, 1, 1, 0],
-                                            scale: [0.5, 1, 1, 0.5]
+                                            scale: [0.35, 0.72, 0.84, 0.25]
                                         }}
-                                        transition={{ 
-                                            duration: 4, 
-                                            delay: node.delay, 
+                                        transition={{
+                                            duration: 2.7,
+                                            delay: signal.delay,
                                             repeat: Infinity,
-                                            ease: "linear"
+                                            ease: "easeInOut"
                                         }}
-                                        className="absolute left-0 z-50 w-8 h-8 rounded-full bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center text-white/60 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                                        className="absolute z-40 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white/85 shadow-[0_0_18px_rgba(255,255,255,0.16)] backdrop-blur-md"
+                                    >
+                                        {signal.icon}
+                                    </motion.div>
+                                ))}
+
+                                <motion.div
+                                    initial={{ left: "46%", top: "50%", opacity: 0, scale: 0.2 }}
+                                    animate={{
+                                        opacity: [0, 1, 1, 0],
+                                        scale: [0.2, 1.08, 0.95, 0.25]
+                                    }}
+                                    transition={{
+                                        duration: 1.8,
+                                        delay: 2.9,
+                                        repeat: Infinity,
+                                        ease: "easeOut"
+                                    }}
+                                    className="absolute z-40 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_20px_rgba(255,255,255,0.6)]"
+                                />
+
+                                {resultNodeIcons.map((node, i) => (
+                                    <motion.div
+                                        key={`result-node-${i}`}
+                                        initial={{ left: "46%", top: "50%", opacity: 0, scale: 0.35 }}
+                                        animate={{
+                                            left: ["46%", "56%", "67%", "78%"],
+                                            top: ["50%", "47%", "42%", "37%"],
+                                            opacity: [0, 1, 1, 0],
+                                            scale: [0.35, 0.7, 0.82, 0.45]
+                                        }}
+                                        transition={{
+                                            duration: 2.4,
+                                            delay: node.delay,
+                                            repeat: Infinity,
+                                            ease: "easeInOut"
+                                        }}
+                                        className="absolute z-40 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/95 text-black shadow-[0_0_18px_rgba(255,255,255,0.18)]"
                                     >
                                         {node.icon}
                                     </motion.div>
                                 ))}
-
-                                {/* Path Lines (Faint visual guides) */}
-                                {[12.5, 37.5, 62.5, 87.5].map((y, i) => (
-                                    <div 
-                                        key={`line-${i}`}
-                                        className="absolute left-[25%] right-[50%] border-t border-dashed border-white/5 z-0"
-                                        style={{ top: `${y}%` }}
-                                    />
-                                ))}
-
-                                    <motion.div
-                                        initial={{ x: "50%", y: "45%", opacity: 0, scale: 0.5 }}
-                                        animate={{ 
-                                            x: ["50%", "85%"],
-                                            opacity: [0, 1, 1, 0],
-                                            scale: [0.5, 1.2, 1, 0.5]
-                                        }}
-                                        transition={{ 
-                                            duration: 3, 
-                                            delay: 2, 
-                                            repeat: Infinity,
-                                            ease: "circOut"
-                                        }}
-                                        className="absolute left-0 z-50 w-10 h-10 rounded-2xl bg-primary border border-white/20 backdrop-blur-xl flex items-center justify-center text-white shadow-[0_0_30px_rgba(54,34,34,0.4)]"
-                                    >
-                                        <Sparkles className="w-4 h-4" />
-                                    </motion.div>
                             </AnimatePresence>
 
                             {/* Left Panel: Signals Flow */}
-                            <div className="col-span-3 border-r border-white/5 p-4 space-y-4 overflow-hidden bg-black/10 flex flex-col justify-between">
-                                {[
-                                    { source: "Linkedin", icon: <Linkedin className="w-3 h-3" />, time: "8m ago", msg: "How are SaaS teams tracking intent on LinkedIn and X?" },
-                                    { source: "Twitter", icon: <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>, time: "2m ago", msg: "Manual prospecting is taking 3-4 hours every day." },
-                                    { source: "Reddit", icon: <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10s10-4.477 10-10c0-5.523-4.477-10-10-10zm4.5 13.5c0 1.105-1.343 2-3 2s-3-.895-3-2c0-1.105 1.343-2 3-2s3 .895 3 2zm-1.5-6.5c0 .276-.224.5-.5.5s-.5-.224-.5-.5.224-.5.5-.5.5.224.5.5zm-4 0c0 .276-.224.5-.5.5s-.5-.224-.5-.5.224-.5.5-.5.5.224.5.5z"/></svg>, time: "8m ago", msg: "Looking for tools to automate GTM workflows on Reddit." },
-                                    { source: "Linkedin", icon: <Linkedin className="w-3 h-3" />, time: "2m ago", msg: "Market analysis signals detected in Q3 finance reports." }
-                                ].map((signal, idx) => (
+                            <div className="col-span-3 border-r border-white/5 p-4 space-y-3 overflow-hidden bg-black/10 flex flex-col justify-between">
+                                {sourceSignals.map((signal, idx) => (
                                     <motion.div 
                                         key={idx}
-                                        initial={{ opacity: 0, x: -20 }}
+                                        initial={{ opacity: 1, x: 0 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 0.1 * idx }}
-                                        className="h-[145px] p-4 rounded-xl bg-white/[0.03] border border-white/5 relative group flex flex-col justify-center"
+                                        className="h-[102px] rounded-xl border border-white/5 bg-white/[0.03] p-4 relative group flex flex-col justify-center"
                                     >
-                                        <div className="flex items-center justify-between mb-2">
+                                        <div className="mb-2 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-5 h-5 rounded px-1 flex items-center justify-center bg-white/10 border border-white/10 text-white/60">
+                                                <div className="flex h-5 w-5 items-center justify-center rounded border border-white/10 bg-white/10 px-1 text-white/60">
                                                     {signal.icon}
                                                 </div>
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 transition-colors group-hover:text-white">
                                                     {signal.source}
                                                 </span>
                                             </div>
-                                            <span className="text-[8px] font-medium text-zinc-600 tracking-tighter italic">{signal.time}</span>
+                                            <span className="text-[8px] font-medium italic tracking-tighter text-zinc-600">{signal.time}</span>
                                         </div>
-                                        <p className="text-[10px] text-zinc-500 leading-tight line-clamp-2 mb-3">
+                                        <p className="mb-2 line-clamp-2 text-[10px] leading-tight text-zinc-500">
                                             {signal.msg}
                                         </p>
-                                        <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-0.5 w-full overflow-hidden rounded-full bg-white/5">
                                             <motion.div 
                                                 className="h-full bg-white/20"
                                                 initial={{ width: "0%" }}
@@ -248,12 +287,12 @@ export function Hero() {
                                     {/* Main Insight Card */}
                                     <div className="p-8 rounded-[32px] bg-white/[0.03] border border-white/10 flex flex-col items-center text-center">
                                         <div className="flex items-center gap-2 mb-8">
-                                            <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_white]" />
+                                            <Sparkles className="w-3.5 h-3.5 text-white" />
                                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Validated Demand</span>
                                         </div>
                                         
                                         <p className="text-white text-[15px] font-light italic leading-relaxed mb-10 max-w-[200px] opacity-70">
-                                            How are SaaS teams tracking intent on LinkedIn and X?
+                                            How are SaaS teams tracking intent on LinkedIn and Reddit?
                                         </p>
 
                                         <div className="grid grid-cols-2 gap-4 w-full">
@@ -304,7 +343,7 @@ export function Hero() {
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                </div>
             </div>
         </section>
     );

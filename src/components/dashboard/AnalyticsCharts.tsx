@@ -31,13 +31,10 @@ export function AnalyticsCharts({ data }: { data: AnalyticsData }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Funnel Visualization */}
             <div className="glass-card p-6 border-white/10 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <Filter className="w-16 h-16 text-white" />
-                </div>
                 
                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-6 flex justify-between">
                     <span>Pipeline Efficiency</span>
-                    <span className="text-primary tracking-normal opacity-50">Forensic Audit</span>
+                    <span className="text-white/40 tracking-normal">Forensic Audit</span>
                 </h3>
 
                 <div className="space-y-6">
@@ -71,14 +68,13 @@ export function AnalyticsCharts({ data }: { data: AnalyticsData }) {
                     </div>
                     <div className="text-right">
                         <p className="text-[8px] font-black uppercase tracking-widest text-zinc-600 mb-1">Efficiency Rate</p>
-                        <p className="text-xl font-black text-primary italic">{filteringRate}%</p>
+                        <p className="text-xl font-black text-white italic">{filteringRate}%</p>
                     </div>
                 </div>
             </div>
 
             {/* Growth Curve */}
             <div className="glass-card p-6 border-white/10 flex flex-col justify-between relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[80px] -z-10 group-hover:bg-primary/10 transition-all duration-1000" />
                 
                 <div>
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-2">
@@ -86,7 +82,7 @@ export function AnalyticsCharts({ data }: { data: AnalyticsData }) {
                     </h3>
                     <div className="flex items-end justify-between">
                         <p className="text-2xl font-black text-white italic">
-                            {conversionRate}% <span className="text-[10px] font-bold text-primary not-italic align-middle ml-2">↑ ACTIVE</span>
+                            {conversionRate}% <span className="text-[10px] font-bold text-white/60 not-italic align-middle ml-2">↑ ACTIVE</span>
                         </p>
                         <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest bg-white/5 px-2 py-1 rounded border border-white/5">7d Trend</span>
                     </div>
@@ -107,7 +103,7 @@ export function AnalyticsCharts({ data }: { data: AnalyticsData }) {
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="2.5"
-                            className="text-primary"
+                            className="text-white/20"
                         />
                         <motion.path
                             initial={{ opacity: 0 }}
@@ -115,21 +111,21 @@ export function AnalyticsCharts({ data }: { data: AnalyticsData }) {
                             transition={{ delay: 1, duration: 1 }}
                             d="M0,35 C10,35 20,30 30,25 C40,20 50,15 60,18 C70,21 80,10 100,2 L100,40 L0,40 Z"
                             fill="currentColor"
-                            className="text-primary"
+                            className="text-white/[0.05]"
                         />
                         {/* Data Points */}
-                        <motion.circle initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 2.5 }} cx="100" cy="2" r="2.5" fill="currentColor" className="text-primary shadow-[0_0_10px_#10b981]" />
+                        <motion.circle initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 2.5 }} cx="100" cy="2" r="2.5" fill="currentColor" className="text-white shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
                     </svg>
 
                     {/* Timeline labels */}
-                    <div className="flex justify-between items-center text-[8px] font-bold text-zinc-700 uppercase tracking-widest mt-2">
+                    <div className="flex justify-between items-center text-[8px] font-bold text-zinc-500 uppercase tracking-widest mt-2">
                         <span>Day 0</span>
                         <span>Day 4</span>
                         <span>Today</span>
                     </div>
                 </div>
 
-                <p className="text-[9px] text-zinc-500 italic leading-relaxed mt-4 border-l-2 border-primary/20 pl-3">
+                <p className="text-[9px] text-zinc-400 italic leading-relaxed mt-4 border-l-2 border-white/10 pl-3">
                     High intent velocity indicates optimal demand capture. 
                     AI is currently prioritizing <span className="text-white">active switchers</span>.
                 </p>

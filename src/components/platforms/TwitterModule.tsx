@@ -220,7 +220,7 @@ export default function TwitterModule({ product }: { product: any }) {
                         </div>
                     ) : (
                         savedDrafts.map((draft) => (
-                            <div key={draft.id} className="glass-card p-6 border-white/10 flex gap-4">
+                            <div key={draft.id} className="glass-card p-6 border-white/10 flex gap-4 rounded-[40px]">
                                 <div className="flex items-start gap-4 flex-1">
                                     <div className="w-10 h-10 rounded-full bg-gray-700 flex-shrink-0" />
                                     <div className="flex-1">
@@ -232,25 +232,25 @@ export default function TwitterModule({ product }: { product: any }) {
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2 shrink-0 min-w-[140px]">
-                                    <button onClick={() => handleTweetIntent(draft.body)} className="px-4 py-2 bg-[#1DA1F2] hover:bg-[#1A91DA] active:scale-95 rounded-lg text-white transition-all shadow-lg shadow-[#1DA1F2]/20 text-xs font-bold flex items-center gap-2 justify-center w-full">
+                                    <button onClick={() => handleTweetIntent(draft.body)} className="px-4 py-2 bg-[#1DA1F2] hover:bg-[#1A91DA] active:scale-95 rounded-full text-white transition-all shadow-lg shadow-[#1DA1F2]/20 text-xs font-bold flex items-center gap-2 justify-center w-full">
                                         <Zap className="w-3.5 h-3.5 fill-current" /> Tweet Now
                                     </button>
 
                                     {draft.status === 'posted' ? (
                                         <div className="flex gap-2 w-full">
-                                            <div className="px-4 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg text-xs font-bold flex items-center gap-2 justify-center flex-1 cursor-default select-none">
+                                            <div className="px-4 py-2 bg-primary/20 text-primary border border-primary/30 rounded-full text-xs font-bold flex items-center gap-2 justify-center flex-1 cursor-default select-none">
                                                 <CheckCheck className="w-3.5 h-3.5" /> Posted
                                             </div>
-                                            <button onClick={() => handleMarkPosted(draft.id, 'posted')} className="px-3 py-2 bg-black/50 hover:bg-white/10 active:scale-95 rounded-lg border border-white/10 text-muted-foreground hover:text-white transition-all flex items-center justify-center group" title="Undo Mark Sent">
+                                            <button onClick={() => handleMarkPosted(draft.id, 'posted')} className="px-3 py-2 bg-black/50 hover:bg-white/10 active:scale-95 rounded-full border border-white/10 text-muted-foreground hover:text-white transition-all flex items-center justify-center group" title="Undo Mark Sent">
                                                 <RotateCcw className="w-3.5 h-3.5 group-hover:-rotate-180 transition-transform duration-500" />
                                             </button>
                                         </div>
                                     ) : (
-                                        <button onClick={() => handleMarkPosted(draft.id, 'draft')} className="px-4 py-2 rounded-lg border text-xs font-medium flex items-center gap-2 justify-center w-full transition-all active:scale-95 bg-black/50 text-muted-foreground border-white/10 hover:bg-primary/10 hover:text-primary hover:border-primary/20" title="Mark as Sent">
+                                        <button onClick={() => handleMarkPosted(draft.id, 'draft')} className="px-4 py-2 rounded-full border text-xs font-medium flex items-center gap-2 justify-center w-full transition-all active:scale-95 bg-black/50 text-muted-foreground border-white/10 hover:bg-primary/10 hover:text-primary hover:border-primary/20" title="Mark as Sent">
                                             <CheckCheck className="w-3.5 h-3.5" /> Mark Sent
                                         </button>
                                     )}
-                                    <button onClick={() => handleCopy(draft.body, draft.id)} className={`px-4 py-2 bg-black/50 active:scale-95 rounded-lg border border-white/10 text-xs font-medium flex items-center gap-2 justify-center w-full transition-all ${copiedIdx === draft.id ? "text-primary border-primary/30 bg-primary/10" : "text-muted-foreground hover:bg-[#423F3E]/20 hover:text-white hover:border-[#423F3E]/30"}`}>
+                                    <button onClick={() => handleCopy(draft.body, draft.id)} className={`px-4 py-2 bg-black/50 active:scale-95 rounded-full border border-white/10 text-xs font-medium flex items-center gap-2 justify-center w-full transition-all ${copiedIdx === draft.id ? "text-primary border-primary/30 bg-primary/10" : "text-muted-foreground hover:bg-[#423F3E]/20 hover:text-white hover:border-[#423F3E]/30"}`}>
                                         {copiedIdx === draft.id ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />} {copiedIdx === draft.id ? "Copied!" : "Copy"}
                                     </button>
                                     <DeleteButton
@@ -268,11 +268,11 @@ export default function TwitterModule({ product }: { product: any }) {
 
     // Generator View
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-300">
+        <div className="space-y-8">
             {/* Redundant selector removed as it is now in the parent page */}
 
             {/* Input - Rich UI */}
-            <div className="glass-card p-5 border-white/10">
+            <div className="glass-card !bg-[#0A0A0A] p-5 border-white/10">
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                         <div className="p-1.5 rounded-lg bg-white/10">
@@ -280,61 +280,61 @@ export default function TwitterModule({ product }: { product: any }) {
                         </div>
                         <div>
                             <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">TWEET GENERATOR</h2>
-                            <p className="text-[10px] font-bold text-gray-500 tracking-widest italic opacity-60 uppercase">Enter a topic (or click a signal above) → Pick a vibe → Get viral tweets</p>
-                        </div>
-                    </div>
+                    <p className="text-[10px] font-black text-zinc-300 tracking-[0.2em] italic uppercase">Enter a topic (or click a signal above) → Pick a vibe → Get viral tweets</p>
+                </div>
+            </div>
+            <button
+                onClick={() => { setView("saved"); loadDrafts(); }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-bold text-white transition-all border border-white/5 shadow-xl"
+            >
+                <BookOpen className="w-3 h-3 text-zinc-400" />
+                {savedDrafts.length > 0 ? `${savedDrafts.length} Saved` : 'History'}
+            </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-6 mb-8">
+            <div className="flex items-center gap-4">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Length</span>
+                <div className="flex bg-black/60 p-1.5 rounded-xl">
+                    {(['short', 'balanced', 'deep'] as const).map((l) => (
+                        <button
+                            key={l}
+                            onClick={() => setPreferredLength(l)}
+                             className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${preferredLength === l ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}`}
+                        >
+                            {l}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            <div className="flex items-center gap-4">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Strategy</span>
+                <div className="flex bg-black/60 p-1.5 rounded-xl">
                     <button
-                        onClick={() => { setView("saved"); loadDrafts(); }}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-bold text-white transition-all border border-white/5"
+                        onClick={() => setIsProductLed(true)}
+                        className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${isProductLed ? "bg-primary text-white" : "text-zinc-400 hover:text-white"}`}
                     >
-                        <BookOpen className="w-3 h-3 text-muted-foreground" />
-                        {savedDrafts.length > 0 ? `${savedDrafts.length} Saved` : 'History'}
+                        Product-Led
+                    </button>
+                    <button
+                        onClick={() => setIsProductLed(false)}
+                        className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"}`}
+                    >
+                        General Viral
                     </button>
                 </div>
-
-                <div className="flex flex-wrap items-center gap-6 mb-6">
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Length</span>
-                        <div className="flex bg-black/40 p-1 rounded-lg border border-white/5">
-                            {(['short', 'balanced', 'deep'] as const).map((l) => (
-                                <button
-                                    key={l}
-                                    onClick={() => setPreferredLength(l)}
-                                    className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${preferredLength === l ? "bg-zinc-800 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
-                                >
-                                    {l}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Strategy</span>
-                        <div className="flex bg-black/40 p-1 rounded-lg border border-white/5">
-                            <button
-                                onClick={() => setIsProductLed(true)}
-                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${isProductLed ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
-                            >
-                                Product-Led
-                            </button>
-                            <button
-                                onClick={() => setIsProductLed(false)}
-                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${!isProductLed ? "bg-white/10 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
-                            >
-                                General Viral
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            </div>
+        </div>
 
                 <div className="flex gap-3">
                     <input
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
-                        className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs font-medium focus:border-white/20 outline-none text-white placeholder:text-gray-600 transition-all font-sans italic"
+                        className="flex-1 bg-black/40 border border-white/5 rounded-full px-6 py-3 text-xs font-medium focus:border-white/20 outline-none text-white placeholder:text-zinc-600 transition-all font-sans italic"
                         placeholder="Managing too many SaaS trials is a nightmare..."
                         onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                     />
-                    <button onClick={handleGenerate} disabled={generating || !topic} className="px-8 py-3 bg-white text-black hover:bg-gray-200 font-black rounded-xl transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap uppercase text-[10px] tracking-widest shadow-xl shadow-white/5">
+                    <button onClick={handleGenerate} disabled={generating || !topic} className="premium-button px-8 py-3 text-white rounded-full transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap uppercase text-[10px] tracking-widest shadow-xl">
                         {generating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-current" />}
                         Generate
                     </button>
@@ -343,7 +343,7 @@ export default function TwitterModule({ product }: { product: any }) {
 
             {/* Generated Assets */}
             {!generating && assets.length > 0 && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 grid lg:grid-cols-3 gap-6 items-start">
+                <div className="grid lg:grid-cols-3 gap-6 items-start">
 
                     {/* Left Column: Tweets List */}
                     <div className="lg:col-span-2 space-y-4">
@@ -375,7 +375,7 @@ export default function TwitterModule({ product }: { product: any }) {
                                                 </div>
                                                 <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
                                                     <div
-                                                        className="h-full bg-primary shadow-[0_0_10px_#10b981]"
+                                                        className="h-full bg-primary shadow-sm"
                                                         style={{ width: `${(asset.analysis?.score || asset.simulation?.viral_potential || 8.5) * 10}%` }}
                                                     />
                                                 </div>
@@ -418,8 +418,8 @@ export default function TwitterModule({ product }: { product: any }) {
                             <div className="space-y-4">
                                 {(assets[0]?.analysis?.why_it_works || ["Short & Punchy", "High Urgency", "Strong Hook"]).map((reason, i) => (
                                     <div key={i} className="flex gap-2.5 items-start">
-                                        <CheckCheck className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-                                        <span className="text-xs font-bold text-gray-300 leading-relaxed italic">{reason}</span>
+                                        <CheckCheck className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                                        <span className="text-xs font-bold text-zinc-300 leading-relaxed italic">{reason}</span>
                                     </div>
                                 ))}
                             </div>
@@ -430,17 +430,17 @@ export default function TwitterModule({ product }: { product: any }) {
 
             {/* Generating State */}
             {generating && (
-                <div className="glass-card flex flex-col items-center justify-center text-center p-12 border-dashed border-white/10 animate-in fade-in duration-500">
+                <div className="glass-card flex flex-col items-center justify-center text-center p-12 border-dashed border-white/10">
                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-6 relative">
                         <div className="absolute inset-0 rounded-full border-t-2 border-white/20 animate-spin"></div>
                         <div className="absolute inset-2 rounded-full border-r-2 border-primary/50 animate-spin duration-700"></div>
-                        <Zap className="w-6 h-6 text-white animate-pulse" />
+                        <Zap className="w-6 h-6 text-white" />
                     </div>
-                    <p className="text-sm font-bold text-white animate-pulse mb-2">{loadingMessages[loadingStep]}</p>
+                    <p className="text-sm font-bold text-white mb-2">{loadingMessages[loadingStep]}</p>
                     <div className="flex gap-1 justify-center">
-                        <div className="w-1 h-1 rounded-full bg-gray-500 animate-bounce delay-0"></div>
-                        <div className="w-1 h-1 rounded-full bg-gray-500 animate-bounce delay-100"></div>
-                        <div className="w-1 h-1 rounded-full bg-gray-500 animate-bounce delay-200"></div>
+                        <div className="w-1 h-1 rounded-full bg-zinc-500 animate-bounce delay-0"></div>
+                        <div className="w-1 h-1 rounded-full bg-zinc-500 animate-bounce delay-100"></div>
+                        <div className="w-1 h-1 rounded-full bg-zinc-500 animate-bounce delay-200"></div>
                     </div>
                 </div>
             )}
@@ -452,7 +452,7 @@ export default function TwitterModule({ product }: { product: any }) {
                         <Twitter className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="text-lg font-bold text-white mb-1">Ready to Tweet?</h3>
-                    <p className="text-xs text-muted-foreground max-w-sm">Enter a topic or click a signal above. We'll generate high-viral potential tweets tailored to your product.</p>
+                    <p className="text-xs text-zinc-400 max-w-sm">Enter a topic or click a signal above. We'll generate high-viral potential tweets tailored to your product.</p>
                 </div>
             )}
 

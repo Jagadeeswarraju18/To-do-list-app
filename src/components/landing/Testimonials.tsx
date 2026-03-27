@@ -5,7 +5,7 @@ import { Quote } from "lucide-react";
 
 const testimonials = [
     {
-        quote: "DemandRadar redefined our entire growth engine. It's the standard for our portfolio companies.",
+        quote: "MarketingX redefined our entire growth engine. It's the standard for our portfolio companies.",
         author: "Marcus Aurelius",
         role: "MD, Growth Capital",
         avatar: "MA"
@@ -20,35 +20,27 @@ const testimonials = [
 
 export function Testimonials() {
     const spring = {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 260,
         damping: 20
     };
 
     return (
-        <section className="py-44 px-6 relative z-10">
-            <div className="max-w-7xl mx-auto">
+        <section className="py-32 px-6 relative z-10">
+            <div className="max-w-[1440px] mx-auto">
                 <div className="mb-32">
-                    <motion.h2 
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={spring}
+                    <h2 
                         className="heading-serif text-6xl md:text-[120px] font-normal text-white tracking-tight leading-[0.9]"
                     >
                         Success <br />
                         <span className="italic opacity-50">engineered.</span>
-                    </motion.h2>
+                    </h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {testimonials.map((t, i) => (
-                        <motion.div
+                        <div
                             key={t.author}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ ...spring, delay: i * 0.1 }}
                             className="glass-card p-16 relative overflow-hidden group"
                         >
                             <div className="relative z-10">
@@ -66,7 +58,7 @@ export function Testimonials() {
                                 </div>
                             </div>
                             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/[0.015] blur-[100px] rounded-full -mr-48 -mt-48 transition-opacity duration-1000" />
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </div>

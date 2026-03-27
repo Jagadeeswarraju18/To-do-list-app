@@ -46,9 +46,9 @@ export default function PlatformStrategyPage() {
     };
 
     const tabs = [
-        { id: "x" as const, label: "X (Twitter)", icon: Twitter, activeColor: "bg-primary text-white shadow-lg shadow-primary/20 border-primary/20" },
-        { id: "linkedin" as const, label: "LinkedIn", icon: Linkedin, activeColor: "bg-slate-700 text-white shadow-lg shadow-slate-900/40 border-slate-600" },
-        { id: "reddit" as const, label: "Reddit", icon: MessageSquare, activeColor: "bg-orange-600 text-white shadow-lg shadow-orange-900/40 border-orange-500" },
+        { id: "x" as const, label: "X (Twitter)", icon: Twitter, activeColor: "bg-primary text-white border-primary/20", inactiveColor: "bg-black/40 border-white/10 text-zinc-400 hover:bg-white/5 hover:text-white" },
+        { id: "linkedin" as const, label: "LinkedIn", icon: Linkedin, activeColor: "bg-primary text-white border-primary/20", inactiveColor: "bg-black/40 border-white/10 text-zinc-400 hover:bg-white/5 hover:text-white" },
+        { id: "reddit" as const, label: "Reddit", icon: MessageSquare, activeColor: "bg-primary text-white border-primary/20", inactiveColor: "bg-black/40 border-white/10 text-zinc-400 hover:bg-white/5 hover:text-white" },
     ];
 
     return (
@@ -57,7 +57,7 @@ export default function PlatformStrategyPage() {
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2 text-white">Brand Command</h1>
                     <div className="flex items-center gap-3">
-                        <p className="text-zinc-400 font-normal tracking-tight text-sm">
+                        <p className="text-zinc-300 font-normal tracking-tight text-sm">
                             Manage your founder persona and platform distribution.
                         </p>
                         <div className="h-4 w-px bg-white/10 hidden sm:block" />
@@ -70,7 +70,7 @@ export default function PlatformStrategyPage() {
                                 className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all group cursor-pointer"
                             >
                                 <Target className="w-3.5 h-3.5 text-primary" />
-                                <span className="text-zinc-300 hidden sm:inline">Context:</span>
+                                <span className="text-zinc-400 hidden sm:inline">Context:</span>
                                 <span className="text-white">{product?.name || "Select Product"}</span>
                                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isProductSelectorOpen ? 'rotate-180' : ''}`} />
                             </button>
@@ -106,9 +106,9 @@ export default function PlatformStrategyPage() {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all text-xs font-bold ${activeTab === tab.id
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all text-xs font-bold ${activeTab === tab.id
                             ? tab.activeColor
-                            : "bg-black/40 border-white/10 text-gray-500 hover:bg-white/5 hover:text-white"
+                            : tab.inactiveColor
                             }`}
                     >
                         <tab.icon className="w-3.5 h-3.5" />
@@ -127,13 +127,13 @@ export default function PlatformStrategyPage() {
 
             {/* Platform Modules - Non-destructive rendering for instant switching */}
             <div className="relative min-h-[600px]">
-                <div className={`${activeTab === "x" ? "block" : "hidden"} animate-in fade-in duration-300`}>
+                <div className={`${activeTab === "x" ? "block" : "hidden"}`}>
                     <TwitterModule product={product} />
                 </div>
-                <div className={`${activeTab === "linkedin" ? "block" : "hidden"} animate-in fade-in duration-300`}>
+                <div className={`${activeTab === "linkedin" ? "block" : "hidden"}`}>
                     <LinkedInModule product={product} />
                 </div>
-                <div className={`${activeTab === "reddit" ? "block" : "hidden"} animate-in fade-in duration-300`}>
+                <div className={`${activeTab === "reddit" ? "block" : "hidden"}`}>
                     <RedditModule product={product} />
                 </div>
             </div>

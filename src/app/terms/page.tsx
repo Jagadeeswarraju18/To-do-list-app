@@ -14,20 +14,20 @@ export default function TermsOfService() {
 
             <div className="relative max-w-4xl mx-auto px-6 py-20">
                 <Link
-                    href="/login"
+                    href="/"
                     className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-12 group"
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Back to Login
+                    Back to Home
                 </Link>
 
                 <div className="space-y-4 mb-16">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest">
                         <Scale className="w-3 h-3" /> Legal Framework
                     </div>
-                    <h1 className="text-5xl font-black tracking-tight">Terms of Service</h1>
+                    <h1 className="text-5xl font-black tracking-tight">Terms & Conditions</h1>
                     <p className="text-xl text-muted-foreground max-w-2xl">
-                        By using DemandRadar, you agree to these rules. We keep it simple: use the platform responsibly, and we'll help you grow.
+                        By using MarketingX, you agree to these rules. We keep it simple: use the platform responsibly, and we'll help you grow.
                     </p>
                 </div>
 
@@ -36,11 +36,11 @@ export default function TermsOfService() {
                         icon={<Zap className="w-5 h-5 text-primary" />}
                         title="Acceptable Use"
                     >
-                        <p>DemandRadar provides tools for lead discovery and personalized outreach. You agree not to:</p>
+                        <p>MarketingX provides tools for lead discovery and personalized outreach. You agree not to:</p>
                         <ul className="list-disc list-inside space-y-2 mt-4 text-muted-foreground">
                             <li>Use the platform for spamming or harassment of any individuals.</li>
                             <li>Attempt to scrape data in bulk for redistribution.</li>
-                            <li>Misrepresent your identity or bypass X/Twitter's platform rules.</li>
+                            <li>Misrepresent your identity or bypass platform rules.</li>
                         </ul>
                     </Section>
 
@@ -70,7 +70,7 @@ export default function TermsOfService() {
 
                 <div className="mt-20 pt-10 border-t border-white/5 text-center">
                     <p className="text-sm text-muted-foreground">
-                        Last updated: February 21, 2026. Your continued use of DemandRadar constitutes acceptance of these terms.
+                        Last updated: February 21, 2026. Your continued use of MarketingX constitutes acceptance of these terms.
                     </p>
                 </div>
             </div>

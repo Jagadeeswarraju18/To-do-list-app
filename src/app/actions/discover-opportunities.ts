@@ -119,7 +119,7 @@ async function scoreAndVerifyCandidates(product: any, candidates: any[]) {
     return { scoredMap, verifiedMap, relevant };
 }
 
-export async function discoverOpportunitiesAction(scanWindow?: string, userIdOverride?: string) {
+export async function discoverOpportunitiesAction(scanWindow?: string, userIdOverride?: string, productIdOverride?: string) {
     try {
         const supabase = createClient();
         let targetUserId = userIdOverride;
@@ -130,7 +130,14 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
             targetUserId = user.id;
         }
 
-        const product = await getProductContext(supabase, targetUserId);
+        let product;
+        if (productIdOverride) {
+            const { data: p } = await supabase.from("products").select("*").eq("id", productIdOverride).single();
+            product = p;
+        } else {
+            product = await getProductContext(supabase, targetUserId);
+        }
+        
         if (!product) return { error: "Product setup missing." };
 
         const { data: run } = await supabase
@@ -190,7 +197,9 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
             productName: product.name,
             productDescription: product.description,
             painSolved: product.pain_solved,
-            productUrl: product.website_url || product.product_url
+            productUrl: product.website_url || product.product_url,
+            targetAudience: product.target_audience,
+            outreachTone: product.outreach_tone
         })));
 
         const insertions = finalRelevant.map(t => {
@@ -228,13 +237,13 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
         }
 
         revalidatePath("/founder/opportunities");
-        return { success: true, addedCount: insertions.length };
+        return { success: true, addedCount: insertions.length, runId: run?.id };
     } catch (e: any) {
         return { error: e.message };
     }
 }
 
-export async function discoverRedditAction(scanWindow?: string, userIdOverride?: string) {
+export async function discoverRedditAction(scanWindow?: string, userIdOverride?: string, productIdOverride?: string) {
     try {
         const supabase = createClient();
         let targetUserId = userIdOverride;
@@ -245,7 +254,14 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
             targetUserId = user.id;
         }
 
-        const product = await getProductContext(supabase, targetUserId);
+        let product;
+        if (productIdOverride) {
+            const { data: p } = await supabase.from("products").select("*").eq("id", productIdOverride).single();
+            product = p;
+        } else {
+            product = await getProductContext(supabase, targetUserId);
+        }
+        
         if (!product) return { error: "Product setup missing." };
 
         const { data: run } = await supabase
@@ -281,8 +297,11 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
         const replies = await generateRedditReplies(relevant.map(p => ({
             postText: p.text || "", author: p.author || "unknown", subreddit: p.subreddit || "unknown", postType: p.post_type || "post",
             productName: product.name, productDescription: product.description, painSolved: product.pain_solved,
-            productUrl: product.website_url || product.product_url
+            // productUrl: product.website_url || product.product_url, // Disabled for Reddit safety
+            targetAudience: product.target_audience, outreachTone: product.outreach_tone
         })));
+
+        const currentRunId = run?.id;
 
         const insertions = relevant.map(p => {
             const v = verifiedMap.get(p.id);
@@ -290,9 +309,14 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
             const author = p.author || "unknown";
             const reply = replies.get(author) || fallbackRedditReply(author, p.text || "", product.name);
             return {
-                user_id: targetUserId, product_id: product.id, run_id: run?.id,
-                tweet_url: p.post_url, tweet_content: p.text || "No content", tweet_author: `u/${author}`,
-                source: 'reddit_post', subreddit: p.subreddit,
+                user_id: targetUserId, 
+                product_id: product.id, 
+                run_id: currentRunId, // Use explicitly extracted ID
+                tweet_url: p.post_url, 
+                tweet_content: p.text || "No content", 
+                tweet_author: `u/${author}`,
+                source: 'reddit_post', 
+                subreddit: p.subreddit,
                 tweet_posted_at: p.created_at || null,
                 intent_level: v?.intent || s?.suggestedIntent || 'medium',
                 relevance_score: v?.score || s?.blendedScore || 0,
@@ -300,27 +324,35 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
                 intent_category: v?.category || s?.suggestedCategory || 'Generic',
                 competitor_name: v?.competitor_name || s?.matchedCompetitor || null,
                 pain_detected: s?.matchedIntentPhrases.slice(0, 2).join(", ") || s?.reasons[0] || product.pain_solved,
-                suggested_dm: reply, status: 'new'
+                suggested_dm: reply, 
+                status: 'new'
             };
         });
 
         const { error: insertError } = await supabase.from("opportunities").insert(insertions);
-        if (run) {
+        
+        if (currentRunId) {
             await supabase.from("discovery_runs").update({
                 status: insertError ? 'failed' : 'completed',
                 leads_found: insertions.length,
+                total_scanned: posts.length, // Added this field like X
                 completed_at: new Date().toISOString()
-            }).eq("id", run.id);
+            }).eq("id", currentRunId);
         }
 
         revalidatePath("/founder/opportunities");
-        return { success: true, addedCount: insertions.length };
+        return { 
+            success: !insertError, 
+            addedCount: insertError ? 0 : insertions.length, 
+            runId: currentRunId,
+            error: insertError?.message
+        };
     } catch (e: any) {
         return { error: e.message };
     }
 }
 
-export async function discoverLinkedInAction(scanWindow?: string, userIdOverride?: string) {
+export async function discoverLinkedInAction(scanWindow?: string, userIdOverride?: string, productIdOverride?: string) {
     try {
         const supabase = createClient();
         let targetUserId = userIdOverride;
@@ -331,7 +363,14 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
             targetUserId = user.id;
         }
 
-        const product = await getProductContext(supabase, targetUserId);
+        let product;
+        if (productIdOverride) {
+            const { data: p } = await supabase.from("products").select("*").eq("id", productIdOverride).single();
+            product = p;
+        } else {
+            product = await getProductContext(supabase, targetUserId);
+        }
+        
         if (!product) return { error: "Product setup missing." };
 
         const { data: run } = await supabase
@@ -367,7 +406,8 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
         const replies = await generateLinkedInReplies(relevant.map(p => ({
             postText: p.text || "", author: p.author || "unknown",
             productName: product.name, productDescription: product.description, painSolved: product.pain_solved,
-            productUrl: product.website_url || product.product_url
+            productUrl: product.website_url || product.product_url,
+            targetAudience: product.target_audience, outreachTone: product.outreach_tone
         })));
 
         const insertions = relevant.map(p => {
@@ -400,7 +440,7 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
         }
 
         revalidatePath("/founder/opportunities");
-        return { success: true, addedCount: insertions.length };
+        return { success: true, addedCount: insertions.length, runId: run?.id };
     } catch (e: any) {
         return { error: e.message };
     }
@@ -454,19 +494,22 @@ export async function regenerateSingleDM(opportunityId: string) {
         if (opp.source === 'reddit_post') {
             const replies = await generateRedditReplies([{
                 postText: opp.tweet_content, author, subreddit: opp.subreddit || "unknown", postType: "post",
-                productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl
+                productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl,
+                targetAudience: product.target_audience, outreachTone: product.outreach_tone
             }]);
             newDM = replies.get(author) || fallbackRedditReply(author, opp.tweet_content, product.name);
         } else if (opp.source === 'linkedin_post') {
             const replies = await generateLinkedInReplies([{
                 postText: opp.tweet_content, author,
-                productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl
+                productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl,
+                targetAudience: product.target_audience, outreachTone: product.outreach_tone
             }]);
             newDM = replies.get(author) || fallbackLinkedInReply(author, product.name);
         } else {
             const dms = await generatePersonalizedDMs([{
                 tweetText: opp.tweet_content, authorUsername: author, authorName: author,
-                productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl
+                productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl,
+                targetAudience: product.target_audience, outreachTone: product.outreach_tone
             }]);
             newDM = dms.get(author) || fallbackDM(author, opp.tweet_content, product.name);
         }
@@ -505,47 +548,4 @@ export async function updateStatus(opportunityId: string, status: string) {
 
 export async function archiveOpportunity(id: string) {
     return updateStatus(id, 'archived');
-}
-
-import { generateOutreachAngles as getAngles, fetchLeadBio as getBio } from "@/lib/ai/lead-enrichment";
-
-// ... existing code ...
-
-export async function generateOutreachAngles(opportunityId: string): Promise<{ success: boolean; error?: string; angles?: any[] }> {
-    try {
-        const supabase = createClient();
-        const { data: opp } = await supabase.from("opportunities").select("*, products(*)").eq("id", opportunityId).single();
-        if (!opp) return { success: false, error: "Opportunity not found" };
-
-        const product = opp.products;
-        const angles = await getAngles({
-            postText: opp.tweet_content,
-            productName: product.name,
-            productDescription: product.description,
-            painSolved: product.pain_solved
-        });
-
-        return { success: true, angles };
-    } catch (e: any) {
-        console.error("Error generating angles:", e);
-        return { success: false, error: e.message };
-    }
-}
-
-export async function fetchLeadBio(opportunityId: string) {
-    try {
-        const supabase = createClient();
-        const { data: opp } = await supabase.from("opportunities").select("*").eq("id", opportunityId).single();
-        if (!opp) return { success: false, error: "Opportunity not found" };
-
-        const bio = await getBio(opp.tweet_author, opp.source === 'reddit_post' ? 'Reddit' : opp.source === 'linkedin_post' ? 'LinkedIn' : 'X', opp.tweet_content);
-
-        await supabase.from("opportunities").update({ author_bio: bio }).eq("id", opportunityId);
-        revalidatePath("/founder/opportunities");
-        
-        return { success: true, bio };
-    } catch (e: any) {
-        console.error("Error fetching bio:", e);
-        return { success: false, error: e.message };
-    }
 }

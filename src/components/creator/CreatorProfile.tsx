@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Camera, Loader2, Save, User, Lock, Eye, EyeOff, Check, X, PenSquare, Share2, MapPin, Briefcase, DollarSign, Globe, Linkedin, Instagram, Youtube, Sparkles, Crown, Zap, ShieldCheck, ArrowRight, Wand2 } from "lucide-react";
+import { Camera, Loader2, Save, User, Lock, Eye, EyeOff, Check, X, PenSquare, Share2, MapPin, Briefcase, DollarSign, Globe, Linkedin, Instagram, Youtube, Sparkles, Crown, Zap, ShieldCheck, ArrowUpRight, Wand2, Target, Activity, ArrowRight } from "lucide-react";
 import { generateAIPitch } from "@/app/actions/creator-actions";
 import { XLogo } from "@/components/ui/XLogo";
 import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { DeleteButton } from "@/components/ui/DeleteButton";
@@ -21,10 +22,12 @@ export default function CreatorProfile({ profile, onProfileUpdate }: { profile: 
     const [showPassword, setShowPassword] = useState(false);
     const [passwordSaved, setPasswordSaved] = useState(false);
     const [platforms, setPlatforms] = useState<any[]>([]);
-    const [isUpgraded, setIsUpgraded] = useState(profile?.is_upgraded || false);
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [upgrading, setUpgrading] = useState(false);
     const [generatingPitch, setGeneratingPitch] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const [formData, setFormData] = useState({
         display_name: profile?.display_name || "",
@@ -43,11 +46,24 @@ export default function CreatorProfile({ profile, onProfileUpdate }: { profile: 
 
     useEffect(() => {
         const fetchPlatforms = async () => {
+            if (!profile?.id) return;
             const { data } = await supabase.from("creator_platforms").select("*").eq("creator_id", profile.id);
             if (data) setPlatforms(data);
         };
         fetchPlatforms();
-    }, [profile.id]);
+    }, [profile?.id]);
+
+    useEffect(() => {
+        if (editing && profile) {
+            setFormData({
+                display_name: profile.display_name || "",
+                bio: profile.bio || "",
+                niche: profile.niche || "",
+                location: profile.location || "",
+                min_budget: profile.min_budget || "",
+            });
+        }
+    }, [editing, profile]);
 
     const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || !e.target.files[0]) return;
@@ -137,32 +153,7 @@ export default function CreatorProfile({ profile, onProfileUpdate }: { profile: 
         }
     };
 
-    const handleUpgrade = async () => {
-        setUpgrading(true);
-        toast.loading("Processing payment...");
 
-        // Mock payment delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        try {
-            const { error } = await supabase
-                .from("creator_profiles")
-                .update({ is_upgraded: true })
-                .eq("id", profile.id);
-
-            if (error) throw error;
-
-            setIsUpgraded(true);
-            onProfileUpdate({ ...profile, is_upgraded: true });
-            setShowUpgradeModal(false);
-            toast.success("Congratulations! You are now a Verified Pro Creator! 🚀");
-        } catch (err) {
-            console.error("Upgrade error:", err);
-            toast.error("Failed to upgrade. Please try again.");
-        } finally {
-            setUpgrading(false);
-        }
-    };
 
     const handleGeneratePitch = async () => {
         setGeneratingPitch(true);
@@ -196,156 +187,218 @@ export default function CreatorProfile({ profile, onProfileUpdate }: { profile: 
     };
 
     return (
-        <div className="space-y-8 animate-fade-up">
-            {/* Profile Card */}
-            <div className="relative group w-full max-w-4xl mx-auto">
-                <div className="relative rounded-[30px] bg-black border border-white/10 overflow-hidden shadow-2xl">
-
-                    {/* Background Mesh */}
-                    <div className="absolute inset-0 opacity-40">
-                        <div className="absolute top-[-50%] left-[-20%] w-[80%] h-[150%] rounded-full bg-gradient-to-br from-zinc-800/30 to-transparent blur-[120px]" />
-                        <div className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[120%] rounded-full bg-gradient-to-t from-blue-800/30 to-transparent blur-[120px]" />
-                    </div>
-
-                    <div className="relative z-10 flex flex-col md:flex-row">
-                        {/* Left Side: Avatar & Identity */}
-                        <div className="md:w-1/3 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-white/5 bg-white/[0.02] backdrop-blur-sm">
-                            <div className="relative group/avatar cursor-pointer mb-6" onClick={() => fileInputRef.current?.click()}>
-                                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 relative">
-                                    {avatarUrl ? (
-                                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110" />
-                                    ) : (
-                                        <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
-                                            <User className="w-12 h-12 text-zinc-500" />
-                                        </div>
-                                    )}
-                                    {uploadingAvatar && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white w-8 h-8" /></div>}
-                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
-                                        <Camera className="w-8 h-8 text-white drop-shadow-lg" />
-                                    </div>
-                                </div>
-                                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-                                {isUpgraded ? (
-                                    <div className="absolute bottom-0 right-0 bg-gradient-to-tr from-yellow-400 to-amber-600 border-4 border-black w-10 h-10 rounded-full flex items-center justify-center shadow-lg animate-pulse z-20" title="Verified Pro">
-                                        <Crown className="w-5 h-5 text-black fill-current" />
-                                    </div>
+        <>
+            <div className="space-y-8 animate-fade-up">
+                {/* Profile Card */}
+            <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 space-y-8 animate-in fade-in duration-700">
+                {/* Top Row: Identity & Primary Status */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Identity Card */}
+                    <div className="lg:col-span-2 glass-panel p-8 sm:p-10 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] -z-10 group-hover:bg-emerald-500/10 transition-colors duration-700" />
+                        
+                        <div className="relative group/avatar cursor-pointer shrink-0" onClick={() => fileInputRef.current?.click()}>
+                            <div className="w-32 h-32 md:w-40 md:h-40 rounded-[32px] overflow-hidden border-2 border-white/10 group-hover/avatar:border-emerald-500/50 transition-all duration-500 shadow-2xl">
+                                {avatarUrl ? (
+                                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="absolute bottom-0 right-0 bg-primary border-4 border-black w-8 h-8 rounded-full flex items-center justify-center z-20" title="Online">
-                                        <Sparkles className="w-4 h-4 text-black fill-current" />
+                                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
+                                        <User className="w-12 h-12 text-zinc-800" />
+                                    </div>
+                                )}
+                                {uploadingAvatar && (
+                                    <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-20">
+                                        <Loader2 className="animate-spin text-emerald-500" />
                                     </div>
                                 )}
                             </div>
-
-                            <div className="text-center space-y-1">
-                                <div className="flex flex-col items-center gap-1">
-                                    <h2 className="text-2xl font-black text-white tracking-tight">{profile.display_name || "Creator"}</h2>
-                                    {isUpgraded && (
-                                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[10px] font-black text-amber-500 uppercase tracking-widest">
-                                            <ShieldCheck className="w-3 h-3" /> Verified Pro
-                                        </div>
-                                    )}
-                                </div>
-                                {profile.niche && (
-                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                                        {profile.niche}
-                                    </div>
-                                )}
+                            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                            <div className="absolute -bottom-2 -right-2 bg-emerald-500 p-2 rounded-xl shadow-lg border border-white/20">
+                                <Sparkles className="w-4 h-4 text-black font-black" />
                             </div>
-
-                            <button
-                                onClick={() => setEditing(true)}
-                                className="mt-6 w-full py-2.5 rounded-xl bg-white text-black font-bold text-sm hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-white/10"
-                            >
-                                <PenSquare className="w-4 h-4" /> Edit Details
-                            </button>
-
-                            {!isUpgraded && (
-                                <button
-                                    onClick={() => setShowUpgradeModal(true)}
-                                    className="mt-3 w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold text-sm hover:from-amber-400 hover:to-orange-500 transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 group"
-                                >
-                                    <Crown className="w-4 h-4 group-hover:rotate-12 transition-transform" /> Upgrade to Pro
-                                </button>
-                            )}
                         </div>
 
-                        {/* Right Side: Details & Stats */}
-                        <div className="md:w-2/3 p-8 flex flex-col justify-between bg-gradient-to-b from-transparent to-black/20">
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2 block">About</label>
-                                    <p className="text-lg text-white/90 leading-relaxed font-medium">
-                                        {profile.bio || "No bio yet. Tell brands who you are!"}
-                                    </p>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
-                                        <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                                            <MapPin className="w-4 h-4" />
-                                            <span className="text-xs font-bold uppercase">Location</span>
-                                        </div>
-                                        <p className="text-white font-semibold">{profile.location || "Remote"}</p>
+                        <div className="flex-1 space-y-6">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
+                                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Active Partner</span>
                                     </div>
-                                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
-                                        <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                                            <DollarSign className="w-4 h-4" />
-                                            <span className="text-xs font-bold uppercase">Min Budget</span>
-                                        </div>
-                                        <p className="text-primary font-bold text-xl">${profile.min_budget || "0"}</p>
+                                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">UID: {profile.id?.slice(0, 8) || "Creator"}</span>
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tighter">{profile.display_name || "New Partner"}</h1>
+                                {profile.niche && (
+                                    <p className="text-sm font-bold text-emerald-400 uppercase tracking-[0.3em]">{profile.niche} Strategist</p>
+                                )}
+                            </div>
+                            <p className="text-lg text-zinc-400 leading-relaxed font-light line-clamp-3">
+                                {profile.bio || "Establishing high-impact creative direction and digital growth frameworks for global tech ventures."}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-8 pt-2">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Base</p>
+                                    <div className="flex items-center gap-2 text-white">
+                                        <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+                                        <span className="text-xs font-bold">{profile.location || "Remote"}</span>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Engagement</p>
+                                    <div className="flex items-center gap-2 text-white">
+                                        <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
+                                        <span className="text-xs font-bold">${profile.min_budget || "100"} Min</span>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div className="mt-8 pt-6 border-t border-white/5">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 block">Connected Matrix</label>
-                                <div className="flex flex-wrap gap-3">
-                                    {platforms.map(p => (
-                                        <div key={p.id} className="group/icon relative px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-3 cursor-default">
-                                            {getPlatformIcon(p.platform)}
-                                            <span className="text-sm font-bold text-white hidden group-hover/icon:inline-block animate-in fade-in slide-in-from-left-2 duration-200">
-                                                {p.platform}
-                                            </span>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                                        </div>
-                                    ))}
-                                    {platforms.length === 0 && <span className="text-sm text-muted-foreground italic">No connections yet.</span>}
+                    {/* Status & Actions Card */}
+                    <div className="glass-panel p-8 flex flex-col justify-between group relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent -z-10" />
+                        <div className="space-y-8">
+                            <div className="flex items-center justify-between">
+                                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <Target className="w-5 h-5 text-white" />
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/20 rounded-full border border-emerald-500/30">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Available</span>
                                 </div>
                             </div>
+                            <div className="space-y-2">
+                                <h3 className="text-[11px] font-black text-zinc-500 uppercase tracking-[0.4em]">Current Protocol</h3>
+                                <p className="text-sm text-zinc-400 leading-relaxed">Open for strategic inquiries and high-impact partnerships.</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 pt-8 mt-auto">
+                            <button
+                                onClick={() => setEditing(true)}
+                                className="w-full py-4 bg-white text-black font-black text-[11px] uppercase tracking-[0.2em] rounded-[20px] hover:bg-emerald-500 hover:scale-[1.02] transition-all active:scale-95 flex items-center justify-center gap-3 shadow-xl"
+                            >
+                                <PenSquare className="w-4 h-4" /> 
+                                Edit Command Details
+                            </button>
+                            <button
+                                className="w-full py-4 bg-white/5 border border-white/10 text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-[20px] hover:bg-white/10 transition-all active:scale-95 flex items-center justify-center gap-3"
+                            >
+                                <Share2 className="w-4 h-4" />
+                                Broadcast Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom Row: Performance & Ecosystem */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {/* Performance Matrix */}
+                    <div className="glass-panel p-8 space-y-10 group">
+                        <div className="flex items-center gap-4">
+                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                <Activity className="w-4 h-4 text-emerald-500" />
+                            </div>
+                            <h3 className="text-xs font-bold text-white uppercase tracking-widest">Performance Matrix</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-8">
+                            <div className="space-y-2">
+                                <div className="flex items-baseline gap-1">
+                                    <p className="text-4xl font-bold text-white tracking-tighter">12.5k</p>
+                                    <span className="text-emerald-500 text-[10px] font-bold">↑ 4%</span>
+                                </div>
+                                <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest border-t border-white/10 pt-2">Global Signal Flow</p>
+                            </div>
+                            <div className="space-y-2">
+                                <p className="text-4xl font-bold text-white tracking-tighter">94%</p>
+                                <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest border-t border-white/10 pt-2">Trust Convergence</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Ecosystem Nodes */}
+                    <div className="glass-panel p-8 space-y-8 lg:col-span-2 group">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                    <Globe className="w-4 h-4 text-emerald-500" />
+                                </div>
+                                <h3 className="text-xs font-bold text-white uppercase tracking-widest">Digital Ecosystem Nodes</h3>
+                            </div>
+                            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] animate-pulse">Live Signal Integration</p>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {platforms.map(p => (
+                                <div key={p.id} className="relative group/node p-4 rounded-[20px] bg-white/[0.02] border border-white/5 hover:border-emerald-500/30 transition-all backdrop-blur-sm cursor-pointer overflow-hidden">
+                                     <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover/node:opacity-100 transition-opacity" />
+                                     <div className="flex items-center justify-between relative z-10">
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-zinc-500 group-hover/node:text-emerald-400 transition-colors">
+                                                {getPlatformIcon(p.platform)}
+                                            </div>
+                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest group-hover/node:text-white transition-colors">{p.platform} Node</span>
+                                        </div>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                     </div>
+                                </div>
+                            ))}
+                            {platforms.length === 0 && (
+                                <div className="col-span-full py-8 text-center border-2 border-dashed border-white/5 rounded-[24px]">
+                                    <p className="text-[10px] font-black text-zinc-600 italic uppercase tracking-[0.3em]">Awaiting external signal tether...</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
+            </div>
 
-            {/* Edit Modal (Portal) */}
-            {editing && createPortal(
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md bg-black/80 animate-in fade-in duration-200">
-                    <div className="bg-[#0d1117] border border-white/10 w-full max-w-2xl max-h-[90vh] rounded-[32px] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 relative">
+            {/* Edit Drawer (Portal) */}
+            {editing && mounted && createPortal(
+                <div className="fixed inset-0 z-[1000] flex justify-end overflow-hidden">
+                    <motion.div
+                        key="drawer-backdrop"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setEditing(false)}
+                        className="fixed inset-0 bg-black/90 backdrop-blur-md"
+                    />
+                    <motion.div
+                        key="drawer-content"
+                        initial={{ x: "100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", damping: 30, stiffness: 250 }}
+                        className="relative w-full max-w-2xl h-full bg-black border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col z-[1001]"
+                    >
                         {/* Header */}
-                        <div className="p-8 border-b border-white/10 flex items-center justify-between bg-black/20">
-                            <div>
-                                <h2 className="text-2xl font-bold text-white">Edit Profile</h2>
-                                <p className="text-sm text-muted-foreground">Update your public creator details.</p>
+                        <div className="p-12 border-b border-white/5 flex flex-col gap-1 items-start bg-zinc-950/40 backdrop-blur-3xl relative">
+                            <div className="flex items-center justify-between w-full">
+                                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.3em]">Identity Console</span>
+                                <button onClick={() => setEditing(false)} className="group/close p-3 hover:bg-white/5 rounded-2xl transition-all text-zinc-500 hover:text-white border border-transparent hover:border-white/10">
+                                    <X className="w-5 h-5 group-hover/close:rotate-90 transition-transform duration-300" />
+                                </button>
                             </div>
-                            <button onClick={() => setEditing(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white">
-                                <X className="w-6 h-6" />
-                            </button>
+                            <h2 className="text-3xl font-bold text-white tracking-tight mt-4">Personalize Dossier</h2>
+                            <p className="text-sm text-zinc-500 font-medium">Refine your professional data and public signals</p>
                         </div>
 
-                        <div className="p-8 space-y-6 overflow-y-auto custom-scrollbar">
-                            <div className="space-y-4">
+                        <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar flex-1">
+                            <div className="space-y-6">
                                 <div className="grid grid-cols-2 gap-6">
                                     <Input label="Display Name" value={formData.display_name} onChange={(v: string) => setFormData({ ...formData, display_name: v })} />
                                     <Input label="Location" value={formData.location} onChange={(v: string) => setFormData({ ...formData, location: v })} icon={<MapPin className="w-4 h-4" />} />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between ml-1">
-                                        <label className="text-sm font-bold text-muted-foreground">Bio</label>
+                                <div className="space-y-2 group/input">
+                                    <div className="flex items-center justify-between px-1">
+                                        <label className="text-[11px] font-mono font-black text-zinc-500 uppercase tracking-widest group-focus-within/input:text-emerald-400 transition-colors">
+                                            Bio
+                                        </label>
                                         <button
                                             onClick={handleGeneratePitch}
                                             disabled={generatingPitch}
-                                            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+                                            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#999] hover:text-white transition-colors disabled:opacity-50"
                                         >
                                             {generatingPitch ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
                                             Generate with AI
@@ -354,171 +407,114 @@ export default function CreatorProfile({ profile, onProfileUpdate }: { profile: 
                                     <textarea
                                         value={formData.bio}
                                         onChange={e => setFormData({ ...formData, bio: e.target.value })}
-                                        rows={4}
-                                        className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-primary/50 focus:bg-primary/5 focus:ring-1 focus:ring-primary/20 transition-all text-white placeholder:text-muted-foreground/30 resize-none"
+                                        rows={6}
+                                        className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-emerald-500/50 focus:bg-emerald-500/5 transition-all text-white placeholder:text-muted-foreground/30 resize-none font-medium text-sm leading-relaxed"
                                         placeholder="Tell brands about your audience and content style..."
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-muted-foreground ml-1">Niche</label>
-                                        <select
-                                            value={formData.niche}
-                                            onChange={e => setFormData({ ...formData, niche: e.target.value })}
-                                            className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-primary/50 focus:bg-primary/5 text-white outline-none appearance-none"
-                                        >
-                                            {["SaaS", "Startups", "AI", "Tech", "Productivity", "Finance", "Marketing", "Developer Tools", "Other"].map(n => (
-                                                <option key={n} value={n} className="bg-gray-900">{n}</option>
-                                            ))}
-                                        </select>
+                                <div className="grid grid-cols-2 gap-8">
+                                    <div className="space-y-2 group/input">
+                                        <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest group-focus-within/input:text-emerald-400 transition-colors ml-1">Niche</label>
+                                        <div className="relative">
+                                            <select
+                                                value={formData.niche}
+                                                onChange={e => setFormData({ ...formData, niche: e.target.value })}
+                                                className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-emerald-500/30 focus:bg-emerald-500/5 text-white outline-none appearance-none font-medium transition-all"
+                                            >
+                                                {["SaaS", "Startups", "AI", "Tech", "Productivity", "Finance", "Marketing", "Developer Tools", "Other"].map(n => (
+                                                    <option key={n} value={n} className="bg-zinc-950 text-white font-medium">{n}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                                                <ArrowRight className="w-4 h-4 rotate-90" />
+                                            </div>
+                                        </div>
                                     </div>
                                     <Input label="Min Budget ($)" type="number" value={formData.min_budget} onChange={(v: string) => setFormData({ ...formData, min_budget: v })} icon={<DollarSign className="w-4 h-4" />} />
                                 </div>
                             </div>
 
-                            {/* Security Toggle */}
-                            <div className="pt-6 border-t border-white/10">
+                            {/* Security Section */}
+                            <div className="pt-8 border-t border-white/10">
                                 <button
                                     onClick={() => setShowPasswordFields(!showPasswordFields)}
-                                    className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-white transition-colors"
+                                    className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-emerald-400 transition-colors group/sec"
                                 >
-                                    <Lock className="w-4 h-4" />
-                                    {showPasswordFields ? "Cancel Password Change" : "Change Password"}
+                                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/5 group-hover/sec:border-emerald-500/20 transition-all">
+                                        <Lock className="w-3.5 h-3.5" />
+                                    </div>
+                                    {showPasswordFields ? "Abort Security Update" : "Update Credentials"}
                                 </button>
 
-                                {showPasswordFields && (
-                                    <div className="mt-4 p-6 bg-black/40 rounded-2xl border border-white/5 space-y-4 animate-in slide-in-from-top-2">
-                                        <Input
-                                            label="New Password"
-                                            type={showPassword ? "text" : "password"}
-                                            value={passwordData.newPassword}
-                                            onChange={(v: string) => setPasswordData({ ...passwordData, newPassword: v })}
-                                            icon={<Lock className="w-4 h-4" />}
-                                            rightElement={
-                                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-muted-foreground hover:text-white">
-                                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                                </button>
-                                            }
-                                        />
-                                        <Input
-                                            label="Confirm Password"
-                                            type="password"
-                                            value={passwordData.confirmPassword}
-                                            onChange={(v: string) => setPasswordData({ ...passwordData, confirmPassword: v })}
-                                            icon={<Lock className="w-4 h-4" />}
-                                        />
-                                        <button
-                                            onClick={handleChangePassword}
-                                            disabled={saving || !passwordData.newPassword}
-                                            className="w-full py-3 bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 rounded-xl font-bold transition-all disabled:opacity-50"
+                                <AnimatePresence>
+                                    {showPasswordFields && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: "auto" }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="mt-6 p-6 bg-white/[0.02] rounded-2xl border border-white/5 space-y-6 overflow-hidden"
                                         >
-                                            Update Password
-                                        </button>
-                                    </div>
-                                )}
+                                            <Input
+                                                label="New Password"
+                                                type={showPassword ? "text" : "password"}
+                                                value={passwordData.newPassword}
+                                                onChange={(v: string) => setPasswordData({ ...passwordData, newPassword: v })}
+                                                icon={<Lock className="w-4 h-4" />}
+                                                rightElement={
+                                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-zinc-500 hover:text-white">
+                                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                    </button>
+                                                }
+                                            />
+                                            <Input
+                                                label="Confirm Password"
+                                                type="password"
+                                                value={passwordData.confirmPassword}
+                                                onChange={(v: string) => setPasswordData({ ...passwordData, confirmPassword: v })}
+                                                icon={<Lock className="w-4 h-4" />}
+                                            />
+                                            <button
+                                                onClick={handleChangePassword}
+                                                disabled={saving || !passwordData.newPassword}
+                                                className="w-full py-3.5 bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                                            >
+                                                Perform Security Override
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
 
-                        <div className="p-6 border-t border-white/10 bg-black/40 flex justify-end gap-3">
-                            <button onClick={() => setEditing(false)} className="px-6 py-3 rounded-xl font-bold text-muted-foreground hover:text-white transition-colors">Cancel</button>
+                        <div className="p-10 border-t border-white/5 bg-zinc-950/40 backdrop-blur-2xl flex items-center justify-between gap-6">
+                            <button onClick={() => setEditing(false)} className="px-8 py-4 text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Discard Changes</button>
                             <SaveButton
                                 onClick={handleSaveProfile}
                                 loading={saving}
-                                label="Save Profile"
-                                className="!px-8 !py-3 w-full sm:w-auto"
+                                label="Update Identity"
+                                className="!px-12 !py-4 !rounded-[2rem] w-full sm:w-auto shadow-[0_0_40px_rgba(16,185,129,0.1)]"
                             />
                         </div>
-                    </div>
-                </div>
-                , document.body)}
-
-            {/* Upgrade Modal (Portal) */}
-            {showUpgradeModal && createPortal(
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-[12px] bg-black/60 animate-in fade-in duration-500">
-                    <div className="relative w-full max-w-sm group">
-                        {/* Subtle Outer Glow */}
-                        <div className="absolute -inset-1 bg-gradient-to-r from-zinc-500 to-zinc-500 rounded-[32px] opacity-10 blur-xl group-hover:opacity-20 transition duration-1000"></div>
-
-                        <div className="relative bg-[#080a0f] border border-white/5 rounded-[30px] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-500">
-
-                            {/* Header Section - Compact */}
-                            <div className="relative h-28 flex flex-col items-center justify-center overflow-hidden border-b border-white/5">
-                                <div className="absolute inset-0 z-0">
-                                    <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[140%] rounded-full bg-gradient-to-br from-primary/10 via-zinc-600/5 to-transparent blur-[60px]" />
-                                </div>
-
-                                <div className="relative z-10 text-center">
-                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-black text-primary uppercase tracking-[0.2em] mb-1">
-                                        Pro Access
-                                    </div>
-                                    <h2 className="text-xl font-black text-white tracking-tight">ELEVATE YOUR PROFILE</h2>
-                                </div>
-                            </div>
-
-                            {/* Main Body - Compact */}
-                            <div className="p-6 space-y-6 relative z-10">
-                                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 text-center relative overflow-hidden">
-                                    <div className="flex items-end justify-center gap-1 mb-4">
-                                        <span className="text-3xl font-black text-white">$4.99</span>
-                                        <span className="text-gray-500 font-bold text-[10px] mb-1.5 uppercase tracking-widest">/ LIFETIME</span>
-                                    </div>
-
-                                    <div className="space-y-3 text-left">
-                                        {[
-                                            { title: "Priority Search", icon: <Zap className="w-3.5 h-3.5 text-primary" /> },
-                                            { title: "Verified Pro Badge", icon: <Crown className="w-3.5 h-3.5 text-primary" /> },
-                                            { title: "Greater Trust", icon: <ShieldCheck className="w-3.5 h-3.5 text-primary" /> }
-                                        ].map((benefit, i) => (
-                                            <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                                                <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/10">
-                                                    {benefit.icon}
-                                                </div>
-                                                <span className="text-[11px] font-bold text-gray-300 uppercase tracking-wider">{benefit.title}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <button
-                                        onClick={handleUpgrade}
-                                        disabled={upgrading}
-                                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-zinc-500 to-zinc-600 text-black font-black text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 relative overflow-hidden group/btn disabled:opacity-50 shadow-lg shadow-primary/10"
-                                    >
-                                        {upgrading ? (
-                                            <Loader2 className="animate-spin w-5 h-5" />
-                                        ) : (
-                                            <span className="relative z-10 flex items-center gap-2">
-                                                GO PRO NOW <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                                            </span>
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:animate-shimmer" />
-                                    </button>
-
-                                    <button
-                                        onClick={() => setShowUpgradeModal(false)}
-                                        className="w-full text-[10px] font-bold text-gray-600 uppercase tracking-widest hover:text-white transition-colors p-2"
-                                    >
-                                        Maybe later
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                , document.body)}
-        </div>
+                    </motion.div>
+                </div>,
+                document.body
+            )}
+        </>
     );
 }
 
 function Input({ label, value, onChange, placeholder, required, type = "text", icon, rightElement }: any) {
     return (
-        <div className="space-y-1.5">
-            <label className="text-sm font-bold text-muted-foreground ml-1">{label} {required && "*"}</label>
+        <div className="space-y-2 group/input">
+            <div className="flex items-center justify-between px-1">
+                <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest group-focus-within/input:text-emerald-400 transition-colors">
+                    {label} {required && <span className="text-emerald-500 opacity-50">*</span>}
+                </label>
+            </div>
             <div className="relative group">
                 {icon && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-white transition-colors pointer-events-none">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within/input:text-emerald-400 transition-colors pointer-events-none">
                         {icon}
                     </div>
                 )}
@@ -526,7 +522,7 @@ function Input({ label, value, onChange, placeholder, required, type = "text", i
                     type={type}
                     value={value || ""}
                     onChange={e => onChange(e.target.value)}
-                    className={`w-full p-4 ${icon ? "pl-11" : ""} bg-white/5 border border-white/10 rounded-2xl focus:border-primary/50 focus:bg-primary/5 focus:ring-0 transition-all text-white placeholder:text-muted-foreground/30 font-medium`}
+                    className={`w-full p-4 ${icon ? "pl-11" : ""} bg-white/[0.03] border border-white/10 rounded-2xl focus:border-emerald-500/30 focus:bg-emerald-500/5 focus:ring-0 transition-all text-white placeholder:text-zinc-700 font-medium text-sm`}
                     placeholder={placeholder} required={required}
                 />
                 {rightElement && (

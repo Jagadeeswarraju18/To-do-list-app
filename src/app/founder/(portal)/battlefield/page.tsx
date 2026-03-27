@@ -103,25 +103,25 @@ export default function BattlefieldPage() {
             {/* Header Area */}
             <div className="relative group/header">
                 <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-transparent rounded-[40px] blur-2xl opacity-50 transition duration-1000" />
-                <div className="relative glass-panel p-8 md:p-12 overflow-hidden border-white/5">
+                <div className="relative glass-panel p-6 md:p-8 overflow-hidden border-white/5">
                     <div className="absolute -top-24 -right-24 opacity-5 pointer-events-none transition-transform duration-1000">
                         <Swords className="w-96 h-96 text-white" />
                     </div>
 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             <div className="flex items-center gap-4">
-                                <div className="bg-white/10 text-white p-3 rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
-                                    <Swords className="w-8 h-8" />
+                                <div className="bg-white/10 text-white p-2.5 rounded-xl border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                                    <Swords className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase">
+                                    <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">
                                         The Battlefield
                                     </h1>
                                     <div className="h-1 w-12 bg-white rounded-full mt-1" />
                                 </div>
                             </div>
-                            <p className="text-zinc-400 text-lg max-w-2xl font-normal leading-relaxed">
+                            <p className="text-zinc-400 text-sm max-w-xl font-normal leading-relaxed">
                                 Deploy hunter-bot strategy to track leads who are actively looking to <span className="text-white font-semibold">switch from your competitors</span>.
                             </p>
                             <div className="flex flex-wrap gap-4">
@@ -137,10 +137,10 @@ export default function BattlefieldPage() {
                         <button
                             onClick={handleDiscover}
                             disabled={discovering}
-                            className="group relative px-10 py-5 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-2xl transition-all shadow-2xl shadow-primary/20 active:scale-95 disabled:opacity-50 flex items-center gap-4 overflow-hidden text-xs tracking-[0.2em] uppercase"
+                            className="group relative px-8 py-3.5 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-xl transition-all shadow-2xl shadow-primary/20 active:scale-95 disabled:opacity-50 flex items-center gap-3 overflow-hidden text-[10px] tracking-[0.2em] uppercase"
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                            {discovering ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />}
+                            {discovering ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />}
                             Execute Strategic Scout
                         </button>
                     </div>

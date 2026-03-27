@@ -118,11 +118,11 @@ export default function DashboardPage() {
         <div className="space-y-12 pb-20">
             {/* Command Center Header */}
             <div className="relative group/header overflow-visible">
-                <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-transparent rounded-[40px] blur-2xl opacity-50 group-hover/header:opacity-100 transition duration-1000" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-transparent rounded-[40px] blur-2xl opacity-50 group-hover/header:opacity-100 transition duration-1000" />
                 <div className="relative glass-panel p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 border-white/5">
                 <div className="relative z-10 flex items-start gap-6">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-white/10 blur-xl rounded-full" />
+                            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
                             <div className="relative w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-[0_0_35px_rgba(54,34,34,0.3)]">
                                 <Radar className="w-8 h-8 shadow-[0_0_5px_rgba(0,0,0,0.1)]" />
                             </div>
@@ -132,9 +132,9 @@ export default function DashboardPage() {
                                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
                                     Command Center
                                 </h1>
-                                <Link href="/founder/opportunities" className="hidden sm:flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-all">
-                                    <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(54,34,34,0.8)] animate-pulse" />
-                                    <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Autopilot Active</span>
+                                <Link href="/founder/opportunities" className="hidden sm:flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/20 rounded-full hover:bg-primary/20 transition-all shadow-lg shadow-black/5">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Autopilot Active</span>
                                 </Link>
                             </div>
                             <p className="text-zinc-400 font-normal tracking-tight text-base">
@@ -220,7 +220,6 @@ export default function DashboardPage() {
                 >
                     {/* Distribution Roadmap */}
                     <div className="glass-panel p-8 relative overflow-hidden group/brief">
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] pointer-events-none group-hover/brief:bg-white/10 transition-colors duration-1000" />
                         <div className="flex items-center justify-between mb-10">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-white/10 rounded-lg">
@@ -273,7 +272,7 @@ export default function DashboardPage() {
                                             <span className="text-xs font-black text-zinc-300 group-hover/channel:text-white transition-colors uppercase tracking-widest">X Network</span>
                                         </div>
                                         <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-                                            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                                            <div className="w-1 h-1 rounded-full bg-emerald-500" />
                                             <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">High Flow</span>
                                         </div>
                                     </div>
@@ -306,7 +305,6 @@ export default function DashboardPage() {
                     transition={{ delay: 0.6 }}
                     className="glass-panel p-8 flex flex-col space-y-8 relative overflow-hidden group h-fit border-zinc-500/10"
                 >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[40px] pointer-events-none group-hover:bg-white/10 transition-colors duration-1000" />
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                             <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">Live Feed</div>
@@ -324,7 +322,7 @@ export default function DashboardPage() {
                             {loading ? (
                                 <div className="flex flex-col gap-8">
                                     {[1, 2, 3].map(i => (
-                                        <div key={i} className="space-y-3 animate-pulse">
+                                        <div key={i} className="space-y-3">
                                             <div className="h-3 w-32 bg-white/5 rounded-full" />
                                             <div className="h-32 w-full bg-white/5 rounded-3xl" />
                                         </div>
@@ -341,7 +339,7 @@ export default function DashboardPage() {
                                     >
                                         <div className="flex justify-between items-center px-1">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(180,83,9,0.8)]" />
+                                                <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(48,30,30,0.8)]" />
                                                 <span className="text-[10px] font-bold text-white uppercase tracking-wider">Tactical Opening</span>
                                             </div>
                                             <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{signal.source === 'reddit_post' ? 'Reddit' : signal.source === 'linkedin_post' ? 'LinkedIn' : 'X'} Stream</span>
@@ -409,12 +407,12 @@ function MetricCard({ title, value, subtext, icon, accentColor, delay }: any) {
                 <div className="p-2 bg-white/5 rounded-xl border border-white/5 transition-all duration-500">
                     {icon}
                 </div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{title}</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300">{title}</div>
             </div>
             
             <div className="space-y-1">
                 <div className="text-2xl font-bold tracking-tight text-white">{value}</div>
-                <div className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">{subtext}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-400">{subtext}</div>
             </div>
 
             <div className="absolute bottom-0 left-0 h-1 w-0 bg-white group-hover:w-full transition-all duration-700" />

@@ -92,7 +92,7 @@ export function UpvoteButton({ productId, initialUpvotes, size = "md" }: UpvoteB
                 : 'bg-slate-800/40 border-slate-700/50 text-slate-400 hover:bg-rose-500/5 hover:border-rose-500/20 hover:text-rose-400'
                 }`}
         >
-            <Heart className={`${size === 'sm' ? 'w-3.5 h-3.5' : size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'} transition-transform duration-300 ${isUpvoted ? 'fill-current scale-110' : 'group-hover:scale-110'}`} />
+            <Heart className={`${size === 'sm' ? 'w-3.5 h-3.5' : size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'} premium-icon transition-transform duration-300 ${isUpvoted ? 'fill-current scale-110' : 'group-hover:scale-110'}`} strokeWidth={1.5} />
             <span className={`${size === 'sm' ? 'text-[10px]' : 'text-xs'} font-bold tabular-nums`}>{upvotesCount}</span>
         </button>
     );

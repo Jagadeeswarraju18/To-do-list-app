@@ -23,7 +23,7 @@ export default function SignalSelector({ onSelect, compact = false }: SignalSele
     };
 
     return (
-        <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-yellow-400" />
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">Daily Briefing: Top 3 Signals</h3>

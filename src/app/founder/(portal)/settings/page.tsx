@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, User, Mail, Shield, Linkedin, Instagram, Link as LinkIcon, Lock, PenSquare, X, Globe, Calendar, Camera, Plus, Trash2, CreditCard, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { XLogo } from "@/components/ui/XLogo";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser } from "@/components/providers/UserProvider";
@@ -50,7 +51,7 @@ function UserSettingsContent() {
         confirm: ""
     });
 
-    // Custom social link state
+    const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
     const [newSocial, setNewSocial] = useState({ platform: "", url: "" });
     const [isAddingSocial, setIsAddingSocial] = useState(false);
 
@@ -259,444 +260,404 @@ function UserSettingsContent() {
     };
 
     return (
-        <div className="space-y-10 animate-fade-up">
-            <div className="mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold text-white uppercase tracking-tight">Account Settings</h1>
-                <p className="text-zinc-500 text-sm font-medium">Manage your profile, billing, and platform integrations.</p>
-            </div>
-
-            {/* Premium Profile Card */}
-            <div className="relative group overflow-hidden rounded-3xl bg-[#0A0A0A] border border-white/10 shadow-2xl transition-all duration-500 hover:shadow-white/5">
-
-                {/* Banner / Header */}
-                <div className="h-48 bg-gradient-to-r from-zinc-900/40 via-black to-zinc-900/40 relative overflow-hidden">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
-                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#423F3E]/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <>
+            <div className="space-y-10 animate-fade-up">
+                <div className="mb-8">
+                    <h1 className="text-2xl md:text-3xl font-bold text-white uppercase tracking-tight">Account Settings</h1>
+                    <p className="text-zinc-500 text-sm font-medium">Manage your profile, billing, and platform integrations.</p>
                 </div>
 
-                <div className="px-8 pb-8 relative">
-                    {/* Floating Avatar & Action */}
-                    <div className="flex justify-between items-end -mt-16 mb-6">
-                        <div className="relative">
-                            <div className="w-32 h-32 rounded-3xl bg-black border-4 border-[#0A0A0A] shadow-xl overflow-hidden relative group/avatar">
-                                {profile.avatar_url ? (
-                                    <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110" />
-                                ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-white/10 to-zinc-900/10 flex items-center justify-center">
-                                        <User className="w-12 h-12 text-white" />
-                                    </div>
-                                )}
-                            </div>
-                            <div className="absolute bottom-2 right-2 w-4 h-4 rounded-full bg-white border-2 border-black" title="Online" />
-                        </div>
+                {/* Premium Profile Card */}
+                <div className="relative group overflow-hidden rounded-3xl bg-[#0A0A0A] border border-white/10 shadow-2xl transition-all duration-500 hover:shadow-white/5">
 
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="bg-primary text-white px-6 py-2.5 rounded-2xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-[#423F3E] transition-all shadow-xl active:scale-95 shadow-primary/20"
-                        >
-                            <PenSquare className="w-4 h-4" />
-                            Edit Profile
-                        </button>
+                    {/* Banner / Header */}
+                    <div className="h-48 bg-gradient-to-r from-zinc-900/40 via-black to-zinc-900/40 relative overflow-hidden">
+                        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
+                        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#423F3E]/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
+                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
                     </div>
 
-                    {/* Content */}
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <div className="md:col-span-2 space-y-3 pt-2">
-                            <div>
-                                <h2 className="text-3xl font-bold text-white tracking-tight uppercase">{profile.full_name || "Founder"}</h2>
-                                <p className="text-zinc-500 text-sm font-medium">{profile.email}</p>
-                            </div>
-                            <div className="flex flex-wrap gap-2 pt-1">
-                                <Badge icon={<Calendar className="w-3.5 h-3.5" />} text={`Member since ${memberSince}`} />
-                                <Badge icon={<Shield className="w-3.5 h-3.5" />} text="Founder Privilege" color="silver" />
-                            </div>
-                        </div>
-
-                        {/* Social Stack */}
-                        <div className="flex flex-col gap-3 justify-center">
-                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Online Presence</p>
-                            <div className="flex flex-wrap gap-2">
-                                {Object.entries(profile.social_links).map(([key, url]) => (
-                                    url &&                                    <SocialButton key={key} href={url} icon={getSocialIcon(key)} type={key.toLowerCase()} label={key} />
-                                ))}
-                                {Object.keys(profile.social_links).length === 0 && (
-                                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest italic">No links linked</span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="mt-8 space-y-8">
-                <Section title="Plans & Billing" icon={<CreditCard className="w-5 h-5 text-white" />}>
-                    <div className="grid lg:grid-cols-4 gap-6 mb-8 mt-14">
-                        {/* Free Plan */}
-                        <div className={`relative p-8 rounded-[32px] border transition-all duration-500 group flex flex-col ${currentPlan === 'Free' ? 'bg-white/[0.03] border-zinc-500/30' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
-                            {currentPlan === 'Free' && (
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-br from-secondary to-secondary/60 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg shadow-primary/20 z-10">
-                                    Active Plan
-                                </div>
-                            )}
-                            <div className="flex items-center justify-between mb-6">
-                                <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest text-[#999]">Legacy</span>
-                            </div>
-                            <div className="mb-8">
-                                <div className="flex items-baseline gap-1 mb-2">
-                                    <span className="text-3xl font-bold text-white tracking-tight">$0</span>
-                                    <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">/month</span>
-                                </div>
-                                <p className="text-zinc-500 text-xs font-medium">Standard search capabilities.</p>
-                            </div>
-                            <ul className="space-y-3.5 mb-10 flex-grow">
-                                <FeatureItem text="1 Active Product" />
-                                <FeatureItem text="Basic Signal Scanning" />
-                                <FeatureItem text="Limited AI Drafts" />
-                            </ul>
-                            <button className="w-full py-3.5 rounded-2xl bg-white/5 text-zinc-500 font-bold text-[10px] uppercase tracking-widest border border-white/5 mt-auto" disabled>
-                                Currently Active
-                            </button>
-                        </div>
-
-                        {/* Starter Plan */}
-                        <div className={`relative p-8 rounded-[32px] border transition-all duration-500 group flex flex-col ${currentPlan === 'Starter' ? 'bg-white/[0.03] border-zinc-500/30' : 'bg-black/40 border-white/5 hover:border-white/10'}`}>
-                            <div className="flex items-center justify-between mb-6">
-                                <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Growth</span>
-                            </div>
-                            <div className="mb-8">
-                                <div className="flex items-baseline gap-2 mb-1">
-                                    <span className="text-3xl font-bold text-white tracking-tight">$15</span>
-                                    <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">/month</span>
-                                </div>
-                                <div className="text-[9px] font-bold text-white uppercase tracking-widest mb-2">Early Adopter Pricing</div>
-                                <p className="text-zinc-500 text-xs font-medium">Enhanced discovery tools.</p>
-                            </div>
-                            <ul className="space-y-3.5 mb-10 flex-grow">
-                                <FeatureItem text="3 Active Products" />
-                                <FeatureItem text="Deep Signal Analysis" />
-                                <FeatureItem text="Priority AI Features" />
-                                <FeatureItem text="Full Platform Access" />
-                            </ul>
-                            <button className="w-full py-3.5 rounded-2xl bg-primary text-white font-bold text-[10px] uppercase tracking-widest hover:bg-[#423F3E] transition-all shadow-xl active:scale-95 mt-auto shadow-primary/20">
-                                Upgrade Plan
-                            </button>
-                        </div>
-
-                        {/* Pro Plan */}
-                        <div className={`relative p-8 rounded-[32px] border transition-all duration-500 group flex flex-col bg-zinc-900 border-white/20 hover:border-white/40`}>
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-br from-secondary to-secondary/60 text-white text-[9px] font-bold uppercase tracking-widest rounded-full border border-primary/20 z-10 whitespace-nowrap shadow-xl shadow-primary/20">
-                                Recommended
-                            </div>
-                            <div className="flex items-center justify-between mb-6 mt-1">
-                                <span className="text-white text-[10px] font-bold uppercase tracking-widest">Enterprise</span>
-                            </div>
-                            <div className="mb-8">
-                                <div className="flex items-baseline gap-1 mb-2">
-                                    <span className="text-3xl font-bold text-white tracking-tight">$39</span>
-                                    <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">/month</span>
-                                </div>
-                                <p className="text-zinc-500 text-xs font-medium">Full automation suite.</p>
-                            </div>
-                            <ul className="space-y-3.5 mb-10 flex-grow">
-                                <FeatureItem text="10 Active Products" />
-                                <FeatureItem text="Automated Engagement" />
-                                <FeatureItem text="Team Collaboration" />
-                                <FeatureItem text="Priority Scanning" />
-                            </ul>
-                                <button className="w-full py-3.5 rounded-2xl bg-gradient-to-br from-secondary to-secondary/60 text-white font-bold text-[10px] uppercase tracking-widest hover:border-white/30 transition-all shadow-lg active:scale-95 mt-auto shadow-primary/20">
-                                    Get Pro Now
-                                </button>
-                        </div>
-
-                        {/* Ultra Plan */}
-                        <div className={`relative p-8 rounded-[32px] border transition-all duration-500 group flex flex-col bg-black/40 border-white/5 hover:border-white/10`}>
-                            <div className="flex items-center justify-between mb-6">
-                                <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Unlimited</span>
-                            </div>
-                            <div className="mb-8">
-                                <div className="flex items-baseline gap-1 mb-2">
-                                    <span className="text-3xl font-bold text-white tracking-tight">$69</span>
-                                    <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">/month</span>
-                                </div>
-                                <p className="text-zinc-500 text-xs font-medium">Strategic market control.</p>
-                            </div>
-                            <ul className="space-y-3.5 mb-10 flex-grow">
-                                <FeatureItem text="Unlimited Products" />
-                                <FeatureItem text="Custom AI Models" />
-                                <FeatureItem text="White-label Reports" />
-                                <FeatureItem text="API Access" />
-                            </ul>
-                            <button className="w-full py-3.5 rounded-2xl bg-white/5 text-white font-bold text-[10px] uppercase tracking-widest border border-white/5 hover:bg-white/10 transition-all active:scale-95 mt-auto">
-                                Contact Sales
-                            </button>
-                        </div>
-                    </div>
-
-
-                    {/* Billing Support Note */}
-                    <p className="text-center text-xs text-muted-foreground pb-4">
-                        Secure payments powered by Stripe. All plans are billed monthly. Need a custom plan for your agency? <span className="text-white hover:underline cursor-pointer">Contact us.</span>
-                    </p>
-                </Section>
-
-                {/* Platform Connections */}
-                <Section title="Platform Connections" icon={<Globe className="w-5 h-5 text-white" />}>
-                    <div className="grid gap-6">
-                        <div className="p-4 bg-black/40 rounded-xl border border-white/10 flex items-center justify-between group hover:border-white/30 transition-all shadow-inner">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shadow-lg">
-                                    <XLogo className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-white flex items-center gap-2">
-                                        X / Twitter
-                                        {xIntegration ? (
-                                            <div className="flex items-center gap-1.5">
-                                                <span className="text-[10px] bg-white/10 text-white px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-white/20">Active</span>
-                                                <span className="text-[10px] bg-white/5 text-zinc-500 px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-white/5 flex items-center gap-1">
-                                                    <Shield className="w-2.5 h-2.5" /> Authority
-                                                </span>
-                                            </div>
-                                        ) : (
-                                            <span className="text-[10px] bg-white/5 text-zinc-600 px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-white/5">Disconnected</span>
-                                        )}
-                                    </h3>
-                                    <p className="text-xs text-muted-foreground mt-1 max-w-md leading-relaxed">
-                                        {xIntegration
-                                            ? `Your account (@${xIntegration.external_username}) is now powering personalized DMs and better lead discovery.`
-                                            : "Connect your X account to enable AI profile scanning for better personalization and automated DMs."
-                                        }
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                {xIntegration ? (
-                                    <div className="text-right">
-                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                                            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                                            <p className="text-xs font-bold text-white uppercase tracking-wider">@{xIntegration.external_username}</p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            disabled={disconnectingX}
-                                            onClick={handleDisconnectX}
-                                            className="text-[10px] text-red-500 hover:text-red-400 uppercase tracking-widest font-bold mt-2 transition-colors disabled:opacity-50"
-                                        >
-                                            {disconnectingX ? "Disconnecting..." : "Disconnect Account"}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        disabled={connectingX}
-                                        onClick={handleConnectX}
-                                        className="px-6 py-3 bg-gradient-to-br from-secondary to-secondary/60 text-white text-[10px] font-bold uppercase tracking-widest rounded-2xl hover:border-white/30 transition-all flex items-center gap-2 shadow-xl active:scale-95 disabled:opacity-50 shadow-primary/20"
-                                    >
-                                        {connectingX ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XLogo className="w-3.5 h-3.5" />}
-                                        Link X Account
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </Section>
-            </div>
-
-            {/* Edit Modal */}
-            {isEditing && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md bg-black/80 animate-in fade-in duration-200">
-                    <div className="bg-[#0A0A0A] border border-white/10 w-full max-w-4xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 pointer-events-auto">
-                        {/* Header */}
-                        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-black/20">
-                            <div>
-                                <h2 className="text-xl font-bold text-white">Edit Profile</h2>
-                                <p className="text-sm text-muted-foreground">Update your personal details and security.</p>
-                            </div>
-                            <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white">
-                                <X className="w-6 h-6" />
-                            </button>
-                        </div>
-
-                        {/* Scrollable Content */}
-                        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 custom-scrollbar">
-                            <form id="profile-form" onSubmit={handleSubmit} className="space-y-8">
-                                {/* Profile Info */}
-                                <Section title="Profile Information" icon={<User className="w-5 h-5 text-white" />}>
-                                    <div className="flex flex-col md:flex-row gap-8 items-start">
-                                        <div className="flex flex-col items-center gap-4">
-                                            <div className="relative group w-32 h-32">
-                                                <div className="w-full h-full rounded-full bg-black/40 border-2 border-dashed border-white/20 flex items-center justify-center overflow-hidden">
-                                                    {profile.avatar_url ? (
-                                                        <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <User className="w-10 h-10 text-muted-foreground" />
-                                                    )}
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center cursor-pointer"
-                                                >
-                                                    {uploadingAvatar ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : <Camera className="w-6 h-6 text-white" />}
-                                                </button>
-                                                <input
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleAvatarUpload}
-                                                    className="hidden"
-                                                />
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">Click to upload image</p>
-                                        </div>
-                                        <div className="flex-1 w-full space-y-4">
-                                            <Input
-                                                label="Full Name"
-                                                value={profile.full_name}
-                                                onChange={(v: string) => setProfile({ ...profile, full_name: v })}
-                                                required
-                                            />
-                                            <div className="space-y-2 opacity-60">
-                                                <label className="text-sm font-medium text-muted-foreground">Email Address</label>
-                                                <div className="w-full p-3 bg-black/20 border border-white/5 rounded-xl flex items-center gap-3">
-                                                    <Mail className="w-4 h-4 text-muted-foreground" />
-                                                    <span className="text-sm text-white">{profile.email}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Section>
-
-
-                                {/* Socials */}
-                                <Section title="Social Connections" icon={<LinkIcon className="w-5 h-5 text-white" />}>
-                                    <div className="grid md:grid-cols-2 gap-6">
-                                        {/* Standard Socials */}
-                                        <Input label="X / Twitter" icon={<XLogo className="w-4 h-4" />} value={profile.social_links.twitter || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, twitter: v } })} placeholder="@username or URL" />
-                                        <Input label="LinkedIn" icon={<Linkedin className="w-4 h-4" />} value={profile.social_links.linkedin || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, linkedin: v } })} placeholder="LinkedIn URL" />
-                                        <Input label="Instagram" icon={<Instagram className="w-4 h-4" />} value={profile.social_links.instagram || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, instagram: v } })} placeholder="@username" />
-                                        <Input label="Personal Website" icon={<Globe className="w-4 h-4" />} value={profile.social_links.website || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, website: v } })} placeholder="https://..." />
-
-                                        {/* Custom Socials */}
-                                        {Object.entries(profile.social_links).map(([key, value]) => {
-                                            if (['twitter', 'linkedin', 'instagram', 'website'].includes(key)) return null;
-                                            return (
-                                                <div key={key} className="relative group">
-                                                    <Input
-                                                        label={key}
-                                                        icon={<Globe className="w-4 h-4" />}
-                                                        value={value}
-                                                        onChange={(v: string) => setProfile({
-                                                            ...profile,
-                                                            social_links: { ...profile.social_links, [key]: v }
-                                                        })}
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeSocial(key)}
-                                                        className="absolute top-0 right-0 p-1 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    >
-                                                        <Trash2 className="w-3 h-3" />
-                                                    </button>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Add New Logic */}
-                                    <div className="mt-4 pt-4 border-t border-white/5">
-                                        {!isAddingSocial ? (
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsAddingSocial(true)}
-                                                className="text-sm text-white hover:text-zinc-300 flex items-center gap-2 font-medium transition-colors"
-                                            >
-                                                <Plus className="w-4 h-4" /> Add Custom Link
-                                            </button>
-                                        ) : (
-                                            <div className="flex gap-2 items-end animate-in fade-in slide-in-from-top-2">
-                                                <div className="w-1/3">
-                                                    <Input
-                                                        label="Platform Name"
-                                                        placeholder="e.g. YouTube"
-                                                        value={newSocial.platform}
-                                                        onChange={(v: string) => setNewSocial({ ...newSocial, platform: v })}
-                                                    />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <Input
-                                                        label="URL"
-                                                        placeholder="https://..."
-                                                        value={newSocial.url}
-                                                        onChange={(v: string) => setNewSocial({ ...newSocial, url: v })}
-                                                    />
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={handleAddSocial}
-                                                    className="p-3 bg-white hover:bg-zinc-200 text-black rounded-xl mb-[2px]"
-                                                >
-                                                    <Plus className="w-5 h-5" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setIsAddingSocial(false)}
-                                                    className="p-3 bg-white/5 hover:bg-white/10 text-white rounded-xl mb-[2px]"
-                                                >
-                                                    <X className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </Section>
-
-                                {/* Security */}
-                                <Section title="Security" icon={<Shield className="w-5 h-5 text-white" />}>
-                                    {!showPasswordFields ? (
-                                        <div className="flex items-center justify-between p-4 bg-black/40 rounded-xl border border-white/10">
-                                            <div className="space-y-1">
-                                                <h3 className="font-medium flex items-center gap-2 text-white">
-                                                    <Lock className="w-4 h-4 text-white" /> Password
-                                                </h3>
-                                                <p className="text-sm text-muted-foreground">Secure your account with a strong password.</p>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowPasswordFields(true)}
-                                                className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-sm transition-colors border border-white/10 font-medium"
-                                            >
-                                                Change Password
-                                            </button>
-                                        </div>
+                    <div className="px-8 pb-8 relative">
+                        {/* Floating Avatar & Action */}
+                        <div className="flex justify-between items-end -mt-16 mb-6">
+                            <div className="relative">
+                                <div className="w-32 h-32 rounded-3xl bg-black border-4 border-[#0A0A0A] shadow-xl overflow-hidden relative group/avatar">
+                                    {profile.avatar_url ? (
+                                        <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110" />
                                     ) : (
-                                        <div className="space-y-4 bg-black/40 p-6 rounded-xl border border-white/10 animate-in fade-in slide-in-from-top-2">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-medium text-white">Set New Password</h3>
-                                                <button type="button" onClick={() => setShowPasswordFields(false)} className="text-xs text-muted-foreground hover:text-white">Cancel</button>
-                                            </div>
-                                            <Input label="New Password" type="password" icon={<Lock className="w-4 h-4" />} value={passwords.new} onChange={(v: string) => setPasswords({ ...passwords, new: v })} placeholder="Enter new password" />
-                                            <Input label="Confirm New Password" type="password" icon={<Lock className="w-4 h-4" />} value={passwords.confirm} onChange={(v: string) => setPasswords({ ...passwords, confirm: v })} placeholder="Confirm new password" />
+                                        <div className="w-full h-full bg-gradient-to-br from-white/10 to-zinc-900/10 flex items-center justify-center">
+                                            <User className="w-12 h-12 text-white" />
                                         </div>
                                     )}
-                                </Section>
-                            </form>
+                                </div>
+                                <div className="absolute bottom-2 right-2 w-4 h-4 rounded-full bg-white border-2 border-black" title="Online" />
+                            </div>
+
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                className="bg-primary text-white px-6 py-2.5 rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2 hover:bg-[#423F3E] transition-all shadow-xl active:scale-95 shadow-primary/20"
+                            >
+                                <PenSquare className="w-4 h-4" />
+                                Edit Profile
+                            </button>
                         </div>
 
-                        {/* Footer */}
-                        <div className="p-6 border-t border-white/10 bg-black/40 flex items-center justify-between gap-4">
-                            <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-3 text-muted-foreground hover:text-white font-medium transition-colors">Cancel</button>
-                            <SaveButton
-                                onClick={handleSubmit}
-                                loading={saving}
-                                label="Save Changes"
-                                className="!px-8 !py-3"
-                            />
+                        {/* Content */}
+                        <div className="grid md:grid-cols-3 gap-8">
+                            <div className="md:col-span-2 space-y-3 pt-2">
+                                <div>
+                                    <h2 className="text-3xl font-bold text-white tracking-tight uppercase">{profile.full_name || "Founder"}</h2>
+                                    <p className="text-zinc-500 text-sm font-medium">{profile.email}</p>
+                                </div>
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                    <Badge icon={<Calendar className="w-3.5 h-3.5" />} text={`Member since ${memberSince}`} />
+                                    <Badge icon={<Shield className="w-3.5 h-3.5" />} text="Founder Privilege" color="silver" />
+                                </div>
+                            </div>
+
+                            {/* Social Stack */}
+                            <div className="flex flex-col gap-3 justify-center">
+                                <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest mb-2">Online Presence</p>
+                                <div className="flex flex-wrap gap-3">
+                                    {Object.entries(profile.social_links).map(([key, url]) => (
+                                        url && <SocialButton key={key} href={url} icon={getSocialIcon(key)} type={key.toLowerCase()} label={key} />
+                                    ))}
+                                    {Object.keys(profile.social_links).length === 0 && (
+                                        <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest italic opacity-50">No signals linked</span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+
+                <div className="mt-12 space-y-12">
+                    <Section title="Plans & Billing" icon={<CreditCard className="w-5 h-5 text-white" />}>
+                        {/* Billing Toggle (iki.ai style) */}
+                        <div className="flex flex-col items-center justify-center mt-2 mb-6 transition-all duration-700">
+                            <div className="inline-flex p-1 bg-zinc-950/80 backdrop-blur-3xl rounded-[20px] border border-white/10 relative overflow-hidden w-full max-w-[420px] group/toggle shadow-2xl">
+                                {/* Yearly Button (Primary Selection, Left-aligned) */}
+                                <button
+                                    onClick={() => setBillingCycle("yearly")}
+                                    className={`relative z-10 flex-1 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 flex items-center justify-center gap-3 rounded-[16px] ${billingCycle === "yearly" ? "text-black" : "text-zinc-500 hover:text-zinc-300"}`}
+                                >
+                                    Yearly
+                                    <span className={`text-[8px] font-black px-2 py-0.5 rounded-md border transition-all ${billingCycle === "yearly" ? "bg-black/5 border-black/10 text-black/40" : "bg-white/5 border-white/10 text-zinc-600"}`}>
+                                        Save 25% Off
+                                    </span>
+                                </button>
+
+                                {/* Monthly Button */}
+                                <button
+                                    onClick={() => setBillingCycle("monthly")}
+                                    className={`relative z-10 flex-1 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 rounded-[16px] flex items-center justify-center ${billingCycle === "monthly" ? "text-black" : "text-zinc-500 hover:text-zinc-300"}`}
+                                >
+                                    Monthly
+                                </button>
+
+                                {/* Sliding Active Indicator (Equal Width Logic) */}
+                                <motion.div
+                                    className="absolute top-1 bottom-1 bg-white shadow-[0_0_30px_rgba(255,255,255,0.3)] pointer-events-none"
+                                    initial={false}
+                                    animate={{
+                                        left: billingCycle === "yearly" ? 4 : "50%",
+                                        width: "calc(50% - 4px)",
+                                    }}
+                                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                                    style={{ borderRadius: 16 }}
+                                />
+                            </div>
+                            <p className="mt-8 text-[9px] font-black text-zinc-900 uppercase tracking-[0.6em] flex items-center gap-3 mb-8">
+                                <div className="w-1.5 h-1.5 rounded-full bg-zinc-900" />
+                                Secure Checkout / Billed {billingCycle === "yearly" ? "Annually" : "Monthly"}
+                            </p>
+                        </div>
+
+                        <div className="grid lg:grid-cols-4 gap-6 mb-12">
+                            {/* Seed Plan */}
+                            <div className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] border-white/10 hover:border-white/20 hover:shadow-2xl hover:shadow-white/[0.02]`}>
+                                {currentPlan === 'Free' && (
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-zinc-800 text-white text-[10px] font-black uppercase tracking-widest rounded-full border border-white/20 shadow-xl z-10">
+                                        Current Logic
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between mb-8">
+                                    <span className="text-zinc-600 text-[11px] font-black uppercase tracking-[0.2em]">Legacy / Seed</span>
+                                </div>
+                                <div className="mb-10">
+                                    <div className="flex items-baseline gap-1 mb-2">
+                                        <span className="text-4xl font-black text-white tracking-widest">$0</span>
+                                        <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
+                                    </div>
+                                    <p className="text-zinc-600 text-xs font-bold uppercase tracking-tight">Pre-launch exploration.</p>
+                                </div>
+                                <ul className="space-y-4 mb-10 flex-grow">
+                                    <FeatureItem text="1 Active Product" />
+                                    <FeatureItem text="5 Intent Signals / day" />
+                                    <FeatureItem text="Basic Discovery Mode" />
+                                </ul>
+                                <button className="w-full py-4 rounded-xl bg-white/5 text-zinc-700 font-black text-[10px] uppercase tracking-widest border border-white/5 opacity-50 pointer-events-none mt-auto">
+                                    Active Account
+                                </button>
+                            </div>
+
+                            {/* Startup Plan */}
+                            <div className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] border-white/10 hover:border-white/20 hover:shadow-2xl hover:shadow-white/[0.02]`}>
+                                <div className="flex items-center justify-between mb-8">
+                                    <span className="text-zinc-600 text-[11px] font-black uppercase tracking-[0.2em]">Startup</span>
+                                </div>
+                                <div className="mb-10">
+                                    <div className="flex items-baseline gap-2 mb-2">
+                                        <span className="text-4xl font-black text-white tracking-widest">
+                                            ${billingCycle === "yearly" ? "15" : "19"}
+                                        </span>
+                                        <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
+                                    </div>
+                                    <div className="text-[10px] font-black text-zinc-700 uppercase tracking-widest mb-3">
+                                        {billingCycle === "yearly" ? "Billed Annually" : "Flex Monthly"}
+                                    </div>
+                                    <p className="text-zinc-600 text-xs font-bold uppercase tracking-tight">For serious solo builders.</p>
+                                </div>
+                                <ul className="space-y-4 mb-10 flex-grow">
+                                    <FeatureItem text="3 Active Products" />
+                                    <FeatureItem text="Deep Intent Analysis" />
+                                    <FeatureItem text="Personalized Hooks" />
+                                    <FeatureItem text="Real-time Alerts" />
+                                </ul>
+                                <button className="w-full py-4 rounded-xl bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-xl active:scale-95 mt-auto">
+                                    Initialize Startup
+                                </button>
+                            </div>
+
+                            {/* Scale Plan (Recommended) */}
+                            <div className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] border-white/20 shadow-2xl shadow-white/[0.05] hover:border-white/40`}>
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                                    <Badge text="Recommended Priority" color="silver" />
+                                </div>
+                                <div className="flex items-center justify-between mb-8 mt-4">
+                                    <span className="text-white text-[11px] font-black uppercase tracking-[0.2em]">Scale</span>
+                                </div>
+                                <div className="mb-10">
+                                    <div className="flex items-baseline gap-1 mb-2">
+                                        <span className="text-5xl font-black text-white tracking-widest">
+                                            ${billingCycle === "yearly" ? "30" : "39"}
+                                        </span>
+                                        <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
+                                    </div>
+                                    <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-3">
+                                        {billingCycle === "yearly" ? "Save 25% Active" : "Dynamic Monthly"}
+                                    </div>
+                                    <p className="text-zinc-500 text-xs font-bold uppercase tracking-tight">Complete Autopilot suite.</p>
+                                </div>
+                                <ul className="space-y-4 mb-10 flex-grow">
+                                    <FeatureItem text="10 Active Products" />
+                                    <FeatureItem text="Autopilot Engagement" />
+                                    <FeatureItem text="Market Intel API" />
+                                    <FeatureItem text="Priority Lead Signal" />
+                                    <FeatureItem text="Strategy Dashboard" />
+                                </ul>
+                                <button className="w-full py-4 rounded-xl bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-xl active:scale-95 mt-auto shadow-white/10">
+                                    Scale Operations
+                                </button>
+                            </div>
+
+                            {/* Unlimited Plan */}
+                            <div className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] border-white/5 hover:border-white/20 hover:shadow-2xl hover:shadow-white/[0.02]`}>
+                                <div className="flex items-center justify-between mb-8">
+                                    <span className="text-zinc-600 text-[11px] font-black uppercase tracking-[0.2em]">Unlimited</span>
+                                </div>
+                                <div className="mb-10">
+                                    <div className="flex items-baseline gap-1 mb-2">
+                                        <span className="text-4xl font-black text-white tracking-widest">
+                                            ${billingCycle === "yearly" ? "45" : "59"}
+                                        </span>
+                                        <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
+                                    </div>
+                                    <p className="text-zinc-600 text-xs font-bold uppercase tracking-tight">Strategic market control.</p>
+                                </div>
+                                <ul className="space-y-4 mb-10 flex-grow">
+                                    <FeatureItem text="Unlimited Products" />
+                                    <FeatureItem text="Custom Lead Scoping" />
+                                    <FeatureItem text="Strategic Overview" />
+                                    <FeatureItem text="White-label Portal" />
+                                </ul>
+                                <button className="w-full py-4 rounded-xl bg-white/5 text-white font-black text-[10px] uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all active:scale-95 mt-auto">
+                                    Claim Unlimited
+                                </button>
+                            </div>
+                        </div>
+
+
+                        {/* Billing Support Note */}
+                        <p className="text-center text-xs text-muted-foreground pb-4">
+                            Secure payments powered by Stripe. All plans are billed monthly. Need a custom plan for your agency? <span className="text-white hover:underline cursor-pointer">Contact us.</span>
+                        </p>
+                    </Section>
+
+                </div>
+
+            </div>
+
+            <AnimatePresence>
+                {isEditing && (
+                    <div className="fixed inset-0 z-[100] flex justify-end overflow-hidden">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsEditing(false)}
+                            className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+
+                        <motion.div
+                            initial={{ x: "100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="relative w-full max-w-xl bg-black border-l border-white/10 flex flex-col h-screen rounded-none shadow-[-20px_0_50px_rgba(0,0,0,0.8)]"
+                        >
+                            {/* Industrial Top ID Bar */}
+                            <div className="h-1 w-full bg-white/10" />
+
+
+                            {/* Header */}
+                            <div className="p-8 border-b border-white/10 flex items-center justify-between">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        System / Identity / Edit
+                                    </div>
+                                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Edit Profile</h2>
+                                </div>
+                                <button
+                                    onClick={() => setIsEditing(false)}
+                                    className="p-2 hover:bg-white/5 border border-white/10 rounded-lg transition-all text-zinc-500 hover:text-white"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Scrollable Content */}
+                            <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+                                <form id="profile-form-fixed" onSubmit={handleSubmit} className="space-y-8">
+                                    {/* Profile Info */}
+                                    <Section title="Profile Information" icon={<User className="w-5 h-5 text-white" />}>
+                                        <div className="flex flex-col md:flex-row gap-8 items-start">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <div className="relative group w-32 h-32">
+                                                    <div className="w-full h-full rounded-2xl bg-black border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden">
+                                                        {profile.avatar_url ? (
+                                                            <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <User className="w-10 h-10 text-zinc-700" />
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => fileInputRef.current?.click()}
+                                                        className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center cursor-pointer"
+                                                    >
+                                                        {uploadingAvatar ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : <Camera className="w-6 h-6 text-white" />}
+                                                    </button>
+                                                    <input
+                                                        ref={fileInputRef}
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleAvatarUpload}
+                                                        className="hidden"
+                                                    />
+                                                </div>
+                                                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest font-black">Profile ID Photo</p>
+                                            </div>
+                                            <div className="flex-1 w-full space-y-6">
+                                                <Input
+                                                    label="Operator Name"
+                                                    value={profile.full_name}
+                                                    onChange={(v: string) => setProfile({ ...profile, full_name: v })}
+                                                    required
+                                                />
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-semibold text-zinc-400">Email Address</label>
+                                                    <div className="w-full p-3 bg-zinc-900 border border-white/5 rounded-xl flex items-center gap-3">
+                                                        <Mail className="w-4 h-4 text-zinc-500" />
+                                                        <span className="text-sm text-zinc-300">{profile.email}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Section>
+
+
+                                    {/* Socials */}
+                                    <Section title="External Comm Channels" icon={<LinkIcon className="w-5 h-5 text-white" />}>
+                                        <div className="grid md:grid-cols-2 gap-8">
+                                            {/* Standard Socials */}
+                                            <Input label="X / Twitter" icon={<XLogo className="w-3 h-3" />} value={profile.social_links.twitter || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, twitter: v } })} placeholder="@username or URL" />
+                                            <Input label="LinkedIn" icon={<Linkedin className="w-3 h-3" />} value={profile.social_links.linkedin || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, linkedin: v } })} placeholder="LinkedIn URL" />
+                                            <Input label="Instagram" icon={<Instagram className="w-3 h-3" />} value={profile.social_links.instagram || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, instagram: v } })} placeholder="@username" />
+                                            <Input label="Global Hub" icon={<Globe className="w-3 h-3" />} value={profile.social_links.website || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, website: v } })} placeholder="https://..." />
+                                        </div>
+                                    </Section>
+
+                                    {/* Security */}
+                                    <Section title="Security Protocol" icon={<Shield className="w-5 h-5 text-white" />}>
+                                        {!showPasswordFields ? (
+                                            <div className="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-xl">
+                                                <div className="space-y-1">
+                                                    <h3 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                                                        <Lock className="w-3 h-3 text-primary/60" /> Access Key
+                                                    </h3>
+                                                    <p className="text-[10px] text-zinc-600 font-mono">Rotate security credentials.</p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPasswordFields(true)}
+                                                    className="px-6 py-2 border border-white/10 hover:border-primary/40 hover:bg-primary/5 text-zinc-400 hover:text-primary text-[10px] font-black uppercase tracking-widest transition-all rounded-lg"
+                                                >
+                                                    INITIALIZE ROTATION
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-6 bg-white/[0.02] p-8 border border-white/5 rounded-xl animate-in fade-in slide-in-from-top-2">
+                                                <Input label="New Access Key" type="password" icon={<Lock className="w-3 h-3" />} value={passwords.new} onChange={(v: string) => setPasswords({ ...passwords, new: v })} placeholder="Enter new password" />
+                                                <Input label="Confirm Rotation" type="password" icon={<Lock className="w-3 h-3" />} value={passwords.confirm} onChange={(v: string) => setPasswords({ ...passwords, confirm: v })} placeholder="Confirm new password" />
+                                            </div>
+                                        )}
+                                    </Section>
+                                </form>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="p-8 border-t border-white/10 flex items-center justify-between bg-zinc-950/20">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditing(false)}
+                                    className="px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition-all"
+                                >
+                                    Abort / Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    form="profile-form-fixed"
+                                    disabled={saving}
+                                    className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-900 disabled:text-zinc-600 text-black text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 transition-all active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                            Executing...
+                                        </>
+                                    ) : (
+                                        'Commit Changes'
+                                    )}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </>
     );
 }
 
@@ -722,10 +683,12 @@ function SocialButton({ href, icon, type, label }: any) {
     return (
         <a
             href={link} target="_blank" rel="noopener noreferrer"
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:bg-white/20 hover:text-white hover:border-white/50 transition-all active:scale-95 group relative"
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:bg-white/20 hover:text-white hover:border-emerald-500/50 transition-all duration-300 active:scale-90 group relative"
         >
-            {icon}
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/90 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            <div className="w-4 h-4 flex items-center justify-center transition-transform group-hover:scale-110">
+                {icon}
+            </div>
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-black border border-white/10 text-[9px] font-mono font-bold uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-50 pointer-events-none translate-y-2 group-hover:translate-y-0">
                 {label}
             </div>
         </a>
@@ -738,36 +701,43 @@ function Badge({ icon, text, color = "default" }: any) {
         : "bg-white/5 text-zinc-500 border-white/5";
 
     return (
-        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 border ${styles}`}>
+        <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest flex items-center gap-2 border ${styles}`}>
             {icon} {text}
         </span>
     );
 }
 
+
+
 function Section({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) {
     return (
-        <div className="glass-card p-6 md:p-8 border-white/5 relative overflow-hidden group/section">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-3xl rounded-full -z-10 transition-all group-hover/section:bg-primary/10" />
-            <h2 className="text-lg font-bold mb-6 flex items-center gap-3 pb-4 border-b border-white/5 text-zinc-100 uppercase tracking-tight">
-                <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">{icon}</div>
-                {title}
+        <div className="relative group/section">
+            <h2 className="text-xs font-black mb-6 flex items-center gap-3 text-zinc-500 uppercase tracking-[0.2em]">
+                <div className="p-2 rounded-lg bg-white/5 border border-white/10 group-hover/section:text-emerald-400 group-hover/section:border-emerald-500/30 transition-all">
+                    {icon}
+                </div>
+                <span>{title}</span>
+                <div className="flex-1 h-px bg-white/10" />
             </h2>
-            <div className="relative">
+            <div className="pl-6 border-l border-white/5 space-y-6">
                 {children}
             </div>
         </div>
     );
 }
 
-function Input({ label, value, onChange, placeholder, required, icon, className = "", type = "text" }: any) {
+
+function Input({ label, value, onChange, placeholder, required, icon, className = "", type = "text", hint }: any) {
     return (
-        <div className="space-y-2 w-full">
-            <label className="text-sm font-medium text-muted-foreground flex justify-between">
-                <span>{label} {required && <span className="text-red-400">*</span>}</span>
-            </label>
+        <div className="space-y-2 group/input">
+            <div className="flex items-center justify-between px-1">
+                <label className="text-[11px] font-mono font-black text-zinc-500 uppercase tracking-widest group-focus-within/input:text-emerald-400 transition-colors">
+                    {label} {required && <span className="text-emerald-500 opacity-50">*</span>}
+                </label>
+            </div>
             <div className="relative group">
                 {icon && (
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-white transition-colors pointer-events-none">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within/input:text-emerald-500 transition-colors">
                         {icon}
                     </div>
                 )}
@@ -775,10 +745,11 @@ function Input({ label, value, onChange, placeholder, required, icon, className 
                     type={type}
                     value={value || ""}
                     onChange={e => onChange(e.target.value)}
-                    className={`w-full p-3 ${icon ? "pl-10" : ""} bg-black/40 border border-white/10 rounded-xl focus:border-white/50 focus:ring-1 focus:ring-zinc-500/50 transition-all text-white placeholder:text-muted-foreground/50 pointer-events-auto ${className}`}
+                    className={`w-full p-4 ${icon ? "pl-12" : "px-4"} bg-black border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 rounded-lg transition-all text-sm text-white outline-none placeholder:text-zinc-800 tracking-tight ${className}`}
                     placeholder={placeholder} required={required}
                 />
             </div>
+            {hint && <p className="text-[9px] font-mono text-zinc-700 uppercase tracking-tight pl-4">{hint}</p>}
         </div>
     );
 }
@@ -798,10 +769,10 @@ function FeatureItem({ text, color = "cocoa", icon }: { text: string; color?: st
 
     return (
         <li className="flex items-center gap-3 group/item">
-            <div className={`flex-shrink-0 p-1 rounded-lg border transition-all duration-300 group-hover/item:scale-110 ${iconBgMap[color] || iconBgMap.cocoa}`}>
-                {icon || <Check className="w-3.5 h-3.5 text-white" />}
+            <div className={`flex-shrink-0 p-1 rounded-lg border border-white/5 bg-white/[0.02] transition-all duration-300 group-hover/item:scale-110`}>
+                {icon || <Check className="w-3.5 h-3.5 text-zinc-600 group-hover/item:text-white transition-colors" />}
             </div>
-            <span className={`text-xs ${colorMap[color] || colorMap.cocoa}`}>
+            <span className={`text-[11px] font-medium tracking-tight text-zinc-500 group-hover/item:text-zinc-300 transition-colors`}>
                 {text}
             </span>
         </li>

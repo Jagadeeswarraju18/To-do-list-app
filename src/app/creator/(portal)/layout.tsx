@@ -33,12 +33,10 @@ export default async function CreatorLayout({
 
     return (
         <UserProvider>
-            <div className="min-h-screen bg-background flex text-white font-sans">
-                <Sidebar />
-                <main className="flex-1 md:ml-72 p-4 pt-18 md:p-8 md:pt-8 relative overflow-hidden">
-                    {/* Background Gradients */}
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/5 rounded-full blur-[100px] pointer-events-none" />
+            <div className="min-h-screen bg-transparent flex text-white font-sans relative overflow-hidden">
 
+                <Sidebar />
+                <main className="flex-1 md:ml-72 p-4 pt-18 md:p-8 md:pt-8 relative z-10">
                     <div className="max-w-7xl mx-auto relative z-10">
                         {children}
                     </div>

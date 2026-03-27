@@ -5,6 +5,8 @@ import DailyDigestEmail from "@/components/emails/DailyDigestEmail";
 import CalibrationEmail from "@/components/emails/CalibrationEmail";
 import { expandProductKeywords } from "@/lib/ai/keyword-expander";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Daily Digest Cron Endpoint
  * This route should be protected by a CRON secret in production.

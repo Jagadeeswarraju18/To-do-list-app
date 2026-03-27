@@ -264,11 +264,11 @@ export default function LinkedInModule({ product }: { product: any }) {
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-300">
+        <div className="space-y-8">
             {/* Redundant selector removed as it is now in the parent page */}
 
             {/* Input - Rich UI */}
-            <div className="glass-card p-5 border-[#0A66C2]/20">
+            <div className="glass-card !bg-[#0A0A0A] p-5 border-[#0A66C2]/20">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-1.5 rounded-lg bg-[#0A66C2]/10">
@@ -276,27 +276,27 @@ export default function LinkedInModule({ product }: { product: any }) {
                         </div>
                         <div>
                             <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">LINKEDIN POST GENERATOR</h2>
-                            <p className="text-[10px] font-bold text-gray-500 tracking-widest italic opacity-60 uppercase">Enter a topic (or click a signal above) → Pick a hook → Get a full post</p>
+                            <p className="text-[10px] font-bold text-zinc-300 tracking-[0.2em] italic uppercase">Enter a topic (or click a signal above) → Pick a hook → Get a full post</p>
                         </div>
                     </div>
                     <button
                         onClick={() => { setView("saved"); loadDrafts(); }}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 text-[10px] font-bold text-[#0A66C2] transition-all border border-[#0A66C2]/20"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 text-[10px] font-bold text-[#0A66C2] transition-all border border-[#0A66C2]/20 shadow-lg"
                     >
                         <BookOpen className="w-3 h-3" />
                         {savedDrafts.length > 0 ? `${savedDrafts.length} Saved` : 'History'}
                     </button>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-6 mb-6">
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Length</span>
-                        <div className="flex bg-[#0A66C2]/5 p-1 rounded-lg border border-[#0A66C2]/10 font-sans">
+                <div className="flex flex-wrap items-center gap-6 mb-8">
+                    <div className="flex items-center gap-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Length</span>
+                        <div className="flex bg-[#0A66C2]/5 p-1.5 rounded-xl font-sans">
                             {(['short', 'balanced', 'deep'] as const).map((l) => (
                                 <button
                                     key={l}
                                     onClick={() => setPreferredLength(l)}
-                                    className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${preferredLength === l ? "bg-zinc-800 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
+                                    className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${preferredLength === l ? "bg-zinc-800 text-white" : "text-gray-400 hover:text-gray-200"}`}
                                 >
                                     {l}
                                 </button>
@@ -304,18 +304,18 @@ export default function LinkedInModule({ product }: { product: any }) {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Strategy</span>
-                        <div className="flex bg-[#0A66C2]/5 p-1 rounded-lg border border-[#0A66C2]/10 font-sans">
+                    <div className="flex items-center gap-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Strategy</span>
+                        <div className="flex bg-[#0A66C2]/5 p-1.5 rounded-xl font-sans">
                             <button
                                 onClick={() => setIsProductLed(true)}
-                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${isProductLed ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
+                                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${isProductLed ? "bg-primary text-white" : "text-gray-400 hover:text-gray-200"}`}
                             >
                                 Product-Led
                             </button>
                             <button
                                 onClick={() => setIsProductLed(false)}
-                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${!isProductLed ? "bg-white/10 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
+                                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-gray-400 hover:text-gray-200"}`}
                             >
                                 General Viral
                             </button>
@@ -331,7 +331,7 @@ export default function LinkedInModule({ product }: { product: any }) {
                         placeholder="The hidden cost of 'ghost' subscriptions in startups..."
                         onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                     />
-                    <button onClick={handleGenerate} disabled={generating || !topic} className="px-8 py-3 bg-[#0A66C2] hover:bg-[#0A66C2]/90 text-white font-black rounded-xl transition-all shadow-xl shadow-[#0A66C2]/10 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap uppercase text-[10px] tracking-widest">
+                    <button onClick={handleGenerate} disabled={generating || !topic} className="premium-button px-8 py-3 text-white rounded-xl transition-all shadow-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap uppercase text-[10px] tracking-widest">
                         {generating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 fill-current" />}
                         Generate
                     </button>
@@ -397,13 +397,13 @@ export default function LinkedInModule({ product }: { product: any }) {
                     <div className="w-16 h-16 rounded-full bg-[#0A66C2]/10 flex items-center justify-center mb-6 relative">
                         <div className="absolute inset-0 rounded-full border-t-2 border-[#0A66C2]/30 animate-spin"></div>
                         <div className="absolute inset-2 rounded-full border-r-2 border-[#0A66C2] animate-spin duration-700"></div>
-                        <Sparkles className="w-6 h-6 text-[#0A66C2] animate-pulse" />
+                        <Sparkles className="w-6 h-6 text-primary" />
                     </div>
-                    <p className="text-sm font-bold text-white animate-pulse mb-2">{loadingMessages[loadingStep]}</p>
+                    <p className="text-sm font-bold text-white mb-2">{loadingMessages[loadingStep]}</p>
                     <div className="flex gap-1 justify-center">
-                        <div className="w-1 h-1 rounded-full bg-[#0A66C2] animate-bounce delay-0"></div>
-                        <div className="w-1 h-1 rounded-full bg-[#0A66C2] animate-bounce delay-100"></div>
-                        <div className="w-1 h-1 rounded-full bg-[#0A66C2] animate-bounce delay-200"></div>
+                        <div className="w-1 h-1 rounded-full bg-primary animate-bounce delay-0"></div>
+                        <div className="w-1 h-1 rounded-full bg-primary animate-bounce delay-100"></div>
+                        <div className="w-1 h-1 rounded-full bg-primary animate-bounce delay-200"></div>
                     </div>
                 </div>
             )}
@@ -411,8 +411,8 @@ export default function LinkedInModule({ product }: { product: any }) {
             {/* Empty State */}
             {hooks.length === 0 && !generating && !post && (
                 <div className="glass-card flex flex-col items-center justify-center text-center p-8 border-dashed border-white/10">
-                    <div className="w-12 h-12 rounded-full bg-[#0A66C2]/10 flex items-center justify-center mb-4">
-                        <Linkedin className="w-6 h-6 text-[#0A66C2]" />
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                        <Linkedin className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold text-white mb-1">Ready to Create?</h3>
                     <p className="text-xs text-muted-foreground max-w-sm">Enter a topic or click a signal above to generate viral hooks, full post drafts, and engagement strategies — all tailored to LinkedIn&apos;s algorithm.</p>
@@ -421,8 +421,8 @@ export default function LinkedInModule({ product }: { product: any }) {
 
             {/* Success Toast */}
             {showSavedToast && (
-                <div className="fixed bottom-8 right-8 bg-[#0A66C2]/10 border border-[#0A66C2]/20 text-[#0A66C2] px-6 py-4 rounded-xl shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-300 flex items-center gap-3 z-50">
-                    <div className="p-2 bg-[#0A66C2]/20 rounded-full">
+                <div className="fixed bottom-8 right-8 bg-primary/10 border border-primary/20 text-primary px-6 py-4 rounded-xl shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-300 flex items-center gap-3 z-50">
+                    <div className="p-2 bg-primary/20 rounded-full">
                         <CheckCheck className="w-5 h-5" />
                     </div>
                     <div>

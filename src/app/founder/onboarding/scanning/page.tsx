@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Zap, Radio, CheckCircle, Loader2 } from "lucide-react";

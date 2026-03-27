@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Radar, Menu, X } from "lucide-react";
+import { Radar, Menu, X, ArrowRight } from "lucide-react";
 
 export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -22,107 +22,130 @@ export function Navbar() {
         { name: "What we offer", href: "#features" },
         { name: "How it works", href: "#how-it-works" },
         { name: "Pricing", href: "#pricing" },
+        { name: "Discover", href: "/discover" },
+        { name: "FAQ", href: "#faq" },
         { name: "About", href: "/about" },
     ];
 
     const spring = {
-        type: "spring",
-        stiffness: 400,
+        type: "spring" as const,
+        stiffness: 500,
         damping: 30
     };
 
     return (
-        <div className="fixed top-8 left-0 right-0 z-[100] px-6 pointer-events-none">
-            <motion.header
-                initial={{ y: -50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={spring}
-                className="max-w-7xl mx-auto flex items-center justify-between pointer-events-auto"
+        <div className="fixed top-0 left-0 right-0 z-[100] flex justify-center pt-6 px-4 pointer-events-none">
+            <header
+                className={`
+                    w-full max-w-7xl mx-auto flex items-center justify-between pointer-events-auto
+                    px-6 py-3 rounded-full border transition-all duration-700
+                    ${isScrolled 
+                        ? "bg-black/80 backdrop-blur-2xl border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.8)]" 
+                        : "bg-black/20 backdrop-blur-md border-white/10"
+                    }
+                `}
             >
                 {/* Logo Section */}
-                {/* Logo Section - Forensic Obsidian Style */}
-                <Link href="/" className="flex items-center gap-3 group">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 transition-transform group-hover:rotate-12">
-                        <Radar className="h-4.5 w-4.5 text-white" />
-                    </div>
-                    <span className="text-xl font-bold tracking-tight text-white uppercase group-hover:tracking-[0.1em] transition-all">
-                        Marketing<span className="text-primary">X</span>
-                    </span>
-                </Link>
-
-                <div className={`
-                    hidden md:flex items-center gap-1 p-1 bg-white/[0.03] backdrop-blur-3xl rounded-3xl border border-white/[0.08] shadow-2xl transition-all duration-500
-                    ${isScrolled ? "px-2 py-1" : "px-3 py-1.5"}
-                `}>
-                    {navLinks.map((link) => (
-                        <Link key={link.name} href={link.href}>
-                            <motion.div
-                                whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
-                                className="px-5 py-2 text-[13px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all rounded-2xl cursor-pointer"
-                            >
-                                {link.name}
-                            </motion.div>
-                        </Link>
-                    ))}
+                <div className="flex items-center">
+                    <Link href="/" className="flex items-center gap-2.5 group">
+                        <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10 overflow-hidden shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <Radar className="h-5 w-5 text-white relative z-10" />
+                        </div>
+                        <span className="text-lg font-bold tracking-tight text-white transition-all duration-300">
+                            Marketing<span className="text-white/40 font-medium">X</span>
+                        </span>
+                    </Link>
                 </div>
 
-                {/* Action CTA */}
+                {/* Desktop Nav Links */}
+                <nav className="hidden md:flex items-center gap-1 bg-white/[0.03] border border-white/[0.05] rounded-full px-1.5 py-1">
+                    {navLinks.map((link) => (
+                        <Link 
+                            key={link.name} 
+                            href={link.href} 
+                            className="relative px-4 py-2 text-[13px] font-semibold text-gray-400 hover:text-white transition-colors group"
+                        >
+                            <span className="relative z-10">{link.name}</span>
+                            <div className="absolute inset-0 bg-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </Link>
+                    ))}
+                </nav>
+
+                {/* Right Actions */}
                 <div className="hidden md:flex items-center gap-4">
-                    <Link href="/login" className="text-[13px] font-medium text-zinc-400 hover:text-white transition-colors px-4">
-                        Login
+                    <Link 
+                        href="/login" 
+                        className="px-5 py-2 text-[13px] font-semibold text-gray-400 hover:text-white transition-all"
+                    >
+                        Log in
                     </Link>
                     <Link href="/signup">
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            transition={spring}
-                            className="px-6 py-2.5 bg-primary text-white font-bold text-[11px] uppercase tracking-widest rounded-2xl shadow-lg shadow-primary/20 border border-primary/20"
-                        >
+                        <button className="premium-button text-[12px] h-10 px-6 active:scale-95 transition-transform">
                             Get Started
-                        </motion.button>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
                     </Link>
                 </div>
 
                 {/* Mobile Toggle */}
                 <button
                     onClick={() => setMobileNav(!mobileNav)}
-                    className="md:hidden w-12 h-12 flex items-center justify-center rounded-full bg-white/[0.05] border border-white/10 text-white"
+                    className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-white/[0.05] border border-white/10 text-white transition-colors hover:bg-white/10 focus:outline-none"
                 >
-                    {mobileNav ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    {mobileNav ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
 
-                {/* Mobile Nav Dropdown */}
+                {/* Mobile Nav Overlay */}
                 <AnimatePresence>
                     {mobileNav && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 40, scale: 1 }}
-                            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                            transition={spring}
-                            className="md:hidden absolute top-12 left-0 right-0"
-                        >
-                            <div className="bg-[#000000]/98 backdrop-blur-3xl rounded-[40px] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-white/[0.08] space-y-8">
-                                {navLinks.map((link) => (
-                                    <Link
-                                        key={link.name}
-                                        href={link.href}
-                                        className="block text-2xl font-bold text-zinc-500 hover:text-white transition-all text-center"
-                                        onClick={() => setMobileNav(false)}
-                                    >
-                                        {link.name}
-                                    </Link>
-                                ))}
-                                <div className="h-px bg-white/5 w-1/4 mx-auto" />
-                                <Link href="/signup" onClick={() => setMobileNav(false)}>
-                                    <button className="w-full py-5 bg-white text-black font-bold rounded-2xl text-lg shadow-xl active:scale-95 transition-all">
-                                        Get Started
-                                    </button>
-                                </Link>
-                            </div>
-                        </motion.div>
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setMobileNav(false)}
+                                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[-1] md:hidden"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                                animate={{ opacity: 1, scale: 1, y: 12 }}
+                                exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                className="md:hidden absolute top-full left-0 right-0 mt-4 px-4"
+                            >
+                                <div className="glass-panel p-6 space-y-4 shadow-2xl">
+                                    <div className="grid gap-2">
+                                        {navLinks.map((link) => (
+                                            <Link
+                                                key={link.name}
+                                                href={link.href}
+                                                className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] text-lg font-medium text-gray-300 hover:text-white hover:bg-white/[0.08] transition-all"
+                                                onClick={() => setMobileNav(false)}
+                                            >
+                                                {link.name}
+                                                <ArrowRight className="w-4 h-4 opacity-50" />
+                                            </Link>
+                                        ))}
+                                    </div>
+                                    <div className="pt-4 space-y-3">
+                                        <Link href="/login" onClick={() => setMobileNav(false)}>
+                                            <button className="w-full py-4 text-[15px] font-bold text-gray-400 hover:text-white transition-colors">
+                                                Log in
+                                            </button>
+                                        </Link>
+                                        <Link href="/signup" onClick={() => setMobileNav(false)}>
+                                            <button className="premium-button w-full py-4 text-[15px]">
+                                                Get Started
+                                            </button>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </>
                     )}
                 </AnimatePresence>
-            </motion.header>
+            </header>
         </div>
     );
 }

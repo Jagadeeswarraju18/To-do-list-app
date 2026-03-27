@@ -257,7 +257,7 @@ export default function LoginPage() {
                                 <Radar className="h-5 w-5 text-white" />
                             </div>
                             <span className="text-xl font-bold tracking-tight text-white uppercase">
-                                Marketing<span className="text-primary">X</span>
+                                Marketing<span className="text-white/60">X</span>
                             </span>
                         </Link>
                     </motion.div>
@@ -428,7 +428,7 @@ export default function LoginPage() {
                             <div className="text-center mt-6">
                             <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
                                 No access key?{" "}
-                                <Link href="/signup" className="text-white hover:text-primary transition-colors underline underline-offset-4">
+                                <Link href="/signup" className="text-white hover:text-zinc-300 transition-colors underline underline-offset-4">
                                     Initialize Account
                                 </Link>
                             </p>

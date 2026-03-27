@@ -39,7 +39,7 @@ export default function FindCreatorsPage() {
             query = query.eq("niche", selectedNiche);
         }
 
-        const { data, error } = await query.order("is_upgraded", { ascending: false });
+        const { data, error } = await query;
 
         if (!error && data) {
             setCreators(data);
@@ -52,7 +52,7 @@ export default function FindCreatorsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0D0D0D]">
+        <div className="min-h-screen bg-transparent">
             <div className="max-w-7xl mx-auto space-y-6 md:space-y-10 animate-fade-up">
                 {/* Header Section */}
                 <div className="flex flex-col gap-6">
@@ -248,15 +248,9 @@ function CreatorCard({ creator, index, onClick }: { creator: any, index: number,
                         )}
                     </div>
                     {/* Status Dot */}
-                    {creator.is_upgraded ? (
-                        <div className="absolute bottom-0 right-0 bg-gradient-to-tr from-stone-400 to-[#362222] border-2 border-[#362222] w-5 h-5 rounded-full flex items-center justify-center shadow-lg animate-pulse z-20" title="Verified Pro">
-                            <Crown className="w-2.5 h-2.5 text-white fill-current" />
-                        </div>
-                    ) : (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#0a0f1a] rounded-full flex items-center justify-center z-20">
-                            <div className="w-2 h-2 bg-white rounded-full border border-[#0a0f1a]" />
-                        </div>
-                    )}
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#0a0f1a] rounded-full flex items-center justify-center z-20">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full border border-[#0a0f1a]" />
+                    </div>
                 </div>
 
                 {/* Content */}

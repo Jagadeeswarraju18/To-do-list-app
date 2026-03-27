@@ -162,11 +162,16 @@ export default function OpportunitiesPage() {
                 platform === 'reddit' ? discoverRedditAction :
                     discoverLinkedInAction;
 
-            const res = await action(scanWindow);
+            const res = await action(scanWindow, undefined, activeProductId || undefined);
             if (res.error) {
                 toast.error(res.error);
             } else {
                 toast.success(`Discovered ${res.addedCount} new signals on ${platform.toUpperCase()} in ${scanWindow}`);
+                if (res.runId) {
+                    setActiveRunId(res.runId);
+                    setActiveTab(platform);
+                    setShowArchived(false); // Ensure we are looking at Active Intelligence
+                }
                 fetchOpportunities();
                 fetchDiscoveryRuns();
             }
@@ -262,19 +267,19 @@ export default function OpportunitiesPage() {
             </div>
 
             {/* Condensed Discovery Console */}
-            <div className="glass-panel p-6 sm:p-8 space-y-8">
+            <div className="glass-panel p-5 sm:p-6 space-y-6">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="space-y-0.5">
                         <h3 className="text-sm font-bold uppercase tracking-widest text-white">Strategic Discovery</h3>
                         <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Select lookback window and scan for high-intent signals.</p>
                     </div>
-                    <div className="flex bg-black/40 p-1 rounded-3xl border border-white/5 w-fit overflow-x-auto no-scrollbar">
+                    <div className="flex bg-black p-1 rounded-3xl border border-white/10 w-fit overflow-x-auto no-scrollbar">
                         {SCAN_WINDOW_OPTIONS.map(option => (
                             <button
                                 key={option.value}
                                 onClick={() => setScanWindow(option.value)}
                                 className={`px-4 py-2 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${scanWindow === option.value
-                                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                    ? 'bg-zinc-800 text-white border border-white/20 shadow-lg'
                                     : 'text-zinc-500 hover:text-white hover:bg-white/5'
                                     }`}
                             >
@@ -296,8 +301,6 @@ export default function OpportunitiesPage() {
                         platform="x"
                         icon={<svg viewBox="0 0 24 24" className="w-8 h-8" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>}
                         loading={discovering}
-                        color="text-white"
-                        glow="from-white/10 to-transparent"
                         onClick={() => handleDiscovery('x')}
                         label="Scout X Feed"
                         sublabel="Network Intelligence"
@@ -305,10 +308,8 @@ export default function OpportunitiesPage() {
 
                     <DiscoveryButton
                         platform="reddit"
-                        icon={<MessageCircle className="w-8 h-8" />}
+                        icon={<svg viewBox="0 0 512 512" className="w-6 h-6" fill="currentColor"><path d="M440.3 203.5c-15 0-28.7 6.4-38.1 16.5-31.1-15.9-74.2-26.7-121.5-28.6l29.6-141.2 103.1 24.3c.5 19.8 16.4 35.8 35.8 35.8 19.8 0 35.8-16.1 35.8-35.8s-16.1-35.8-35.8-35.8c-15.3 0-28.3 9.4-33.5 22.9l-114.2-26.8c-4.4-1.1-8.9 1.1-10.3 5.3L256 166.3c-47.5 1.5-90.8 12.3-122.2 28.2-9.4-10.2-23.2-16.7-38.3-16.7-28.7 0-52 23.3-52 52 0 18.2 9.5 34.3 24 43.7-1.4 6-2.1 12.1-2.1 18.5 0 81.6 86 148 191.9 148s191.9-66.4 191.9-148c0-6.1-.7-12-2.1-17.8 14.5-9.3 24.1-25.3 24.1-43.6 0-28.8-23.4-52.1-52.1-52.1zM163.6 309.5c0-18.7 15.2-34 33.9-34 18.7 0 34 15.2 34 34 0 18.7-15.2 34-34 34-18.8 0-33.9-15.2-33.9-34zm114.7 93.5c-37.4 0-71.1-12.7-74.9-13.6-4.6-1-7.5-5.9-6.3-10.5 1-4.6 5.9-7.5 10.5-6.3 1.2 .3 31.8 10.1 70.7 10.1 38.6 0 69.2-9.8 70.3-10.1 4.6-1.2 9.4 1.7 10.6 6.3 1.2 4.6-1.7 9.4-6.3 10.6-3.7 .9-37.4 13.5-74.6 13.5zm42.1-59.5c-18.7 0-33.9-15.2-33.9-34 0-18.7 15.2-34 33.9-34 18.7 0 34 15.2 34 34 0 18.7-15.2 34-34 34z"/></svg>}
                         loading={discoveringReddit}
-                        color="text-orange-500"
-                        glow="from-orange-500/20 to-transparent"
                         onClick={() => handleDiscovery('reddit')}
                         label="Scout r/Feed"
                         sublabel="Community Signals"
@@ -318,8 +319,6 @@ export default function OpportunitiesPage() {
                         platform="linkedin"
                         icon={<svg viewBox="0 0 24 24" className="w-8 h-8" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>}
                         loading={discoveringLinkedIn}
-                        color="text-blue-500"
-                        glow="from-blue-500/20 to-transparent"
                         onClick={() => handleDiscovery('linkedin')}
                         label="Scout LinkedIn"
                         sublabel="Enterprise Signals"
@@ -330,16 +329,16 @@ export default function OpportunitiesPage() {
             {/* Filter Bar */}
             <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5 relative z-40">
                 <div className="flex flex-nowrap items-center justify-start gap-4 shrink-0 w-full lg:w-auto overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <div className="flex items-center gap-1.5 bg-black/40 p-1.5 rounded-3xl border border-white/5 shrink-0">
+                    <div className="flex items-center gap-1.5 bg-black p-1.5 rounded-3xl border border-white/10 shrink-0">
                         <button
                             onClick={() => setShowArchived(false)}
-                            className={`px-8 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${!showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                            className={`px-8 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${!showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
                         >
                             Active Intelligence
                         </button>
                         <button
                             onClick={() => setShowArchived(true)}
-                            className={`px-8 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                            className={`px-8 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
                         >
                             Historical Archive
                         </button>
@@ -418,7 +417,7 @@ export default function OpportunitiesPage() {
                                 {activeRunId ? (
                                     <span className="flex items-center gap-2">
                                         <span className="text-primary w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
-                                        {new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleDateString()}
+                                        {new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleDateString()} {new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 ) : "All Time"}
                                 <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform ${showSessionMenu ? 'rotate-180' : ''}`} />
@@ -451,7 +450,9 @@ export default function OpportunitiesPage() {
                                                     className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 flex items-center justify-between group ${activeRunId === run.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
                                                     >
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px]">{new Date(run.started_at).toLocaleDateString()}</span>
+                                                            <span className="text-[10px]">
+                                                                {new Date(run.started_at).toLocaleDateString()} {new Date(run.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
                                                             <span className={`text-[8px] font-medium ${activeRunId === run.id ? 'text-black/50' : 'text-gray-600'}`}>
                                                                 {run.platform.toUpperCase()}
                                                             </span>
@@ -473,12 +474,12 @@ export default function OpportunitiesPage() {
 
                     <div className="h-6 w-px bg-white/5 hidden lg:block" />
 
-                    <div className="flex overflow-x-auto no-scrollbar items-center bg-[#111111]/50 p-1 rounded-2xl border border-white/5 gap-1 w-full max-w-full sm:w-auto -mx-4 px-4 sm:mx-0 sm:px-1">
+                    <div className="flex overflow-x-auto no-scrollbar items-center bg-black p-1 rounded-2xl border border-white/10 gap-1 w-full max-w-full sm:w-auto -mx-4 px-4 sm:mx-0 sm:px-1">
                         {[
-                            { id: 'all', label: 'ALL', count: opportunities.filter(o => !isHandled(o)).length, color: 'emerald', icon: null },
-                            { id: 'x', label: 'X', count: opportunities.filter(o => o.source === 'tweet_url' && !isHandled(o)).length, color: 'zinc', icon: <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg> },
-                            { id: 'reddit', label: 'REDDIT', count: opportunities.filter(o => o.source === 'reddit_post' && !isHandled(o)).length, color: 'orange', icon: <MessageCircle className="w-3.5 h-3.5" /> },
-                            { id: 'linkedin', label: 'LINKEDIN', count: opportunities.filter(o => o.source === 'linkedin_post' && !isHandled(o)).length, color: 'blue', icon: <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg> }
+                            { id: 'all', label: 'ALL', count: opportunities.filter(o => showArchived ? isHandled(o) : !isHandled(o)).length, color: 'emerald', icon: null },
+                            { id: 'x', label: 'X', count: opportunities.filter(o => o.source === 'tweet_url' && (showArchived ? isHandled(o) : !isHandled(o))).length, color: 'zinc', icon: <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg> },
+                            { id: 'reddit', label: 'REDDIT', count: opportunities.filter(o => o.source === 'reddit_post' && (showArchived ? isHandled(o) : !isHandled(o))).length, color: 'orange', icon: <MessageCircle className="w-3.5 h-3.5" /> },
+                            { id: 'linkedin', label: 'LINKEDIN', count: opportunities.filter(o => o.source === 'linkedin_post' && (showArchived ? isHandled(o) : !isHandled(o))).length, color: 'blue', icon: <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg> }
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -487,11 +488,11 @@ export default function OpportunitiesPage() {
                                     setActiveRunId(null);
                                 }}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shrink-0 whitespace-nowrap ${activeTab === tab.id
-                                    ? tab.color === 'orange' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                                    ? tab.color === 'orange' ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/20'
                                         : tab.color === 'blue' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                            : tab.color === 'emerald' ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                            : tab.color === 'emerald' ? 'bg-zinc-800 text-white border border-white/20 shadow-xl'
                                                 : 'bg-zinc-800 text-white'
-                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                    : 'text-zinc-500 hover:text-white hover:bg-white/10'
                                     }`}
                             >
                                 {tab.icon}
@@ -514,9 +515,9 @@ export default function OpportunitiesPage() {
                         >
                             <div className="relative">
                                 <Loader2 className="w-12 h-12 animate-spin text-white" />
-                                <div className="absolute inset-0 blur-xl bg-white/10 animate-pulse rounded-full" />
+                                <div className="absolute inset-0 blur-xl bg-white/10 rounded-full" />
                             </div>
-                            <p className="font-bold tracking-widest uppercase text-[10px] animate-pulse">Scanning Global Streams...</p>
+                            <p className="font-bold tracking-widest uppercase text-[10px]">Scanning Global Streams...</p>
                         </motion.div>
                     ) : filteredOpportunities.length > 0 ? (
                         filteredOpportunities.map((opp, idx) => (
@@ -642,20 +643,35 @@ export default function OpportunitiesPage() {
     );
 }
 
-function DiscoveryButton({ platform, icon, loading, color, glow, onClick, label, sublabel }: any) {
+function DiscoveryButton({ platform, icon, loading, onClick, label, sublabel }: any) {
+    const isReddit = platform === 'reddit';
+    const isLinkedIn = platform === 'linkedin';
+    const isX = platform === 'x';
+
+    const iconColors = isReddit ? 'bg-[#FF4500]/10 text-[#FF4500] border-[#FF4500]/20 group-hover:bg-[#FF4500] group-hover:text-white' :
+                       isLinkedIn ? 'bg-[#0077B5]/10 text-[#0077B5] border-[#0077B5]/20 group-hover:bg-[#0077B5] group-hover:text-white' :
+                       isX ? 'bg-white/5 text-white border-white/10 group-hover:bg-white group-hover:text-black' :
+                       'bg-white/5 text-zinc-300 border-white/5 group-hover:bg-white/10 group-hover:text-white';
+
+    const glowColors = isReddit ? 'from-[#FF4500]/10' :
+                       isLinkedIn ? 'from-[#0077B5]/10' :
+                       isX ? 'from-white/10' :
+                       'from-white/5';
+
     return (
         <button
             onClick={onClick}
             disabled={loading}
-            className="group relative flex flex-col items-center justify-center gap-2 p-6 rounded-[24px] bg-black/40 border border-white/5 hover:border-white/20 transition-all overflow-hidden disabled:opacity-50 text-white"
+            className="group relative flex flex-col items-center justify-center gap-2 p-4 rounded-[20px] bg-black/40 border border-white/5 hover:border-white/20 transition-all overflow-hidden disabled:opacity-50 text-white"
         >
+            <div className={`absolute inset-0 bg-gradient-to-br ${glowColors} to-transparent pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity`} />
             <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors" />
-            <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white transition-all group-hover:scale-105 border border-white/5 group-hover:border-white/20">
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all group-hover:scale-105 border ${iconColors} shadow-xl relative z-10`}>
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : React.cloneElement(icon as React.ReactElement, { className: "w-4 h-4" })}
             </div>
-            <div className="text-center">
-                <div className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest group-hover:text-white transition-colors">{label}</div>
-                {sublabel && <div className="text-[8px] text-zinc-400 uppercase tracking-wider mt-0.5">{sublabel}</div>}
+            <div className="text-center relative z-10">
+                <div className="text-[10px] font-black text-white uppercase tracking-widest group-hover:scale-105 transition-transform">{label}</div>
+                {sublabel && <div className="text-[9px] text-zinc-300 font-bold uppercase tracking-wider mt-0.5 opacity-80 group-hover:opacity-100 transition-opacity whitespace-nowrap">{sublabel}</div>}
             </div>
         </button>
     );

@@ -1,21 +1,12 @@
 "use client";
 
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
-import { Check, ArrowRight, Sparkles, Loader2 } from "lucide-react";
+import { Check, ArrowRight, Sparkles, Loader2, Zap } from "lucide-react";
 import Link from "next/link";
 import { MouseEvent, useState } from "react";
 import { toast } from "sonner";
 
 const plans = [
-    {
-        id: "free",
-        name: "Free",
-        price: "0",
-        desc: "Essential for solo builders.",
-        features: ["1 Product Slot", "10 Signals / mo", "20 Post Drafts / mo", "Basic Intent Filter"],
-        btn: "Start Free",
-        popular: false
-    },
     {
         id: "starter",
         name: "Starter",
@@ -51,10 +42,6 @@ export function Pricing() {
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
     const handleCheckout = async (planId: string) => {
-        if (planId === 'free') {
-            window.location.href = '/signup';
-            return;
-        }
 
         setLoadingPlan(planId);
         try {
@@ -79,92 +66,74 @@ export function Pricing() {
     };
 
     return (
-        <section id="pricing" className="py-32 px-6 relative z-10 overflow-hidden bg-black">
-            <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-24 relative">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-zinc-400 text-[10px] font-black uppercase tracking-[0.3em] mb-10 backdrop-blur-md"
+        <section id="pricing" className="py-32 px-6 relative z-10 overflow-hidden bg-[#0A0A0A] scroll-mt-32">
+            <div className="max-w-[1440px] mx-auto">
+                <div className="text-center mb-32 relative">
+                    <div
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/5 bg-white/[0.02] text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mb-10 backdrop-blur-md"
                     >
-                        <Sparkles className="w-3.5 h-3.5 text-zinc-500" />
+                        <Zap className="w-3.5 h-3.5 text-primary" />
                         Infrastructure
-                    </motion.div>
+                    </div>
                     
-                    <motion.h2 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="heading-serif text-6xl md:text-8xl font-light text-white mb-8 tracking-tighter leading-[0.9]"
+                    <h2 
+                        className="heading-serif text-6xl md:text-[100px] font-light text-white mb-8 tracking-tighter leading-[0.9]"
                     >
-                        Leverage <span className="italic text-zinc-500">at scale.</span>
-                    </motion.h2>
+                        Leverage <span className="italic text-zinc-600">at scale.</span>
+                    </h2>
                     
-                    <motion.p 
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.4 }}
+                    <p 
                         className="text-zinc-500 max-w-xl mx-auto text-lg leading-relaxed font-medium"
                     >
                         Pick a plan that matches your current velocity. Upgrade or downgrade anytime as you grow.
-                    </motion.p>
-
-                    {/* Ambient Glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-white/[0.02] blur-[120px] rounded-full pointer-events-none" />
+                    </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2">
                     {plans.map((plan, i) => (
-                        <motion.div
+                        <div
                             key={plan.name}
-                            initial={{ opacity: 0, y: 40 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.7, delay: i * 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
-                            className={`group relative p-1 rounded-[32px] transition-all duration-700 ${plan.popular ? "bg-gradient-to-b from-white/20 to-transparent shadow-2xl shadow-white/5" : "bg-white/[0.03] hover:bg-white/[0.05]"}`}
+                            className={`group relative p-[1px] rounded-[40px] transition-all duration-700 ${plan.popular ? "bg-gradient-to-b from-primary/40 to-transparent shadow-2xl shadow-primary/5" : "bg-white/[0.03] hover:bg-white/[0.05]"}`}
                         >
-                            <div className="relative h-full bg-[#0a0a0a] rounded-[31px] p-10 flex flex-col border border-white/[0.03]">
+                            <div className="relative h-full bg-[#0d0d0d] rounded-[39px] p-10 flex flex-col border border-white/[0.03]">
                                 
                                 {plan.popular && (
                                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
-                                        <span className="px-3 py-1 rounded-full bg-white text-black text-[9px] font-black uppercase tracking-widest shadow-xl">
+                                        <span className="px-4 py-1.5 rounded-full bg-primary text-white text-[9px] font-black uppercase tracking-widest shadow-xl border border-white/10">
                                             Most Popular
                                         </span>
                                     </div>
                                 )}
 
                                 <div className="mb-10 text-center lg:text-left">
-                                    <h3 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-6">{plan.name}</h3>
+                                    <h3 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-8">{plan.name}</h3>
                                     <div className="flex items-baseline justify-center lg:justify-start gap-1.5 mb-2">
-                                        <span className="text-zinc-500 text-2xl font-light mb-auto mt-1">$</span>
+                                        <span className="text-zinc-600 text-2xl font-light mb-auto mt-1">$</span>
                                         <span className="text-5xl md:text-6xl font-medium text-white tracking-tighter">
                                             {plan.promoPrice ? plan.promoPrice : plan.price}
                                         </span>
-                                        <span className="text-zinc-600 text-sm font-medium">/mo</span>
+                                        <span className="text-zinc-700 text-sm font-medium">/mo</span>
                                     </div>
                                     
                                     {plan.promoPrice && (
-                                        <div className="flex items-center gap-2 justify-center lg:justify-start mb-4">
-                                            <span className="text-zinc-700 line-through text-sm font-light">${plan.price}</span>
-                                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10">
+                                        <div className="flex items-center gap-2 justify-center lg:justify-start mb-6">
+                                            <span className="text-zinc-800 line-through text-sm font-light">${plan.price}</span>
+                                            <span className="text-[9px] font-black text-primary uppercase tracking-widest px-2 py-0.5 rounded-full border border-primary/20 bg-primary/10">
                                                 Early Bird
                                             </span>
                                         </div>
                                     )}
 
-                                    <p className="text-zinc-500 text-[11px] leading-relaxed font-semibold min-h-[32px]">
+                                    <p className="text-zinc-600 text-[11px] leading-relaxed font-semibold min-h-[32px]">
                                         {plan.desc}
                                     </p>
                                 </div>
 
-                                <div className="space-y-4 mb-12 flex-grow">
+                                <div className="space-y-5 mb-12 flex-grow">
                                     {plan.features.map((f, idx) => (
-                                        <div key={f} className="flex items-start gap-3 group/feat">
-                                            <div className={`mt-1.5 w-1 h-1 rounded-full ${plan.popular ? "bg-white" : "bg-zinc-800 group-hover/feat:bg-zinc-400"} transition-colors`} />
-                                            <span className={`text-[11px] leading-tight font-medium transition-colors ${plan.popular ? "text-zinc-300 group-hover/feat:text-white" : "text-zinc-600 group-hover/feat:text-zinc-400"}`}>
+                                        <div key={f} className="flex items-start gap-4 group/feat">
+                                            <div className={`mt-1.5 w-1 h-1 rounded-full ${plan.popular ? "bg-primary" : "bg-zinc-800 group-hover/feat:bg-zinc-400"} transition-colors`} />
+                                            <span className={`text-[11px] leading-tight font-medium transition-colors ${plan.popular ? "text-zinc-400 group-hover/feat:text-white" : "text-zinc-600 group-hover/feat:text-zinc-400"}`}>
                                                 {f}
                                             </span>
                                         </div>
@@ -172,40 +141,37 @@ export function Pricing() {
                                 </div>
 
                                 <div className="mt-auto">
-                                    <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
+                                    <button
                                         onClick={() => handleCheckout(plan.id)}
                                         disabled={loadingPlan === plan.id}
-                                        className={`w-full py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${plan.popular 
-                                            ? "bg-white text-black hover:bg-zinc-200" 
-                                            : "border border-white/10 text-white hover:bg-white/5 hover:border-white/20"}`}
+                                        className={`w-full py-5 flex items-center justify-center gap-3 ${plan.popular 
+                                            ? "premium-button" 
+                                            : "premium-secondary-button"}`}
                                     >
                                         {loadingPlan === plan.id ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            <Loader2 className="h-4 w-4 animate-spin premium-icon" />
                                         ) : (
                                             <>
                                                 {plan.btn}
-                                                <ArrowRight className={`h-3.5 w-3.5 opacity-50 ${plan.popular ? "text-black" : "text-white"}`} />
+                                                <ArrowRight className="h-3.5 w-3.5 opacity-50 premium-icon" />
                                             </>
                                         )}
-                                    </motion.button>
+                                    </button>
                                 </div>
                             </div>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
 
-                <div className="mt-24 text-center">
-                    <p className="text-zinc-600 text-xs font-medium">
-                        Need a custom enterprise solution? <Link href="/contact" className="text-zinc-400 hover:text-white underline underline-offset-4 transition-colors">Contact us</Link>
+                <div className="mt-32 text-center">
+                    <p className="text-zinc-700 text-xs font-medium">
+                        Need a custom enterprise solution? <Link href="/contact" className="text-zinc-500 hover:text-white underline underline-offset-8 transition-colors">Request Callback</Link>
                     </p>
                 </div>
             </div>
 
             {/* Background elements */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1000px] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0,transparent_70%)] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1000px] bg-[radial-gradient(circle_at_center,rgba(54,34,34,0.05)_0,transparent_70%)] pointer-events-none" />
         </section>
     );
 }

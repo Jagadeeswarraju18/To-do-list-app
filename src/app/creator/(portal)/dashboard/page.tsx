@@ -108,7 +108,7 @@ export default function CreatorDashboardPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-2">Dashboard</h1>
-                    <p className="text-gray-400 font-medium tracking-tight border-l-2 border-primary pl-4 text-sm">
+                    <p className="text-zinc-400 font-medium tracking-tight border-l-2 border-primary pl-4 text-sm">
                         {loading ? "Welcome back..." : `Welcome back, ${profile?.display_name || 'Creator'}`}
                     </p>
                 </div>
@@ -139,7 +139,7 @@ export default function CreatorDashboardPage() {
                     title="Profile Views"
                     value={stats.profileViews}
                     subtext="Founders viewing your profile"
-                    icon={<Eye className="w-5 h-5 text-slate-400" />}
+                    icon={<Eye className="w-5 h-5 text-zinc-400" />}
                 />
             </div>
 
@@ -151,22 +151,22 @@ export default function CreatorDashboardPage() {
                             <Flame className="w-5 h-5 text-red-500" />
                             Market Heatmap
                         </h2>
-                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded border border-white/5">Real-time Demand</span>
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest bg-white/5 px-2 py-1 rounded border border-white/5">Real-time Demand</span>
                     </div>
 
                     <div className="glass-card p-6">
                         {loadingHeatmap ? (
                             <div className="flex items-center justify-center h-48">
-                                <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+                                <Loader2 className="w-6 h-6 text-zinc-400 animate-spin" />
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                                 {Object.entries(heatmap).sort((a, b) => b[1] - a[1]).map(([niche, count]) => (
                                     <div key={niche} className="relative group">
                                         <div className="flex flex-col items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all hover:bg-white/[0.04] h-full">
-                                            <div className="text-[10px] font-black uppercase tracking-tighter text-gray-400 mb-2 text-center line-clamp-1">{niche}</div>
+                                            <div className="text-[10px] font-black uppercase tracking-tighter text-zinc-400 mb-2 text-center line-clamp-1">{niche}</div>
                                             <div className="text-xl font-black text-white italic">{count}</div>
-                                            <div className="text-[8px] font-bold text-primary uppercase mt-1">Signals</div>
+                                            <div className="text-[8px] font-bold text-white/60 uppercase mt-1">Signals</div>
 
                                             {/* Small visual bar */}
                                             <div className="w-full h-1 bg-white/5 rounded-full mt-3 overflow-hidden">
@@ -198,12 +198,12 @@ export default function CreatorDashboardPage() {
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <span className="text-xs font-black text-white">{count}</span>
-                                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                                        <div className="w-2 h-2 rounded-full bg-primary" />
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        <p className="text-[10px] text-gray-500 italic mt-2 leading-relaxed">
+                        <p className="text-[10px] text-zinc-400 italic mt-2 leading-relaxed">
                             These niches have the highest volume of founder leads right now. Focus your content here.
                         </p>
                     </div>
@@ -228,13 +228,13 @@ export default function CreatorDashboardPage() {
                                         <div className="p-2 bg-primary/10 rounded-lg">
                                             <Target className="w-4 h-4 text-primary" />
                                         </div>
-                                        <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Target Lead</div>
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Target Lead</div>
                                     </div>
                                     <p className="text-xs text-white font-medium italic line-clamp-2">
                                         "{bounty.opportunities?.tweet_content || "No content"}"
                                     </p>
                                     <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">@{bounty.opportunities?.tweet_author || "user"}</span>
+                                        <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">@{bounty.opportunities?.tweet_author || "user"}</span>
                                         <div className="flex gap-2">
                                             <button className="px-3 py-1.5 bg-primary text-black font-black rounded-lg text-[9px] uppercase tracking-widest hover:bg-emerald-400 transition-all">
                                                 Accept
@@ -245,7 +245,7 @@ export default function CreatorDashboardPage() {
                                                 rel="noopener noreferrer"
                                                 className="p-1.5 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all"
                                             >
-                                                <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
+                                                <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
                                             </a>
                                         </div>
                                     </div>
@@ -265,7 +265,7 @@ export default function CreatorDashboardPage() {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab ? 'bg-zinc-600 text-white shadow-lg shadow-zinc-600/20' : 'text-gray-500 hover:text-white'}`}
+                                className={`px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab ? 'bg-zinc-600 text-white shadow-lg shadow-zinc-600/20' : 'text-zinc-400 hover:text-white'}`}
                             >
                                 {tab}
                             </button>
@@ -276,7 +276,7 @@ export default function CreatorDashboardPage() {
                 <div className="space-y-3">
                     {loading ? (
                         <div className="flex items-center justify-center p-12 glass-card">
-                            <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+                            <Loader2 className="w-6 h-6 text-zinc-400 animate-spin" />
                         </div>
                     ) : filteredDeals.length > 0 ? (
                         filteredDeals.map((deal) => (
@@ -291,7 +291,7 @@ export default function CreatorDashboardPage() {
                                                 <h4 className="font-black text-sm text-white">Offer from Founder</h4>
                                                 <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-black uppercase tracking-widest border border-primary/10">{deal.status}</span>
                                             </div>
-                                            <div className="flex items-center gap-3 text-[10px] font-bold text-gray-500">
+                                            <div className="flex items-center gap-3 text-[10px] font-bold text-zinc-400">
                                                 <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(deal.created_at).toLocaleDateString()}</span>
                                                 <span className="flex items-center gap-1 text-primary uppercase tracking-widest"><DollarSign className="w-3 h-3" /> Budget: ${deal.budget}</span>
                                             </div>
@@ -310,7 +310,7 @@ export default function CreatorDashboardPage() {
                                     <div className="mt-4 pt-4 border-t border-white/5 space-y-4 animate-fade-in">
                                         {deal.deliverables && (
                                             <div>
-                                                <p className="font-medium text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Deliverables</p>
+                                                <p className="font-medium text-[10px] text-zinc-400 mb-2 uppercase tracking-widest">Deliverables</p>
                                                 <div className="p-4 bg-black/40 rounded-lg text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
                                                     {deal.deliverables}
                                                 </div>
@@ -319,13 +319,13 @@ export default function CreatorDashboardPage() {
 
                                         <div className="flex items-center justify-between pt-2">
                                             {deal.timeline ? (
-                                                <div className="text-sm text-gray-400">
+                                                <div className="text-sm text-zinc-300">
                                                     Timeline: <span className="text-white font-medium">{new Date(deal.timeline).toLocaleDateString()}</span>
                                                 </div>
                                             ) : <div />}
                                             <a
                                                 href={`mailto:?subject=Re: Collaboration on your product`}
-                                                className="flex items-center gap-2 px-4 py-2 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white rounded-lg border border-white/10 transition-all text-sm font-medium"
+                                                className="flex items-center gap-2 px-4 py-2 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg border border-white/10 transition-all text-sm font-medium"
                                             >
                                                 Email Founder
                                             </a>
@@ -348,19 +348,16 @@ export default function CreatorDashboardPage() {
 function CreatorMetricCard({ title, value, subtext, icon }: any) {
     return (
         <div className="glass-card p-5 flex flex-col space-y-3 hover:translate-y-[-2px] transition-all cursor-default relative overflow-hidden group">
-            <div className="absolute top-[-20%] right-[-10%] text-white/[0.02] transform rotate-12 group-hover:scale-110 transition-transform">
-                {icon}
-            </div>
             <div className="flex items-center justify-between mb-1">
-                <div className="p-2 w-fit bg-white/5 rounded-xl border border-white/5 relative z-10">
+                <div className="p-2 w-fit bg-primary/5 rounded-xl border border-white/5 relative z-10">
                     {icon}
                 </div>
-                <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 z-10">{title}</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400 z-10">{title}</div>
             </div>
 
             <div className="relative z-10">
                 <div className="text-2xl font-black mb-0.5 italic tracking-tight text-white">{value}</div>
-                <div className="text-[10px] font-bold text-gray-600 tracking-tight">{subtext}</div>
+                <div className="text-[10px] font-bold text-zinc-400 tracking-tight">{subtext}</div>
             </div>
         </div>
     );

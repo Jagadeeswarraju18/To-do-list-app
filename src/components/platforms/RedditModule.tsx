@@ -121,6 +121,7 @@ export default function RedditModule({ product }: { product: any }) {
                     subreddit: selectedSub.name,
                     flair: "Discussion",
                     format: 'discussion',
+                    strategy: isProductLed ? 'Product-Led' : 'General Viral',
                     compliance_notes: []
                 });
             }
@@ -297,11 +298,11 @@ export default function RedditModule({ product }: { product: any }) {
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-300">
+        <div className="space-y-8">
             {/* Redundant selector removed as it is now in the parent page */}
 
             {/* Compact Search Bar */}
-            <div className="glass-card p-5 border-orange-500/20 bg-orange-600/[0.02]">
+            <div className="glass-card !bg-[#0A0A0A] p-5 border-orange-500/20">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-1.5 rounded-lg bg-orange-600/10">
@@ -309,27 +310,27 @@ export default function RedditModule({ product }: { product: any }) {
                         </div>
                         <div>
                             <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">REDDIT POST GENERATOR</h2>
-                            <p className="text-[10px] font-bold text-gray-500 tracking-widest italic opacity-60 uppercase">Enter a topic (or click a signal above) → Find communities → Draft value-first content</p>
+                            <p className="text-[10px] font-bold text-zinc-300 tracking-[0.2em] italic uppercase">Enter a topic (or click a signal above) → Find communities → Draft value-first content</p>
                         </div>
                     </div>
                     <button
                         onClick={() => { setView("saved"); loadSavedDrafts(); }}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-600/5 hover:bg-orange-600/10 text-[10px] font-bold text-orange-500 transition-all border border-orange-500/10"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-600/5 hover:bg-orange-600/10 text-[10px] font-bold text-orange-500 transition-all border border-orange-500/10 shadow-lg"
                     >
                         <BookOpen className="w-3 h-3 text-orange-400" />
                         {savedDrafts.length > 0 ? `${savedDrafts.length} Saved` : 'History'}
                     </button>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-6 mb-6">
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Length</span>
-                        <div className="flex bg-black/40 p-1 rounded-lg border border-white/5">
+                <div className="flex flex-wrap items-center gap-6 mb-8">
+                    <div className="flex items-center gap-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Length</span>
+                        <div className="flex bg-black/60 p-1.5 rounded-xl">
                             {(['short', 'balanced', 'deep'] as const).map((l) => (
                                 <button
                                     key={l}
                                     onClick={() => setPreferredLength(l)}
-                                    className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${preferredLength === l ? "bg-zinc-800 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
+                                    className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${preferredLength === l ? "bg-zinc-800 text-white" : "text-gray-400 hover:text-gray-200"}`}
                                 >
                                     {l}
                                 </button>
@@ -337,18 +338,18 @@ export default function RedditModule({ product }: { product: any }) {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Strategy</span>
-                        <div className="flex bg-black/40 p-1 rounded-lg border border-white/5">
+                    <div className="flex items-center gap-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Strategy</span>
+                        <div className="flex bg-black/60 p-1.5 rounded-xl">
                             <button
                                 onClick={() => setIsProductLed(true)}
-                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${isProductLed ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
+                                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${isProductLed ? "bg-primary text-white" : "text-gray-400 hover:text-gray-200"}`}
                             >
                                 Product-Led
                             </button>
                             <button
                                 onClick={() => setIsProductLed(false)}
-                                className={`px-3 py-1 text-[8px] font-black uppercase tracking-tight rounded-md transition-all ${!isProductLed ? "bg-white/10 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"}`}
+                                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-gray-400 hover:text-gray-200"}`}
                             >
                                 General Viral
                             </button>
@@ -372,7 +373,7 @@ export default function RedditModule({ product }: { product: any }) {
 
             {/* Communities Grid */}
             {subreddits.length > 0 && (
-                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div>
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-xs font-black italic uppercase tracking-[0.2em] text-orange-500">FOUND {subreddits.length} COMMUNITIES</h3>
                         <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Click to select &rarr; Draft a post</p>
@@ -404,7 +405,7 @@ export default function RedditModule({ product }: { product: any }) {
 
             {/* Rules + Post Drafter */}
             {selectedSub && (
-                <div className="grid lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300 mt-8 pb-12">
+                <div className="grid lg:grid-cols-3 gap-6 mt-8 pb-12">
                     {/* Rules & Tone */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 mb-1">
@@ -429,8 +430,8 @@ export default function RedditModule({ product }: { product: any }) {
                     <div className="lg:col-span-2 space-y-4">
                         <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2">
-                                <PenTool className="w-3.5 h-3.5 text-orange-500" />
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 italic">VALUE FIRST POST DRAFTER</h3>
+                                <PenTool className="w-3.5 h-3.5 text-primary" />
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary italic">VALUE FIRST POST DRAFTER</h3>
                             </div>
                             <button className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-orange-600/10 text-orange-400 text-[9px] font-black uppercase tracking-widest border border-orange-500/20 transition-all">
                                 <BookOpen className="w-3 h-3" /> 1 Saved
@@ -438,15 +439,15 @@ export default function RedditModule({ product }: { product: any }) {
                         </div>
 
 
-                        <div className="glass-card p-6 bg-black/40 border-white/5 min-h-[250px] flex flex-col justify-between relative overflow-hidden">
+                        <div className="glass-card !bg-[#0A0A0A] p-6 border-white/5 min-h-[250px] flex flex-col justify-between relative overflow-hidden">
                             {generating ? (
                                 <div className="absolute inset-0 z-10 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
-                                    <div className="w-16 h-16 rounded-full bg-[#FF4500]/10 flex items-center justify-center mb-6 relative">
-                                        <div className="absolute inset-0 rounded-full border-t-2 border-[#FF4500]/30 animate-spin"></div>
-                                        <div className="absolute inset-2 rounded-full border-r-2 border-[#FF4500] animate-spin duration-700"></div>
-                                        <MessageSquare className="w-6 h-6 text-[#FF4500] animate-pulse" />
+                                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 relative">
+                                        <div className="absolute inset-0 rounded-full border-t-2 border-primary/30 animate-spin"></div>
+                                        <div className="absolute inset-2 rounded-full border-r-2 border-primary animate-spin duration-700"></div>
+                                        <MessageSquare className="w-6 h-6 text-primary" />
                                     </div>
-                                    <p className="text-sm font-bold text-white animate-pulse mb-2">{loadingMessages[loadingStep]}</p>
+                                    <p className="text-sm font-bold text-white mb-2">{loadingMessages[loadingStep]}</p>
                                     <div className="flex gap-1 justify-center">
                                         <div className="w-1 h-1 rounded-full bg-[#FF4500] animate-bounce delay-0"></div>
                                         <div className="w-1 h-1 rounded-full bg-[#FF4500] animate-bounce delay-100"></div>
@@ -458,7 +459,16 @@ export default function RedditModule({ product }: { product: any }) {
                                     <div className="flex items-center justify-between pb-3 border-b border-white/5">
                                         <div>
                                             <h3 className="text-sm font-bold text-white">{generatedPost.title}</h3>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-[#FF4500] bg-[#FF4500]/10 px-2 py-0.5 rounded mt-1 inline-block">r/{generatedPost.subreddit} • {generatedPost.flair}</span>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-[#FF4500] bg-[#FF4500]/10 px-2 py-0.5 rounded inline-block">r/{generatedPost.subreddit} • {generatedPost.flair}</span>
+                                                <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded inline-block ${generatedPost.strategy === 'Product-Led' ? 'bg-primary/10 text-primary' : 'bg-white/10 text-white'}`}>
+                                                    {generatedPost.strategy}
+                                                </span>
+                                                <div className="flex items-center gap-1 text-[8px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 shadow-sm">
+                                                    <ShieldCheck className="w-2.5 h-2.5" />
+                                                    COMPLIANT
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="flex gap-2">
                                             <button onClick={() => setGeneratedPost(null)} className="p-2 hover:bg-white/10 rounded-lg text-muted-foreground transition-all" title="Reset">
@@ -470,7 +480,7 @@ export default function RedditModule({ product }: { product: any }) {
                                         <p className="text-xs text-gray-300 whitespace-pre-wrap leading-relaxed">{generatedPost.body}</p>
                                     </div>
                                     <div className="flex gap-3 pt-2">
-                                        <button onClick={() => handleRedditIntent(generatedPost.title, generatedPost.body)} className="flex-1 px-4 py-2 bg-[#FF4500] hover:bg-[#CC3700] rounded-xl text-white font-bold text-xs transition-all flex items-center justify-center gap-2">
+                                        <button onClick={() => handleRedditIntent(generatedPost.title, generatedPost.body)} className="flex-1 px-4 py-2 bg-primary hover:bg-[#CC3700] rounded-xl text-white font-bold text-xs transition-all flex items-center justify-center gap-2">
                                             <Share2 className="w-4 h-4" /> Post to Reddit
                                         </button>
                                         <SaveButton
@@ -484,14 +494,14 @@ export default function RedditModule({ product }: { product: any }) {
                             ) : (
                                 <>
                                     <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
-                                        <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
-                                            <PenTool className="w-5 h-5 text-orange-500" />
+                                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <PenTool className="w-5 h-5 text-primary" />
                                         </div>
                                         <div className="max-w-[200px]">
                                             <p className="text-xs font-bold text-gray-400 mb-1">Ready to draft?</p>
                                             <p className="text-[10px] text-gray-600">We'll draft a post that follows r/{selectedSub.name}'s rules.</p>
                                         </div>
-                                        <button onClick={handleGeneratePost} className="px-8 py-3 bg-orange-600 hover:bg-orange-500 text-white font-black rounded-xl transition-all shadow-xl shadow-orange-600/20 flex items-center gap-2 uppercase text-[10px] tracking-widest mt-2">
+                                        <button onClick={handleGeneratePost} className="premium-button px-8 py-3 text-white rounded-xl transition-all shadow-xl flex items-center gap-2 uppercase text-[10px] tracking-widest mt-2">
                                             <Zap className="w-3.5 h-3.5 fill-current" /> Generate Draft
                                         </button>
                                     </div>
@@ -505,8 +515,8 @@ export default function RedditModule({ product }: { product: any }) {
             {/* Old saved drafts list removed */}
             {/* Success Toast */}
             {showSavedToast && (
-                <div className="fixed bottom-8 right-8 bg-[#FF4500]/10 border border-[#FF4500]/20 text-[#FF4500] px-6 py-4 rounded-xl shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-300 flex items-center gap-3 z-50">
-                    <div className="p-2 bg-[#FF4500]/20 rounded-full">
+                <div className="fixed bottom-8 right-8 bg-primary/10 border border-primary/20 text-primary px-6 py-4 rounded-xl shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-300 flex items-center gap-3 z-50">
+                    <div className="p-2 bg-primary/20 rounded-full">
                         <CheckCheck className="w-5 h-5" />
                     </div>
                     <div>

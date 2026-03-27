@@ -6,6 +6,8 @@ interface DMGeneratorInput {
     productDescription: string;
     painSolved: string;
     productUrl?: string;
+    targetAudience?: string;
+    outreachTone?: string;
 }
 
 /**
@@ -52,7 +54,9 @@ Post: "${t.tweetText}"
 PRODUCT CONTEXT:
 Name: ${product.productName}
 What it does: ${product.productDescription}
+Target Audience: ${product.targetAudience || 'General Audience'}
 Pain it solves: ${product.painSolved}
+Brand Tone: ${product.outreachTone || 'Casual, human, and empathetic'}
 Link: ${productLink}
 
 YOUR JOB:
@@ -173,6 +177,8 @@ interface RedditReplyInput {
     productDescription: string;
     painSolved: string;
     productUrl?: string;
+    targetAudience?: string;
+    outreachTone?: string;
 }
 
 /**
@@ -220,21 +226,24 @@ Content: "${p.postText.substring(0, 400)}"
 PRODUCT CONTEXT:
 Name: ${product.productName}
 What it does: ${product.productDescription}
+Target Audience: ${product.targetAudience || 'General Audience'}
 Pain it solves: ${product.painSolved}
-Link: ${productLink}
+Brand Tone: ${product.outreachTone || 'Helpful Redditor'}
 
 YOUR JOB:
 Write a helpful, genuine Reddit reply for each post that:
 1. Actually addresses their problem or question first
 2. Shares personal experience or empathy with the issue
-3. Mentions the product naturally as something you built or found helpful
-4. Includes the product link
-5. Sounds like a real Redditor, not a marketer
+3. Mentions the product naturally by name as something you built to solve this
+4. DO NOT INCLUDE ANY LINKS (Reddit's filters are aggressive against first-response links)
+5. Suggestions for 'soft pitches': "I built [Name] for this", "Check out [Name] if you're stuck", or "Search for [Name], it's what I use"
+6. Sounds like a real Redditor, not a marketer
 
 CRITICAL RULES FOR REDDIT TONE:
 - Reddit HATES obvious self-promotion. Be genuinely helpful first.
+- NEVER include a raw URL or link in the first reply.
 - Start by relating to their problem or answering their question
-- Share your product as "something I've been using" or "I actually built something for this"
+- Share your product as "something I built for exactly this"
 - Use Reddit-natural language: "honestly", "tbh", "imo", "fwiw"
 - NO hyphens, NO em dashes, NO semicolons
 - NO emojis (Reddit doesn't use emojis much)
@@ -243,14 +252,14 @@ CRITICAL RULES FOR REDDIT TONE:
 - Match the energy of the subreddit (casual for casual subs, more detailed for technical subs)
 - End naturally, don't be pushy
 
-BAD EXAMPLE (spammy):
+BAD EXAMPLE (spammy and has link):
 "Check out my app AppName! It solves exactly this problem. Visit link.com to learn more!"
 
-GOOD EXAMPLE:
-"been dealing with the same thing for months tbh. i ended up building a tool for it called AppName (link.com) that basically tracks all your subscriptions and alerts you before charges hit. saved me like $200 in the first month alone"
+GOOD EXAMPLE (No link, helpful):
+"been dealing with the same thing for months tbh. i ended up building a tool for it called AppName that basically tracks all your subscriptions and alerts you before charges hit. saved me like $200 in the first month alone, might be worth a look."
 
 ANOTHER GOOD EXAMPLE:
-"this is so relatable lol. fwiw i found that having one place to see all your subscriptions makes a huge difference. been using AppName (link.com) for this and it catches stuff i totally forgot i was paying for"
+"this is so relatable lol. fwiw i found that having one place to see all your subscriptions makes a huge difference. i actually built AppName for this exact reason, it catches stuff i totally forgot i was paying for."
 
 Return ONLY a JSON object, no markdown:
 {
@@ -334,6 +343,8 @@ interface LinkedInReplyInput {
     productDescription: string;
     painSolved: string;
     productUrl?: string;
+    targetAudience?: string;
+    outreachTone?: string;
 }
 
 /**
@@ -374,6 +385,7 @@ Content: "${p.postText.substring(0, 500)}"
                         content: `You write professional LinkedIn comments for a founder.
                         
 TONE:
+- Target Tone Strategy: ${product.outreachTone || 'Insightful, professional, peer-to-peer'}
 - Insightful and value-added (not just salesy)
 - Short (2-3 sentences)
 - Professional yet approachable

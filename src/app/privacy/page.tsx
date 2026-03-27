@@ -14,11 +14,11 @@ export default function PrivacyPolicy() {
 
             <div className="relative max-w-4xl mx-auto px-6 py-20">
                 <Link
-                    href="/login"
+                    href="/"
                     className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-12 group"
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Back to Login
+                    Back to Home
                 </Link>
 
                 <div className="space-y-4 mb-16">
@@ -27,7 +27,7 @@ export default function PrivacyPolicy() {
                     </div>
                     <h1 className="text-5xl font-black tracking-tight">Privacy Policy</h1>
                     <p className="text-xl text-muted-foreground max-w-2xl">
-                        At DemandRadar (MarketingX), your privacy is our foundation. We use data to empower your outreach, not to exploit your identity.
+                        At MarketingX, your privacy is our foundation. We use data to empower your outreach, not to exploit your identity.
                     </p>
                 </div>
 
@@ -48,10 +48,10 @@ export default function PrivacyPolicy() {
                         icon={<Lock className="w-5 h-5 text-primary" />}
                         title="How We Use Your Data"
                     >
-                        <p>Your data is used exclusively to power the DemandRadar features:</p>
+                        <p>Your data is used exclusively to power the MarketingX features:</p>
                         <ul className="list-disc list-inside space-y-2 mt-4 text-muted-foreground">
                             <li>To identify potential customers on X and Reddit based on your specific keywords.</li>
-                            <li>To generate personalized, AI-driven DMs using Grok.</li>
+                            <li>To generate personalized, AI-driven DMs.</li>
                             <li>To improve the accuracy of our lead scanning algorithms.</li>
                         </ul>
                     </Section>
