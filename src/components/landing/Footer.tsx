@@ -10,7 +10,7 @@ export function Footer() {
             {/* Massive Obsidian-style Watermark */}
             <div className="absolute bottom-[-15%] left-0 w-full flex justify-center pointer-events-none select-none overflow-hidden z-0">
                 <span className="text-[35vw] font-black text-white/[0.02] tracking-tighter uppercase leading-none">
-                    MarketingX
+                    Mardis
                 </span>
             </div>
 
@@ -23,8 +23,8 @@ export function Footer() {
                             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/5">
                                 <Radar className="h-4 w-4 text-white" />
                             </div>
-                            <span className="text-lg font-black tracking-tighter text-white uppercase">
-                                MarketingX
+                            <span className="text-lg brand-title uppercase">
+                                Mardis
                             </span>
                         </Link>
                         
@@ -57,9 +57,9 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    {/* Column 3: MarketingX */}
+                    {/* Column 3: Mardis */}
                     <div className="space-y-8">
-                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-600">MarketingX</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-600">Mardis</h4>
                         <ul className="space-y-4">
                             {["Resources", "About Us", "Careers", "Contact", "LinkedIn"].map(l => (
                                 <li key={l}>
@@ -89,7 +89,7 @@ export function Footer() {
 
                 {/* Bottom Row */}
                 <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-[11px] font-medium text-gray-600 tracking-tight">
-                    <span>© 2026 MarketingX Technologies Limited. MarketingX is the registered trademark.</span>
+                    <span>&copy; 2026 MardisHub Technologies Limited. MardisHub is the registered trademark.</span>
                     <div className="flex items-center gap-4">
                         <span className="opacity-40">Powered by</span>
                         <div className="flex items-center gap-2 text-white/50">

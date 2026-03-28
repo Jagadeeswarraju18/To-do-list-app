@@ -8,13 +8,13 @@ import {
     Section,
     Text,
     Button,
-    Hr,
 } from "@react-email/components";
 import * as React from "react";
+import { MailFooter } from "./MailFooter";
 
 interface UpgradeReminderEmailProps {
     userName?: string;
-    limitType: "leads" | "scanning" | "exports" | "products";
+    limitType: string;
     usageCount: number;
     currentPlanName: string;
     nextPlanName: string;
@@ -24,50 +24,49 @@ interface UpgradeReminderEmailProps {
 export const UpgradeReminderEmail = ({ 
     userName, 
     limitType, 
-    usageCount, 
     currentPlanName, 
     nextPlanName, 
     nextPlanFeatures 
 }: UpgradeReminderEmailProps) => (
     <Html>
         <Head />
-        <Preview>Action Required: You've reached your {limitType} limit on {currentPlanName} ⚡</Preview>
+        <Preview>Helpful stats regarding your Mardis account usage</Preview>
         <Body style={main}>
             <Container style={container}>
-                <Heading style={h1}>Upgrade Your Strategy Alpha</Heading>
+                <Heading style={h1}>Insights for Your Growth</Heading>
                 <Text style={text}>
                     Hi {userName || "there"},
                 </Text>
                 <Text style={text}>
-                    You've reached your **{currentPlanName}** limit for **{limitType}** ({usageCount} used). To continue scaling your outreach and unlocking premium signals, it's time to level up.
+                    We've noticed you're making great progress with Mardis. To ensure you continue detecting high-intent signals without interruption, we wanted to share some account insights.
                 </Text>
 
-                <Section style={alertSection}>
-                    <Text style={alertText}>
-                        **Status**: {currentPlanName.toUpperCase()} {limitType.toUpperCase()} LIMIT REACHED
+                <Section style={infoSection}>
+                    <Text style={infoText}>
+                        Current Plan: {currentPlanName}
+                    </Text>
+                    <Text style={infoText}>
+                        Scanning Status: {limitType === 'leads' ? 'High-Volume Detected' : 'Active'}
                     </Text>
                 </Section>
 
                 <Text style={text}>
-                    Upgrade to **MarketingX {nextPlanName}** to unlock:
+                    To unlock even more powerful capabilities like these, consider exploring our **{nextPlanName}** features:
                     {nextPlanFeatures.map((feature, idx) => (
-                        <React.Fragment key={idx}>
-                            <br />• {feature}
-                        </React.Fragment>
+                        <div key={idx} style={{ marginTop: '6px', color: '#666' }}>
+                            • {feature}
+                        </div>
                     ))}
                 </Text>
 
                 <Button
                     style={button}
-                    href={`${process.env.NEXT_PUBLIC_APP_URL}/#pricing`}
+                    href={process.env.NEXT_PUBLIC_APP_URL + "/founder/dashboard"}
                 >
-                    Upgrade to {nextPlanName} Now
+                    Expand Your Strategy
                 </Button>
 
-                <Hr style={hr} />
-                <Text style={footer}>
-                    Need more time? You can still access your existing data, but new discoveries will be paused until the next billing cycle or upgrade.
-                </Text>
+                <MailFooter />
             </Container>
         </Body>
     </Html>
@@ -99,48 +98,35 @@ const text = {
     color: "#484848",
     fontSize: "14px",
     lineHeight: "24px",
-    margin: "24px 0",
+    margin: "16px 0",
 };
 
-const alertSection = {
-    backgroundColor: "#fff1f2",
+const infoSection = {
+    backgroundColor: "#f8fafc",
     borderRadius: "8px",
     padding: "16px",
-    border: "1px solid #fecaca",
+    border: "1px solid #e2e8f0",
     textAlign: "center" as const,
 };
 
-const alertText = {
-    color: "#b91c1c",
+const infoText = {
+    color: "#475569",
     fontSize: "12px",
-    fontWeight: "800",
-    letterSpacing: "0.1em",
-    margin: "0",
+    fontWeight: "700",
+    letterSpacing: "0.05em",
+    margin: "5px 0",
+    textTransform: "uppercase" as const,
 };
 
 const button = {
     backgroundColor: "#10b981",
     borderRadius: "8px",
-    color: "#000",
+    color: "#ffffff",
     fontSize: "14px",
     fontWeight: "800",
     textDecoration: "none",
     textAlign: "center" as const,
     display: "block",
     padding: "16px",
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.1em",
     marginTop: "24px",
-};
-
-const hr = {
-    borderColor: "#e6ebf1",
-    margin: "30px 0",
-};
-
-const footer = {
-    color: "#8898aa",
-    fontSize: "12px",
-    lineHeight: "16px",
-    textAlign: "center" as const,
 };

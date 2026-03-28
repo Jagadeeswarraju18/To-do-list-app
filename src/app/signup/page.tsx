@@ -167,7 +167,7 @@ export default function SignupPage() {
                         transition={{ duration: 1.5 }}
                         className="text-[20vw] font-bold text-white tracking-tighter uppercase leading-none block -rotate-90 origin-left translate-x-12"
                     >
-                        MarketingX
+                        Mardis
                     </motion.span>
                 </div>
 
@@ -181,8 +181,8 @@ export default function SignupPage() {
                             <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-2xl">
                                 <Radar className="h-5 w-5 text-white" />
                             </div>
-                            <span className="text-xl font-bold tracking-tight text-white uppercase">
-                                Marketing<span className="text-primary">X</span>
+                            <span className="text-xl brand-title uppercase">
+                                Mardis
                             </span>
                         </Link>
                     </motion.div>
@@ -203,7 +203,7 @@ export default function SignupPage() {
                             transition={{ duration: 1, delay: 0.5 }}
                             className="text-zinc-400 text-sm font-medium leading-relaxed max-w-md"
                         >
-                            Join the elite network of founders and creators using MarketingX to bridge the gap between product and market fit.
+                            Join the elite network of founders and creators using Mardis to bridge the gap between product and market fit.
                         </motion.p>
                     </div>
                 </div>

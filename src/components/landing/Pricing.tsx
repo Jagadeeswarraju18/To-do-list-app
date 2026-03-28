@@ -8,32 +8,42 @@ import { toast } from "sonner";
 
 const plans = [
     {
-        id: "starter",
-        name: "Starter",
-        price: "19",
-        promoPrice: "15",
-        promoQty: "10",
-        desc: "Scaling for active makers.",
-        features: ["3 Product Slots", "150 Signals / mo", "300 Post Drafts / mo", "6 Refreshes / day"],
-        btn: "Level Up",
+        id: "seed",
+        name: "Legacy / Seed",
+        price: "0",
+        desc: "Pre-launch exploration.",
+        features: ["1 Active Product", "5 Intent Signals / day", "Basic Discovery Mode"],
+        btn: "Active Account",
         popular: false
     },
     {
-        id: "pro",
-        name: "Pro",
+        id: "startup",
+        name: "Startup",
+        price: "19",
+        promoPrice: "15",
+        desc: "For serious solo builders.",
+        features: ["3 Active Products", "Deep Intent Analysis", "Personalized Hooks", "Real-time Alerts"],
+        btn: "Initialize Startup",
+        popular: false
+    },
+    {
+        id: "scale",
+        name: "Scale",
         price: "39",
-        desc: "Growth for rising startups.",
-        features: ["10 Product Slots", "500 Signals / mo", "1,000 Post Drafts / mo", "12 Refreshes / day"],
-        btn: "Go Pro",
+        promoPrice: "30",
+        desc: "Complete Autopilot suite.",
+        features: ["10 Active Products", "Autopilot Engagement", "Market Intel API", "Priority Lead Signal", "Strategy Dashboard"],
+        btn: "Scale Operations",
         popular: true
     },
     {
-        id: "ultra",
-        name: "Ultra",
-        price: "69",
-        desc: "Scale for market leaders.",
-        features: ["25 Product Slots", "1,500 Signals / mo", "3,000 Post Drafts / mo", "Hourly Refresh"],
-        btn: "Scale Now",
+        id: "unlimited",
+        name: "Unlimited",
+        price: "59",
+        promoPrice: "45",
+        desc: "Strategic market control.",
+        features: ["Unlimited Products", "Custom Lead Scoping", "Strategic Overview", "White-label Portal"],
+        btn: "Claim Unlimited",
         popular: false
     }
 ];
@@ -89,75 +99,75 @@ export function Pricing() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2">
                     {plans.map((plan, i) => (
                         <div
                             key={plan.name}
-                            className={`group relative p-[1px] rounded-[40px] transition-all duration-700 ${plan.popular ? "bg-gradient-to-b from-primary/40 to-transparent shadow-2xl shadow-primary/5" : "bg-white/[0.03] hover:bg-white/[0.05]"}`}
+                            className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] ${plan.popular ? "border-white/20 shadow-2xl shadow-white/[0.05] hover:border-white/40" : "border-white/10 hover:border-white/20 hover:shadow-2xl hover:shadow-white/[0.02]"}`}
                         >
-                            <div className="relative h-full bg-[#0d0d0d] rounded-[39px] p-10 flex flex-col border border-white/[0.03]">
+                            {plan.popular && (
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                                    <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest flex items-center gap-2 border bg-white/10 text-white border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.05)]">
+                                        <Sparkles className="w-3.5 h-3.5" /> Recommended Priority
+                                    </span>
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-between mb-8 mt-4">
+                                <span className={`text-[11px] font-black uppercase tracking-[0.2em] ${plan.popular ? "text-white" : "text-zinc-600"}`}>{plan.name}</span>
+                            </div>
+
+                            <div className="mb-10 text-left">
+                                <div className="flex items-baseline gap-1 mb-2">
+                                    <span className="text-5xl font-black text-white tracking-widest">
+                                        ${plan.promoPrice ? plan.promoPrice : plan.price}
+                                    </span>
+                                    <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
+                                </div>
                                 
-                                {plan.popular && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
-                                        <span className="px-4 py-1.5 rounded-full bg-primary text-white text-[9px] font-black uppercase tracking-widest shadow-xl border border-white/10">
-                                            Most Popular
+                                {plan.promoPrice && (
+                                    <div className="flex items-center gap-2 justify-start mb-6">
+                                        <span className="text-zinc-800 line-through text-sm font-light">${plan.price}</span>
+                                        <span className="text-[9px] font-black text-primary uppercase tracking-widest px-2 py-0.5 rounded-full border border-primary/20 bg-primary/10">
+                                            Early Bird
                                         </span>
                                     </div>
                                 )}
 
-                                <div className="mb-10 text-center lg:text-left">
-                                    <h3 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-8">{plan.name}</h3>
-                                    <div className="flex items-baseline justify-center lg:justify-start gap-1.5 mb-2">
-                                        <span className="text-zinc-600 text-2xl font-light mb-auto mt-1">$</span>
-                                        <span className="text-5xl md:text-6xl font-medium text-white tracking-tighter">
-                                            {plan.promoPrice ? plan.promoPrice : plan.price}
+                                <p className={`text-xs font-bold uppercase tracking-tight ${plan.popular ? "text-zinc-500" : "text-zinc-600"}`}>
+                                    {plan.desc}
+                                </p>
+                            </div>
+
+                            <div className="space-y-4 mb-10 flex-grow">
+                                {plan.features.map((f, idx) => (
+                                    <div key={f} className="flex items-center gap-3 group/item">
+                                        <div className={`flex-shrink-0 p-1 rounded-lg border border-white/5 bg-white/[0.02] transition-all duration-300 group-hover/item:scale-110`}>
+                                            <Check className={`w-3.5 h-3.5 ${plan.popular ? "text-zinc-400 group-hover/item:text-white" : "text-zinc-600 group-hover/item:text-zinc-300"} transition-colors`} />
+                                        </div>
+                                        <span className={`text-[11px] font-medium tracking-tight ${plan.popular ? "text-zinc-400 group-hover/item:text-zinc-200" : "text-zinc-500 group-hover/item:text-zinc-300"} transition-colors`}>
+                                            {f}
                                         </span>
-                                        <span className="text-zinc-700 text-sm font-medium">/mo</span>
                                     </div>
-                                    
-                                    {plan.promoPrice && (
-                                        <div className="flex items-center gap-2 justify-center lg:justify-start mb-6">
-                                            <span className="text-zinc-800 line-through text-sm font-light">${plan.price}</span>
-                                            <span className="text-[9px] font-black text-primary uppercase tracking-widest px-2 py-0.5 rounded-full border border-primary/20 bg-primary/10">
-                                                Early Bird
-                                            </span>
-                                        </div>
+                                ))}
+                            </div>
+
+                            <div className="mt-auto">
+                                <button
+                                    onClick={() => handleCheckout(plan.id)}
+                                    disabled={loadingPlan === plan.id}
+                                    className={`w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 ${plan.popular 
+                                        ? "bg-white text-black hover:bg-zinc-200 shadow-white/10" 
+                                        : plan.id === "seed" ? "bg-white/5 text-zinc-700 opacity-50 pointer-events-none" : "bg-white/5 text-zinc-300 border border-white/10 hover:bg-white/10"}`}
+                                >
+                                    {loadingPlan === plan.id ? (
+                                        <Loader2 className="h-4 w-4 animate-spin mx-auto text-inherit" />
+                                    ) : (
+                                        <span className="flex items-center justify-center gap-2">
+                                            {plan.btn} <ArrowRight className="w-3.5 h-3.5" />
+                                        </span>
                                     )}
-
-                                    <p className="text-zinc-600 text-[11px] leading-relaxed font-semibold min-h-[32px]">
-                                        {plan.desc}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-5 mb-12 flex-grow">
-                                    {plan.features.map((f, idx) => (
-                                        <div key={f} className="flex items-start gap-4 group/feat">
-                                            <div className={`mt-1.5 w-1 h-1 rounded-full ${plan.popular ? "bg-primary" : "bg-zinc-800 group-hover/feat:bg-zinc-400"} transition-colors`} />
-                                            <span className={`text-[11px] leading-tight font-medium transition-colors ${plan.popular ? "text-zinc-400 group-hover/feat:text-white" : "text-zinc-600 group-hover/feat:text-zinc-400"}`}>
-                                                {f}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="mt-auto">
-                                    <button
-                                        onClick={() => handleCheckout(plan.id)}
-                                        disabled={loadingPlan === plan.id}
-                                        className={`w-full py-5 flex items-center justify-center gap-3 ${plan.popular 
-                                            ? "premium-button" 
-                                            : "premium-secondary-button"}`}
-                                    >
-                                        {loadingPlan === plan.id ? (
-                                            <Loader2 className="h-4 w-4 animate-spin premium-icon" />
-                                        ) : (
-                                            <>
-                                                {plan.btn}
-                                                <ArrowRight className="h-3.5 w-3.5 opacity-50 premium-icon" />
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
+                                </button>
                             </div>
                         </div>
                     ))}

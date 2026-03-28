@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
         const result = await sendEmail({
             to: email,
-            subject: "Welcome to MarketingX 🚀",
+            subject: "Welcome to Mardis 🚀",
             react: WelcomeEmail({ userName, role: role || "founder" }),
         });
 

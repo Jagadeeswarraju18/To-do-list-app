@@ -275,8 +275,8 @@ export default function LinkedInModule({ product }: { product: any }) {
                             <Linkedin className="w-4 h-4 text-[#0A66C2]" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">LINKEDIN POST GENERATOR</h2>
-                            <p className="text-[10px] font-bold text-zinc-300 tracking-[0.2em] italic uppercase">Enter a topic (or click a signal above) → Pick a hook → Get a full post</p>
+                            <h2 className="text-xl font-bold tracking-tight text-white">LinkedIn Post Generator</h2>
+                            <p className="text-[11px] font-medium text-zinc-400 tracking-normal leading-relaxed">Turn high-intent signals into professional, viral LinkedIn stories.</p>
                         </div>
                     </div>
                     <button
@@ -290,13 +290,13 @@ export default function LinkedInModule({ product }: { product: any }) {
 
                 <div className="flex flex-wrap items-center gap-6 mb-8">
                     <div className="flex items-center gap-4">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Length</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-white/30">Length</span>
                         <div className="flex bg-[#0A66C2]/5 p-1.5 rounded-xl font-sans">
                             {(['short', 'balanced', 'deep'] as const).map((l) => (
                                 <button
                                     key={l}
                                     onClick={() => setPreferredLength(l)}
-                                    className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${preferredLength === l ? "bg-zinc-800 text-white" : "text-gray-400 hover:text-gray-200"}`}
+                                    className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-tight rounded-lg transition-all ${preferredLength === l ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-white"}`}
                                 >
                                     {l}
                                 </button>
@@ -305,17 +305,17 @@ export default function LinkedInModule({ product }: { product: any }) {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Strategy</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-white/30">Strategy</span>
                         <div className="flex bg-[#0A66C2]/5 p-1.5 rounded-xl font-sans">
                             <button
                                 onClick={() => setIsProductLed(true)}
-                                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${isProductLed ? "bg-primary text-white" : "text-gray-400 hover:text-gray-200"}`}
+                                className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-tight rounded-lg transition-all ${isProductLed ? "bg-primary text-white" : "text-zinc-500 hover:text-white"}`}
                             >
                                 Product-Led
                             </button>
                             <button
                                 onClick={() => setIsProductLed(false)}
-                                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-gray-400 hover:text-gray-200"}`}
+                                className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-tight rounded-lg transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-zinc-500 hover:text-white"}`}
                             >
                                 General Viral
                             </button>
@@ -327,7 +327,7 @@ export default function LinkedInModule({ product }: { product: any }) {
                     <input
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
-                        className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs font-medium focus:border-secondary/30 outline-none text-white placeholder:text-gray-600 transition-all font-sans italic"
+                        className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs font-medium focus:border-secondary/30 outline-none text-white placeholder:text-gray-600 transition-all font-sans"
                         placeholder="The hidden cost of 'ghost' subscriptions in startups..."
                         onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                     />
@@ -368,7 +368,7 @@ export default function LinkedInModule({ product }: { product: any }) {
 
                     {/* Engagement Ideas */}
                     <div className="glass-card p-6 border-secondary/20 bg-slate-600/[0.02]">
-                        <h3 className="text-[10px] font-black uppercase mb-4 tracking-[0.2em] text-slate-400 flex items-center gap-2 italic font-sans italic">
+                        <h3 className="text-[10px] font-bold uppercase mb-4 tracking-[0.1em] text-zinc-500 flex items-center gap-2">
                             <MessageCircle className="w-3.5 h-3.5" /> Engagement Ideas
                         </h3>
                         <div className="space-y-4">
@@ -378,12 +378,12 @@ export default function LinkedInModule({ product }: { product: any }) {
                             ].map((idea, i) => (
                                 <div key={i} className="p-3 bg-black/40 rounded-xl border border-white/5 group relative">
                                     <div className="flex items-center gap-2 mb-1.5">
-                                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded italic font-sans italic ${idea.type === "COMMENT" ? "bg-secondary/10 text-slate-400" : "bg-primary/10 text-primary"}`}>{idea.type}</span>
+                                         <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded ${idea.type === "COMMENT" ? "bg-secondary/10 text-zinc-400" : "bg-primary/10 text-primary"}`}>{idea.type}</span>
                                     </div>
                                     <p className="text-xs font-bold text-gray-300 italic mb-1.5 pr-6 leading-relaxed">
                                         {idea.text}
                                     </p>
-                                    <p className="text-[9px] text-gray-600 italic font-black uppercase tracking-widest">{idea.context}</p>
+                                     <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">{idea.context}</p>
                                 </div>
                             ))}
                         </div>
@@ -414,8 +414,8 @@ export default function LinkedInModule({ product }: { product: any }) {
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                         <Linkedin className="w-6 h-6 text-primary" />
                     </div>
-                    <h3 className="text-lg font-bold text-white mb-1">Ready to Create?</h3>
-                    <p className="text-xs text-muted-foreground max-w-sm">Enter a topic or click a signal above to generate viral hooks, full post drafts, and engagement strategies — all tailored to LinkedIn&apos;s algorithm.</p>
+                    <h3 className="text-lg font-bold text-white mb-2">Ready to Create?</h3>
+                    <p className="text-[11px] text-zinc-400 font-medium max-w-sm leading-relaxed px-4">Enter a topic or click a signal above to generate viral hooks, full post drafts, and engagement strategies — all tailored to LinkedIn&apos;s algorithm.</p>
                 </div>
             )}
 

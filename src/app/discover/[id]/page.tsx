@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
     const { data: product } = await getPublicProductDetails(params.id);
-    if (!product) return { title: "App Not Found | DemandRadar" };
+    if (!product) return { title: "App Not Found | Mardis" };
     return {
-        title: `${product.name} | DemandRadar Apps`,
+        title: `${product.name} | Mardis Apps`,
         description: product.description || product.pain_solved,
     };
 }
@@ -37,7 +37,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                     <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
                         <Radar className="w-5 h-5 text-white opacity-40" />
                     </div>
-                    <span className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">MarketingX</span>
+                    <span className="text-xl brand-title uppercase leading-none">Mardis</span>
                 </Link>
                 <Link href="/discover" className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors flex items-center gap-2 px-4 py-2 rounded-full border border-white/5 hover:bg-white/5">
                     <ArrowLeft className="w-3.5 h-3.5" /> Directory

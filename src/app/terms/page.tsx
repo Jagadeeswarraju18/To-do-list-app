@@ -21,22 +21,12 @@ export default function TermsOfService() {
                     Back to Home
                 </Link>
 
-                <div className="space-y-4 mb-16">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest">
-                        <Scale className="w-3 h-3" /> Legal Framework
-                    </div>
-                    <h1 className="text-5xl font-black tracking-tight">Terms & Conditions</h1>
-                    <p className="text-xl text-muted-foreground max-w-2xl">
-                        By using MarketingX, you agree to these rules. We keep it simple: use the platform responsibly, and we'll help you grow.
-                    </p>
-                </div>
-
-                <div className="grid gap-8">
+                <div className="grid gap-8 mt-16">
                     <Section
                         icon={<Zap className="w-5 h-5 text-primary" />}
                         title="Acceptable Use"
                     >
-                        <p>MarketingX provides tools for lead discovery and personalized outreach. You agree not to:</p>
+                        <p>Mardis provides tools for lead discovery and personalized outreach. You agree not to:</p>
                         <ul className="list-disc list-inside space-y-2 mt-4 text-muted-foreground">
                             <li>Use the platform for spamming or harassment of any individuals.</li>
                             <li>Attempt to scrape data in bulk for redistribution.</li>
@@ -70,7 +60,7 @@ export default function TermsOfService() {
 
                 <div className="mt-20 pt-10 border-t border-white/5 text-center">
                     <p className="text-sm text-muted-foreground">
-                        Last updated: February 21, 2026. Your continued use of MarketingX constitutes acceptance of these terms.
+                        Last updated: February 21, 2026. Your continued use of Mardis constitutes acceptance of these terms.
                     </p>
                 </div>
             </div>

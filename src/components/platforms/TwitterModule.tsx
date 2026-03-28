@@ -279,9 +279,9 @@ export default function TwitterModule({ product }: { product: any }) {
                             <Twitter className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">TWEET GENERATOR</h2>
-                    <p className="text-[10px] font-black text-zinc-300 tracking-[0.2em] italic uppercase">Enter a topic (or click a signal above) → Pick a vibe → Get viral tweets</p>
-                </div>
+                            <h2 className="text-xl font-bold tracking-tight text-white">Tweet Generator</h2>
+                            <p className="text-[11px] font-medium text-zinc-400 tracking-normal leading-relaxed">Enter a topic (or click a signal above) to generate high-viral potential tweets.</p>
+                        </div>
             </div>
             <button
                 onClick={() => { setView("saved"); loadDrafts(); }}
@@ -294,13 +294,13 @@ export default function TwitterModule({ product }: { product: any }) {
 
         <div className="flex flex-wrap items-center gap-6 mb-8">
             <div className="flex items-center gap-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Length</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-white/30">Length</span>
                 <div className="flex bg-black/60 p-1.5 rounded-xl">
                     {(['short', 'balanced', 'deep'] as const).map((l) => (
                         <button
                             key={l}
                             onClick={() => setPreferredLength(l)}
-                             className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${preferredLength === l ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}`}
+                         className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-tight rounded-lg transition-all ${preferredLength === l ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-white"}`}
                         >
                             {l}
                         </button>
@@ -308,17 +308,17 @@ export default function TwitterModule({ product }: { product: any }) {
                 </div>
             </div>
             <div className="flex items-center gap-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 italic">Strategy</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-white/30">Strategy</span>
                 <div className="flex bg-black/60 p-1.5 rounded-xl">
                     <button
                         onClick={() => setIsProductLed(true)}
-                        className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${isProductLed ? "bg-primary text-white" : "text-zinc-400 hover:text-white"}`}
+                        className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-tight rounded-lg transition-all ${isProductLed ? "bg-primary text-white" : "text-zinc-500 hover:text-white"}`}
                     >
                         Product-Led
                     </button>
                     <button
                         onClick={() => setIsProductLed(false)}
-                        className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"}`}
+                        className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-tight rounded-lg transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-zinc-500 hover:text-white"}`}
                     >
                         General Viral
                     </button>
@@ -330,7 +330,7 @@ export default function TwitterModule({ product }: { product: any }) {
                     <input
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
-                        className="flex-1 bg-black/40 border border-white/5 rounded-full px-6 py-3 text-xs font-medium focus:border-white/20 outline-none text-white placeholder:text-zinc-600 transition-all font-sans italic"
+                        className="flex-1 bg-black/40 border border-white/5 rounded-full px-6 py-3 text-xs font-medium focus:border-white/20 outline-none text-white placeholder:text-zinc-600 transition-all font-sans"
                         placeholder="Managing too many SaaS trials is a nightmare..."
                         onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                     />
@@ -348,7 +348,7 @@ export default function TwitterModule({ product }: { product: any }) {
                     {/* Left Column: Tweets List */}
                     <div className="lg:col-span-2 space-y-4">
                         <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-xs font-black italic uppercase tracking-widest text-white">Draft Tweet</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-white">Draft Tweet</h3>
                         </div>
 
                         {assets.map((asset, i) => (
@@ -370,8 +370,8 @@ export default function TwitterModule({ product }: { product: any }) {
                                             {/* Viral Score */}
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between mb-1">
-                                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Viral Potential:</span>
-                                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">{asset.analysis?.score || asset.simulation?.viral_potential || 8.5}/10</span>
+                                                    <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-gray-500">Viral Potential:</span>
+                                                    <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-primary">{asset.analysis?.score || asset.simulation?.viral_potential || 8.5}/10</span>
                                                 </div>
                                                 <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
                                                     <div
@@ -385,7 +385,7 @@ export default function TwitterModule({ product }: { product: any }) {
                                             <div className="flex gap-2 shrink-0">
                                                 <button
                                                     onClick={() => handleCopy(asset.content, asset.id)}
-                                                    className={`p-2 rounded-lg border transition-all flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest ${copiedIdx === asset.id
+                                                    className={`p-2 rounded-lg border transition-all flex items-center gap-1.5 text-[9px] uppercase tracking-widest ${copiedIdx === asset.id
                                                         ? "bg-primary/20 border-primary/30 text-primary"
                                                         : "bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10"
                                                         }`}
@@ -412,7 +412,7 @@ export default function TwitterModule({ product }: { product: any }) {
                     <div className="lg:col-span-1 space-y-4">
                         <div className="flex items-center gap-2 mb-2">
                             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 italic">Why This Works</h3>
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-500">Why This Works</h3>
                         </div>
                         <div className="glass-card p-6 bg-black/40 border-white/5">
                             <div className="space-y-4">
@@ -451,8 +451,8 @@ export default function TwitterModule({ product }: { product: any }) {
                     <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-4">
                         <Twitter className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-white mb-1">Ready to Tweet?</h3>
-                    <p className="text-xs text-zinc-400 max-w-sm">Enter a topic or click a signal above. We'll generate high-viral potential tweets tailored to your product.</p>
+                    <h3 className="text-lg font-bold text-white mb-2">Ready to Tweet?</h3>
+                    <p className="text-[11px] text-zinc-400 font-medium max-w-sm leading-relaxed px-4">Enter a topic or click a signal above. We&apos;ll generate high-viral potential tweets tailored to your product.</p>
                 </div>
             )}
 

@@ -11,6 +11,7 @@ import {
     Hr,
 } from "@react-email/components";
 import * as React from "react";
+import { MailFooter } from "./MailFooter";
 
 interface CalibrationEmailProps {
     userName?: string;
@@ -21,7 +22,7 @@ interface CalibrationEmailProps {
 export const CalibrationEmail = ({ userName, productName, suggestedKeywords }: CalibrationEmailProps) => (
     <Html>
         <Head />
-        <Preview>We're struggling to find leads for ${productName} — Let's fix that! 🛠️</Preview>
+        <Preview>We're struggling to find leads for ${productName} — Let's fix that! 🛠️ | Mardis</Preview>
         <Body style={main}>
             <Container style={container}>
                 <Heading style={h1}>Calibrating Your Strategy</Heading>
@@ -53,10 +54,7 @@ export const CalibrationEmail = ({ userName, productName, suggestedKeywords }: C
                     Update My Keywords
                 </Button>
 
-                <Hr style={hr} />
-                <Text style={footer}>
-                    Need help fine-tuning? Just reply to this email, and our strategy team will take a look.
-                </Text>
+                <MailFooter />
             </Container>
         </Body>
     </Html>

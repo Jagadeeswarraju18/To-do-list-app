@@ -6,8 +6,8 @@ import { Plus, Minus, HelpCircle } from "lucide-react";
 
 const faqs = [
     {
-        question: "What is MarketingX?",
-        answer: "MarketingX is an autonomous GTM (Go-To-Market) engine designed for elite founders. It monitors social nodes and the deep web for high-intent signals, allowing you to execute outreach with clinical precision."
+        question: "What is Mardis?",
+        answer: "Mardis is an autonomous GTM (Go-To-Market) engine designed for elite founders. It monitors social nodes and the deep web for high-intent signals, allowing you to execute outreach with clinical precision."
     },
     {
         question: "How does the AI discover signals?",

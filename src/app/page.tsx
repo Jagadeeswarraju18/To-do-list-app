@@ -36,17 +36,18 @@ export default function LandingPage() {
                         style={{ opacity: 1, visibility: 'visible', display: 'block' }}
                     >
                         <h2 className="heading-serif text-6xl md:text-[120px] font-black text-white mb-16 tracking-tighter leading-none italic">
-                            Engineered for <br /> 
-                            <span className="not-italic opacity-40">market leaders.</span>
+                            Scale your pipeline <br /> 
+                            <span className="not-italic opacity-40">on pure intent.</span>
                         </h2>
                         <p className="text-zinc-500 text-xl md:text-2xl mb-20 max-w-2xl mx-auto font-medium tracking-tight">
-                            Join the elite circle of founders who build businesses on precision signals. Zero fluff. Pure intelligence.
+                            Stop guessing and start detecting. Mardis turns social noise into high-signal opportunities. <br className="hidden md:block" />
+                            Zero fluff. Pure demand.
                         </p>
                         <div className="flex flex-col items-center gap-12">
                             <button 
                                 className="px-16 py-6 bg-white text-black font-black uppercase tracking-[0.2em] rounded-full text-xl shadow-2xl transition-all hover:bg-zinc-200"
                             >
-                                Deploy Engine
+                                Find Your People
                             </button>
                             <div className="flex items-center gap-12 opacity-30">
                                 <div className="flex items-center gap-3">

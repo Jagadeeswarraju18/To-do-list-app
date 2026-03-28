@@ -383,7 +383,7 @@ export default function DashboardPage() {
             <div className="flex justify-center pt-8 border-t border-white/5">
                 <div className="flex items-center gap-3 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
                     <ShieldCheck className="w-3.5 h-3.5" />
-                    MarketingX ensures all posts align with your verified founder persona.
+                    Mardis ensures all posts align with your verified founder persona.
                 </div>
             </div>
         </div>

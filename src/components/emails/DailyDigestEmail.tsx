@@ -11,6 +11,7 @@ import {
     Hr,
 } from "@react-email/components";
 import * as React from "react";
+import { MailFooter } from "./MailFooter";
 
 interface Lead {
     id: string;
@@ -37,18 +38,20 @@ const getPlatformColor = (source: string) => {
     return '#1DA1F2'; // X Blue
 };
 
-export const DailyDigestEmail = ({ userName, leads }: DailyDigestEmailProps) => (
+export const DailyDigestEmail = ({ userName, leads }: DailyDigestEmailProps) => {
+    const leadCount = leads.length;
+    return (
     <Html>
         <Head />
-        <Preview>You have {leads.length.toString()} new high-intent leads today! 🎯</Preview>
+        <Preview>Your Mardis Intel: {leadCount.toString()} High-Intent Leads Found 🚀</Preview>
         <Body style={main}>
             <Container style={container}>
-                <Heading style={h1}>Your Daily Lead Intel</Heading>
+                <Heading style={h1}>Daily Strategy Digest</Heading>
                 <Text style={text}>
                     Hi {userName || "there"},
                 </Text>
                 <Text style={text}>
-                    Our "Strategy Alpha" engine has identified **{leads.length}** new high-intent leads for your product in the last 24 hours.
+                    Your Mardis scouts have been busy! We've identified **{leadCount} new intent signals** that align with your growth strategy. Here are the top opportunities waiting for you:
                 </Text>
  
                 <Section style={leadSection}>
@@ -89,16 +92,12 @@ export const DailyDigestEmail = ({ userName, leads }: DailyDigestEmailProps) => 
                 >
                     View All Leads in Dashboard
                 </Button>
-
-                <Hr style={hr} />
-                <Text style={footer}>
-                    You're receiving this because you enabled Daily Intel Digests. 
-                    <br />Customize your notification settings <a href={`${process.env.NEXT_PUBLIC_APP_URL}/founder/settings`} style={link}>here</a>.
-                </Text>
+                <MailFooter />
             </Container>
         </Body>
     </Html>
-);
+    );
+};
 
 export default DailyDigestEmail;
 

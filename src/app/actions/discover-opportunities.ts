@@ -17,6 +17,42 @@ import {
 import { searchRedditOpportunities } from "@/lib/reddit/client";
 import { searchLinkedInOpportunities } from "@/lib/linkedin/client";
 
+async function checkRateLimits(supabase: any, userId: string, platform: string) {
+    // 1. Concurrency Check: Is there a scan already RUNNING for this user?
+    const { data: activeRun } = await supabase
+        .from("discovery_runs")
+        .select("id, platform, created_at")
+        .eq("user_id", userId)
+        .eq("status", "running")
+        .maybeSingle();
+
+    if (activeRun) {
+        return { 
+            error: `A discovery scan (${activeRun.platform}) is already in progress. Please wait for it to complete.`,
+            type: 'concurrency'
+        };
+    }
+
+    // 2. Daily Quota Check: How many successful scans in the last 24h?
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count, error: countError } = await supabase
+        .from("discovery_runs")
+        .select("*", { count: 'exact', head: true })
+        .eq("user_id", userId)
+        .eq("status", "completed")
+        .gte("created_at", twentyFourHoursAgo);
+
+    const DAILY_LIMIT = 10; // Default daily limit
+    if (!countError && count !== null && count >= DAILY_LIMIT) {
+        return { 
+            error: `Daily discovery limit reached (${DAILY_LIMIT}/${DAILY_LIMIT}). Please try again tomorrow.`,
+            type: 'quota'
+        };
+    }
+
+    return { success: true };
+}
+
 async function getProductContext(supabase: any, userOrId: any) {
     const userId = typeof userOrId === 'string' ? userOrId : userOrId.id;
     const { data: profile } = await supabase
@@ -139,6 +175,10 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
         }
         
         if (!product) return { error: "Product setup missing." };
+        
+        // Rate Limit & Concurrency Check
+        const limitCheck = await checkRateLimits(supabase, targetUserId, 'x');
+        if (limitCheck.error) return { error: limitCheck.error };
 
         const { data: run } = await supabase
             .from("discovery_runs")
@@ -263,6 +303,10 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
         }
         
         if (!product) return { error: "Product setup missing." };
+        
+        // Rate Limit & Concurrency Check
+        const limitCheck = await checkRateLimits(supabase, targetUserId, 'reddit');
+        if (limitCheck.error) return { error: limitCheck.error };
 
         const { data: run } = await supabase
             .from("discovery_runs")
@@ -372,6 +416,10 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
         }
         
         if (!product) return { error: "Product setup missing." };
+        
+        // Rate Limit & Concurrency Check
+        const limitCheck = await checkRateLimits(supabase, targetUserId, 'linkedin');
+        if (limitCheck.error) return { error: limitCheck.error };
 
         const { data: run } = await supabase
             .from("discovery_runs")

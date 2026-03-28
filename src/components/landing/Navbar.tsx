@@ -52,8 +52,8 @@ export function Navbar() {
                             <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                             <Radar className="h-5 w-5 text-white relative z-10" />
                         </div>
-                        <span className="text-lg font-bold tracking-tight text-white transition-all duration-300">
-                            Marketing<span className="text-white/40 font-medium">X</span>
+                        <span className="text-lg brand-title uppercase transition-all duration-300">
+                             Mardis
                         </span>
                     </Link>
                 </div>

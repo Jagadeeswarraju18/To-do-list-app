@@ -4,12 +4,14 @@ import { Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { Radar, ArrowLeft, Loader2 } from "lucide-react";
+import { ParticleSwirl } from "@/components/ui/ParticleSwirl";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 function DiscoverLoginContent() {
     const searchParams = useSearchParams();
     const [loading, setLoading] = useState(false);
+    const [isHovering, setIsHovering] = useState(false);
     const next = searchParams.get('next') || '/discover';
 
     const handleGoogleLogin = async () => {
@@ -32,51 +34,61 @@ function DiscoverLoginContent() {
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-white/20 overflow-hidden flex flex-col items-center justify-center p-6 relative">
-            {/* Background elements (Obsidian Identity) */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px]" />
-                <div className="absolute bottom-[20%] right-[-10%] w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px]" />
-            </div>
+            {/* Advanced Particle Animation (Antigravity Aesthetic) */}
+            <ParticleSwirl isHovering={isHovering} />
+            
+            {/* Subtlest possible grid overlay for depth */}
+            <div className="fixed inset-0 pointer-events-none z-10 bg-[linear-gradient(to_right,#ffffff01_1px,transparent_1px),linear-gradient(to_bottom,#ffffff01_1px,transparent_1px)] bg-[size:64px_64px]" />
 
             <motion.div 
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="w-full max-w-[400px] relative z-10"
+                transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+                className="w-full max-w-[400px] relative z-20"
             >
                 {/* Brand Header */}
                 <div className="text-center mb-12">
-                    <Link href={next} className="inline-flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-[11px] font-black uppercase tracking-[0.2em] mb-8">
-                        <ArrowLeft className="w-3.5 h-3.5" />
-                        Return to Discovery
+                    <Link 
+                        href={next} 
+                        onMouseEnter={() => setIsHovering(true)}
+                        onMouseLeave={() => setIsHovering(false)}
+                        className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-[0.2em] mb-12 group"
+                    >
+                        <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+                        Back to Directory
                     </Link>
                     
-                    <div className="flex justify-center mb-6">
-                        <div className="w-16 h-16 rounded-3xl border border-white/20 bg-white/5 flex items-center justify-center">
-                            <Radar className="w-8 h-8 text-white" />
+                    <div className="flex justify-center mb-8">
+                        <div className="w-16 h-16 rounded-[28px] border border-white/5 bg-white/[0.02] flex items-center justify-center backdrop-blur-md">
+                            <Radar className="w-7 h-7 text-white/50" />
                         </div>
                     </div>
                     
-                    <h1 className="text-2xl font-black uppercase tracking-tighter mb-2">
-                        Discovery<span className="text-white/40">Identity</span>
+                    <h1 className="text-[32px] font-bold uppercase tracking-[-0.04em] mb-3 leading-none bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+                        Voter <span className="text-white/20">Authentication</span>
                     </h1>
-                    <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
-                        Sign in to signal intelligence <br />and track high-growth products.
+                    <p className="text-[12px] text-zinc-500 font-medium tracking-tight leading-relaxed max-w-[280px] mx-auto opacity-80">
+                        Sign in with Google to participate in <br />
+                        founder discovery and voting.
                     </p>
                 </div>
 
                 {/* Auth Card */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-[40px] p-8 md:p-10 backdrop-blur-3xl shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+                <div className="bg-[#050505]/60 border border-white/[0.06] rounded-[48px] p-8 md:p-12 backdrop-blur-3xl shadow-[0_50px_100px_rgba(0,0,0,0.9)] relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    
                     <button
                         onClick={handleGoogleLogin}
+                        onMouseEnter={() => setIsHovering(true)}
+                        onMouseLeave={() => setIsHovering(false)}
                         disabled={loading}
-                        className="w-full py-5 bg-white text-black font-black rounded-3xl transition-all hover:bg-gray-200 active:scale-[0.98] text-[13px] uppercase tracking-[0.15em] flex items-center justify-center gap-4 disabled:opacity-50"
+                        className="w-full py-5 bg-white text-black font-bold rounded-2xl transition-all hover:bg-zinc-200 active:scale-[0.98] text-[13px] uppercase tracking-[0.1em] flex items-center justify-center gap-4 disabled:opacity-50 relative z-10 shadow-xl"
                     >
                         {loading ? (
                             <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                         ) : (
                             <>
-                                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" viewBox="0 0 24 24">
                                     <path
                                         fill="currentColor"
                                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -99,18 +111,15 @@ function DiscoverLoginContent() {
                         )}
                     </button>
                     
-                    <div className="mt-8 text-center px-4">
-                        <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest leading-loose">
-                            One-click initialization. <br />
-                            No founder profiles required for voters.
-                        </p>
-                    </div>
+                    <p className="mt-9 text-center text-[10px] text-zinc-700 font-bold uppercase tracking-[0.25em] opacity-60 group-hover:opacity-100 transition-opacity">
+                        One-click Voter Access
+                    </p>
                 </div>
 
                 {/* Footer Brand */}
-                <div className="mt-12 text-center">
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/10">
-                        Obsidian Core Strategy
+                <div className="mt-16 text-center opacity-10 hover:opacity-50 transition-opacity duration-1000">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.6em] text-zinc-900">
+                        Obsidian Core
                     </span>
                 </div>
             </motion.div>

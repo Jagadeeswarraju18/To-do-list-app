@@ -26,9 +26,14 @@ export default function PrivacyPolicy() {
                         <Shield className="w-3 h-3" /> Trust & Privacy
                     </div>
                     <h1 className="text-5xl font-black tracking-tight">Privacy Policy</h1>
-                    <p className="text-xl text-muted-foreground max-w-2xl">
-                        At MarketingX, your privacy is our foundation. We use data to empower your outreach, not to exploit your identity.
-                    </p>
+                    <div className="space-y-12">
+                        <section>
+                            <h2 className="text-xl font-bold mb-6 tracking-tight uppercase text-primary">Data Philosophy</h2>
+                            <p className="text-zinc-400 text-sm font-medium leading-relaxed">
+                                At Mardis, your privacy is our foundation. We use data to empower your outreach, not to exploit your identity. Our scanning engines monitor public social nodes to find intent, and we only process what is necessary for your growth.
+                            </p>
+                        </section>
+                    </div>
                 </div>
 
                 <div className="grid gap-8">
@@ -48,7 +53,7 @@ export default function PrivacyPolicy() {
                         icon={<Lock className="w-5 h-5 text-primary" />}
                         title="How We Use Your Data"
                     >
-                        <p>Your data is used exclusively to power the MarketingX features:</p>
+                        <p>Your data is used exclusively to power the Mardis features:</p>
                         <ul className="list-disc list-inside space-y-2 mt-4 text-muted-foreground">
                             <li>To identify potential customers on X and Reddit based on your specific keywords.</li>
                             <li>To generate personalized, AI-driven DMs.</li>

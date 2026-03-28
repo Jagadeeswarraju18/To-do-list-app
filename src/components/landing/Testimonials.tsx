@@ -5,7 +5,7 @@ import { Quote } from "lucide-react";
 
 const testimonials = [
     {
-        quote: "MarketingX redefined our entire growth engine. It's the standard for our portfolio companies.",
+        quote: "Mardis redefined our entire growth engine. It's the standard for our portfolio companies.",
         author: "Marcus Aurelius",
         role: "MD, Growth Capital",
         avatar: "MA"

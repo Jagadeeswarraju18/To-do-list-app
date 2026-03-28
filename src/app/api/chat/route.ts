@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
+import { buildRateLimitHeaders, runRateLimit } from "@/lib/rate-limit/upstash";
 
 export async function POST(req: NextRequest) {
     try {
@@ -9,6 +10,19 @@ export async function POST(req: NextRequest) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             return new Response("Unauthorized", { status: 401 });
+        }
+
+        const [rateLimitMinute, rateLimitHour] = await Promise.all([
+            runRateLimit("chatMinute", `user:${user.id}`),
+            runRateLimit("chatHour", `user:${user.id}`),
+        ]);
+
+        if (!rateLimitMinute.success || !rateLimitHour.success) {
+            const activeLimit = !rateLimitMinute.success ? rateLimitMinute : rateLimitHour;
+            return Response.json(
+                { error: "Too many chat requests. Please try again shortly." },
+                { status: 429, headers: buildRateLimitHeaders(activeLimit) }
+            );
         }
 
         const { messages } = await req.json();

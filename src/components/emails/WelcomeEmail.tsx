@@ -11,6 +11,7 @@ import {
     Hr,
 } from "@react-email/components";
 import * as React from "react";
+import { MailFooter } from "./MailFooter";
 
 interface WelcomeEmailProps {
     userName?: string;
@@ -20,15 +21,15 @@ interface WelcomeEmailProps {
 export const WelcomeEmail = ({ userName, role }: WelcomeEmailProps) => (
     <Html>
         <Head />
-        <Preview>Welcome to MarketingX - Your Strategy Alpha</Preview>
+        <Preview>Welcome to Mardis - Your Strategy Alpha</Preview>
         <Body style={main}>
             <Container style={container}>
-                <Heading style={h1}>Welcome to MarketingX</Heading>
+                <Heading style={h1}>Welcome to Mardis</Heading>
                 <Text style={text}>
                     Hi {userName || "there"},
                 </Text>
                 <Text style={text}>
-                    We're thrilled to have you join us as a {role}! MarketingX is designed to give you the "Strategy Alpha" you need to dominate your niche.
+                    We're thrilled to have you join us as a {role}! Mardis is designed to give you the "Strategy Alpha" you need to dominate your niche.
                 </Text>
 
                 {role === "founder" ? (
@@ -63,13 +64,7 @@ export const WelcomeEmail = ({ userName, role }: WelcomeEmailProps) => (
                     </Section>
                 )}
 
-                <Hr style={hr} />
-                <Text style={footer}>
-                    If you have any questions, just reply to this email. We're here to help!
-                </Text>
-                <Text style={footer}>
-                    &copy; 2026 MarketingX. All rights reserved.
-                </Text>
+                <MailFooter />
             </Container>
         </Body>
     </Html>

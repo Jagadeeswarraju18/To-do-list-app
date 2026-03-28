@@ -84,8 +84,8 @@ export function Sidebar() {
                         </div>
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-bold text-base tracking-tight leading-none text-white whitespace-nowrap">
-                            {isCreatorView ? 'Creator Hub' : 'MarketingX'}
+                        <span className={`leading-none text-white whitespace-nowrap ${isCreatorView ? 'font-bold text-base tracking-tight' : 'text-xl brand-title uppercase'}`}>
+                            {isCreatorView ? 'Creator Hub' : 'Mardis'}
                         </span>
                         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mt-1.5">Alpha Deck</span>
                     </div>
@@ -137,8 +137,8 @@ export function Sidebar() {
                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isCreatorView ? 'bg-zinc-800' : 'bg-primary'}`}>
                         {isCreatorView ? <UserCircle className="w-4 h-4 text-white" /> : <Radar className="w-4 h-4 text-white" />}
                     </div>
-                    <span className="font-bold text-sm tracking-tight text-white uppercase italic">
-                        {isCreatorView ? 'Creator Hub' : 'MarketingX'}
+                    <span className={`text-white uppercase ${isCreatorView ? 'font-bold text-sm tracking-tight' : 'text-lg brand-title'}`}>
+                        {isCreatorView ? 'Creator Hub' : 'Mardis'}
                     </span>
                 </div>
                 <button

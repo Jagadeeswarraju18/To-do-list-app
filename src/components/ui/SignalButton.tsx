@@ -74,15 +74,15 @@ export function SignalButton({ productId, initialUpvotes, size = "md" }: SignalB
             onClick={handleUpvote}
             title={isUpvoted ? "Remove signal" : (user ? "Signal intelligence (Upvote)" : "Sign in to signal intelligence")}
             className={`group flex items-center gap-2.5 px-3 py-1.5 rounded-2xl border transition-all duration-300 ${isUpvoted
-                    ? 'bg-white border-white text-black font-black'
+                    ? 'bg-white border-white text-black font-bold'
                     : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10 hover:border-white/10'
                 }`}
         >
             <div className="flex flex-col items-start leading-[1] py-0.5">
-                <span className={`text-[13px] font-black tabular-nums transition-colors ${isUpvoted ? 'text-black' : 'text-gray-300'}`}>
+                <span className={`text-[13px] font-bold tabular-nums transition-colors ${isUpvoted ? 'text-black' : 'text-gray-300'}`}>
                     {upvotesCount}
                 </span>
-                <span className={`text-[7px] font-black uppercase tracking-[0.15em] mt-0.5 ${isUpvoted ? 'text-black/60' : 'text-gray-500'}`}>
+                <span className={`text-[7px] font-semibold uppercase tracking-[0.15em] mt-0.5 ${isUpvoted ? 'text-black/60' : 'text-gray-500'}`}>
                     Signal
                 </span>
             </div>

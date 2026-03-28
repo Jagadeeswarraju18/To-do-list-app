@@ -78,13 +78,13 @@ export function Hero() {
                 
                 {/* Heading - Forensic Obsidian Typography */}
                 <div className="mb-8 relative">
-                    <h1 className="heading-serif text-white text-6xl md:text-[100px] mb-6 max-w-5xl mx-auto leading-[0.95] tracking-tighter italic">
-                        The all-in-one execution <br />
-                        <span className="not-italic opacity-40">platform for founders.</span>
+                    <h1 className="heading-serif text-white text-6xl md:text-[100px] mb-6 max-w-5xl mx-auto leading-[0.95] tracking-tighter italic text-center">
+                        Find your next customer <br />
+                        <span className="not-italic opacity-40">where they are already looking.</span>
                     </h1>
-                    <p className="text-zinc-500 text-lg md:text-[20px] max-w-2xl mx-auto font-medium leading-[1.4] tracking-tight mb-10 px-4">
-                        AI-powered demand signals available now — with <br className="hidden md:block" />
-                        automated outreach and market intelligence.
+                    <p className="text-zinc-500 text-lg md:text-[20px] max-w-2xl mx-auto font-medium leading-[1.4] tracking-tight mb-10 px-4 text-center">
+                        Mardis scans Reddit, X, and LinkedIn for high-intent signals. <br className="hidden md:block" />
+                        Identify exactly who needs your product today — zero fluff. pure demand.
                     </p>
                 </div>
 
@@ -94,7 +94,7 @@ export function Hero() {
                         <button 
                             className="px-12 py-4 rounded-full bg-white text-black font-black uppercase tracking-[0.2em] text-[15px] shadow-2xl transition-all hover:bg-zinc-200"
                         >
-                            Deploy Engine
+                            Start Mapping Demand
                         </button>
                     </Link>
                 </div>
@@ -105,7 +105,7 @@ export function Hero() {
             >
                 <div className="absolute inset-0 obsidian-noise opacity-10" />
                     
-                    {/* MarketingX Signal Ingest Interface */}
+                    {/* Mardis Signal Ingest Interface */}
                     <div className="absolute inset-0 flex flex-col text-left overflow-hidden">
                         {/* Top Headers */}
                         <div className="flex justify-between items-center px-10 py-6 border-b border-white/5 bg-white/[0.02]">
