@@ -1,7 +1,11 @@
 import { Resend } from "resend";
 import { render } from "@react-email/components";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient() {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return null;
+    return new Resend(apiKey);
+}
 
 interface SendEmailProps {
     to: string | string[];
@@ -18,6 +22,11 @@ interface SendEmailProps {
  */
 export async function sendEmail({ to, subject, react, text, from }: SendEmailProps) {
     try {
+        const resend = getResendClient();
+        if (!resend) {
+            return { success: false, error: "RESEND_API_KEY is missing" };
+        }
+
         const fromAddress = from || process.env.MAIL_FROM || "Mardis <onboarding@mardishub.com>";
         
         // Prepare the email payload
