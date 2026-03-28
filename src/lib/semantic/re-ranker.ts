@@ -1,8 +1,10 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+function getOpenAIClient() {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) return null;
+    return new OpenAI({ apiKey });
+}
 
 /**
  * Calculates the cosine similarity between two vectors.
@@ -41,6 +43,11 @@ export async function semanticReRank<T extends { id: string; text: string }>(
     }
 
     try {
+        const openai = getOpenAIClient();
+        if (!openai) {
+            throw new Error("OPENAI_API_KEY is missing");
+        }
+
         console.log(`[Semantic ReRank] Target concept: "${request.targetConcept}"`);
         console.log(`[Semantic ReRank] Processing ${request.items.length} items...`);
 
