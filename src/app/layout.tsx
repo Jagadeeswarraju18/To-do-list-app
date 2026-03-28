@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
     title: "Mardis — Find People Who Already Need What You Build",
@@ -34,7 +31,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="dark">
-            <body className={`${inter.className} min-h-screen bg-[#050505] antialiased`}>
+            <body className="min-h-screen bg-[#050505] antialiased">
                 <div className="stealth-grid-bg">
                     <div className="stealth-grid" />
                 </div>
