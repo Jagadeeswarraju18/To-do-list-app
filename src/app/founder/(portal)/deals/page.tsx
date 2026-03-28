@@ -85,7 +85,7 @@ export default function FounderDealsPage() {
 
         if (!error && data) {
             // Fetch creator emails and platforms for each deal
-            const creatorIds = Array.from(new Set(data.map((d: any) => d.creator_id)));
+            const creatorIds = Array.from(new Set(data.map((d: any) => d.creator_id))) as string[];
 
             const [emailsRes, platformsRes] = await Promise.all([
                 supabase.from("profiles").select("id, email").in("id", creatorIds),

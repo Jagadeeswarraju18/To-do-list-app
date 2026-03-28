@@ -201,7 +201,7 @@ export default function RedditModule({ product }: { product: any }) {
             title: generatedPost.title,
             body: generatedPost.body,
             topic: niche,
-            style: generatedPost.format
+            style: (generatedPost as any).format
         });
 
         if (error) {

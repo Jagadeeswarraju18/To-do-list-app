@@ -313,8 +313,8 @@ export default function PlatformManager({ userId }: { userId: string }) {
 
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Input label="Username" placeholder="e.g. elonmusk" value={formData.username} onChange={v => setFormData({ ...formData, username: v })} required />
-                                    <Input label="Profile URL" placeholder="https://..." value={formData.url} onChange={v => setFormData({ ...formData, url: v })} required type="url" />
+                                    <Input label="Username" placeholder="e.g. elonmusk" value={formData.username} onChange={(v: string) => setFormData({ ...formData, username: v })} required />
+                                    <Input label="Profile URL" placeholder="https://..." value={formData.url} onChange={(v: string) => setFormData({ ...formData, url: v })} required type="url" />
                                 </div>
                                 <Input label="Follower Count" placeholder="e.g. 10000" type="number" value={formData.follower_count} onChange={(v: string) => setFormData({ ...formData, follower_count: v })} required />
                                 <div className="grid grid-cols-2 gap-4">

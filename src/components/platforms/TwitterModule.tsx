@@ -90,7 +90,7 @@ export default function TwitterModule({ product }: { product: any }) {
 
             // Map the response to our StrategicAsset format
             // The AI returns { tweets: string[], analysis: { ... } }
-            const assetsArray = Array.isArray((generatedContent as any).tweets) ? (generatedContent as any).tweets : ((generatedContent as any).Tweets || []);
+            const assetsArray = Array.isArray((generatedContent as any).tweets) ? (generatedContent as any).tweets : ((generatedContent as any).tweets || []);
             const analysis = (generatedContent as any).analysis;
 
             if (assetsArray.length > 0) {

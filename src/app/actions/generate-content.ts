@@ -28,7 +28,7 @@ interface GenerationParams {
   targetAudience: string;
   differentiation?: string;
   additionalContext?: string;
-  contentGoal?: ContentGoal; // Deprecated, but keeping for backward compatibility in interface if needed
+  contentGoal?: ContentGoal;
   signalContext?: string;
   preferredLength?: 'short' | 'balanced' | 'deep';
   urgency?: UrgencyLevel;

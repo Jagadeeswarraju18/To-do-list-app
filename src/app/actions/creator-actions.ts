@@ -35,7 +35,9 @@ export async function getMarketHeatmap() {
         };
 
         opps?.forEach(opp => {
-            const product = Array.isArray(opp.products) ? opp.products[0] : opp.products;
+            // Fix: Cast the products relation to handle both array and object responses from Supabase
+            const productsData = opp.products as any;
+            const product = Array.isArray(productsData) ? productsData[0] : productsData;
             const context = `${product?.description || ""} ${product?.target_audience || ""}`.toLowerCase();
 
             if (context.includes("ai") || context.includes("gpt") || context.includes("llm")) niches["AI"]++;
