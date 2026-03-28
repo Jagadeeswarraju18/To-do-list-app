@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DodoPayments } from 'dodopayments';
 import { createClient } from '@/lib/supabase/server';
 
-const dodo = new DodoPayments({
-    bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
-});
+function getDodoClient() {
+    const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+    if (!apiKey) {
+        return null;
+    }
+    return new DodoPayments({ bearerToken: apiKey });
+}
 
 // Map plan types to Dodo Payments Product IDs
 const PLAN_PRODUCT_MAPPING: Record<string, string> = {
@@ -21,6 +25,14 @@ const PLAN_PRICES: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
     try {
+        const dodo = getDodoClient();
+        if (!dodo) {
+            return NextResponse.json(
+                { error: 'Payments are not configured on this environment' },
+                { status: 500 }
+            );
+        }
+
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
 

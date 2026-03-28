@@ -2,18 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DodoPayments } from 'dodopayments';
 import { createClient } from '@supabase/supabase-js';
 
-const dodo = new DodoPayments({
-    bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
-    webhookKey: process.env.DODO_PAYMENTS_WEBHOOK_SECRET!,
-});
+function getWebhookClients() {
+    const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+    const webhookSecret = process.env.DODO_PAYMENTS_WEBHOOK_SECRET;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Direct Supabase client for backend updates (bypassing middleware/auth)
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY! // Note: Need to add this to .env.local
-);
+    if (!apiKey || !webhookSecret || !supabaseUrl || !serviceRoleKey) {
+        return null;
+    }
+
+    return {
+        dodo: new DodoPayments({
+            bearerToken: apiKey,
+            webhookKey: webhookSecret,
+        }),
+        supabaseAdmin: createClient(supabaseUrl, serviceRoleKey),
+        webhookSecret,
+    };
+}
 
 export async function POST(req: NextRequest) {
+    const clients = getWebhookClients();
+    if (!clients) {
+        return NextResponse.json(
+            { error: 'Webhook integrations are not configured on this environment' },
+            { status: 500 }
+        );
+    }
+
+    const { dodo, supabaseAdmin, webhookSecret } = clients;
     const payload = await req.text();
     const signature = req.headers.get('x-dodo-signature');
 
@@ -25,7 +43,7 @@ export async function POST(req: NextRequest) {
         // Verify webhook signature using the SDK's unwrap method
         const event = dodo.webhooks.unwrap(payload, {
             headers: Object.fromEntries(req.headers.entries()),
-            key: process.env.DODO_PAYMENTS_WEBHOOK_SECRET!
+            key: webhookSecret
         });
 
         console.log('Webhook event received:', event.type);

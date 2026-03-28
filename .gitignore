@@ -17,3 +17,4 @@ build
 !src/**/*.mjs
 !supabase/**/*.js
 !supabase/**/*.mjs
+.vercel
