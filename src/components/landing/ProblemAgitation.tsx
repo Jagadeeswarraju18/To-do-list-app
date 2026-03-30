@@ -20,23 +20,23 @@ export function ProblemAgitation() {
 
     const painPoints = [
         { 
-            title: "Manual Prospecting", 
+            title: "Manual Hunting", 
             value: "14h / wk", 
-            desc: "Wasted shifting through noisey LinkedIn & X feeds.",
+            desc: "Time wasted shifting through noisy social feeds looking for a single clear signal.",
             icon: Clock,
             accent: "from-primary/20 to-transparent"
         },
         { 
-            title: "Signal Latency", 
-            value: "92%", 
-            desc: "Of intent signals are missed or acted upon too late.",
+            title: "Generic AI Spam", 
+            value: "94%", 
+            desc: "Of AI-generated replies get ignored or banned for being low-quality marketing fluff.",
             icon: ZapOff,
             accent: "from-amber-900/20 to-transparent"
         },
         { 
             title: "Conversion Decay", 
             value: "64%", 
-            desc: "Drop in lead quality when outreach isn't immediate.",
+            desc: "Drop in lead quality when you lack a platform-native, expert-led response strategy.",
             icon: TrendingDown,
             accent: "from-primary/20 to-transparent"
         }

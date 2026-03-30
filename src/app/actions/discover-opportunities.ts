@@ -525,7 +525,7 @@ export async function addManualOpportunityAction(data: { url: string, content: s
     }
 }
 
-export async function regenerateSingleDM(opportunityId: string) {
+export async function regenerateSingleDM(opportunityId: string, redditReplyMode?: 'expert' | 'technical' | 'helpful') {
     try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -543,7 +543,7 @@ export async function regenerateSingleDM(opportunityId: string) {
             const replies = await generateRedditReplies([{
                 postText: opp.tweet_content, author, subreddit: opp.subreddit || "unknown", postType: "post",
                 productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl,
-                targetAudience: product.target_audience, outreachTone: product.outreach_tone
+                targetAudience: product.target_audience, outreachTone: product.outreach_tone, replyMode: redditReplyMode || 'helpful'
             }]);
             newDM = replies.get(author) || fallbackRedditReply(author, opp.tweet_content, product.name);
         } else if (opp.source === 'linkedin_post') {

@@ -179,6 +179,7 @@ interface RedditReplyInput {
     productUrl?: string;
     targetAudience?: string;
     outreachTone?: string;
+    replyMode?: 'expert' | 'technical' | 'helpful';
 }
 
 /**
@@ -208,6 +209,24 @@ Content: "${p.postText.substring(0, 400)}"
 
     const product = posts[0];
     const productLink = product.productUrl || `[your product link]`;
+    const replyMode = product.replyMode || 'helpful';
+    const personaInstruction = replyMode === 'expert'
+        ? `PERSONA MODE: EXPERT
+- Sound like someone who has seen this problem many times and has a strong point of view.
+- Be confident, direct, and concise.
+- Prioritize diagnosis and a sharper recommendation.
+- Do not sound arrogant or salesy.`
+        : replyMode === 'technical'
+            ? `PERSONA MODE: TECHNICAL
+- Sound more concrete and systems-oriented.
+- Use specifics, workflows, edge cases, and implementation detail where relevant.
+- Keep the language plain, but make it more practical and less generic.
+- Avoid marketing framing entirely.`
+            : `PERSONA MODE: HELPFUL
+- Sound warm, grounded, and easy to talk to.
+- Lead with empathy and practical usefulness.
+- Keep it community-first and low-pressure.
+- Make it feel like a normal Redditor offering something that helped.`;
 
     try {
         const response = await fetch("https://api.x.ai/v1/chat/completions", {
@@ -229,6 +248,7 @@ What it does: ${product.productDescription}
 Target Audience: ${product.targetAudience || 'General Audience'}
 Pain it solves: ${product.painSolved}
 Brand Tone: ${product.outreachTone || 'Helpful Redditor'}
+${personaInstruction}
 
 YOUR JOB:
 Write a helpful, genuine Reddit reply for each post that:
@@ -251,6 +271,7 @@ CRITICAL RULES FOR REDDIT TONE:
 - Each reply MUST be unique and different
 - Match the energy of the subreddit (casual for casual subs, more detailed for technical subs)
 - End naturally, don't be pushy
+- The reply mode must visibly affect the writing style. Do not return near-identical phrasing across modes.
 
 BAD EXAMPLE (spammy and has link):
 "Check out my app AppName! It solves exactly this problem. Visit link.com to learn more!"

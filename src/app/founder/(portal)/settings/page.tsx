@@ -490,7 +490,7 @@ function UserSettingsContent() {
 
                         {/* Billing Support Note */}
                         <p className="text-center text-xs text-muted-foreground pb-4">
-                            Secure payments powered by Stripe. All plans are billed monthly. Need a custom plan for your agency? <span className="text-white hover:underline cursor-pointer">Contact us.</span>
+                            Secure payments powered by Dodo Payments. All plans are billed {billingCycle === "yearly" ? "annually" : "monthly"}. Need a custom plan for your agency? <span className="text-white hover:underline cursor-pointer">Contact us.</span>
                         </p>
                     </Section>
 

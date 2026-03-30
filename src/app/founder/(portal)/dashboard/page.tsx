@@ -119,25 +119,25 @@ export default function DashboardPage() {
             {/* Command Center Header */}
             <div className="relative group/header overflow-visible">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-transparent rounded-[40px] blur-2xl opacity-50 group-hover/header:opacity-100 transition duration-1000" />
-                <div className="relative glass-panel p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 border-white/5">
-                <div className="relative z-10 flex items-start gap-6">
+                <div className="relative glass-panel p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-white/5">
+                <div className="relative z-10 flex items-start gap-4">
                         <div className="relative">
                             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-                            <div className="relative w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-[0_0_35px_rgba(54,34,34,0.3)]">
-                                <Radar className="w-8 h-8 shadow-[0_0_5px_rgba(0,0,0,0.1)]" />
+                            <div className="relative w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-[0_0_25px_rgba(54,34,34,0.3)]">
+                                <Radar className="w-6 h-6 shadow-[0_0_5px_rgba(0,0,0,0.1)]" />
                             </div>
                         </div>
                         <div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                            <div className="flex items-center gap-2 mb-1">
+                                <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white">
                                     Command Center
                                 </h1>
-                                <Link href="/founder/opportunities" className="hidden sm:flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/20 rounded-full hover:bg-primary/20 transition-all shadow-lg shadow-black/5">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Autopilot Active</span>
+                                <Link href="/founder/opportunities" className="hidden sm:flex items-center gap-2 px-2 py-0.5 bg-primary/5 border border-primary/20 rounded-full hover:bg-primary/20 transition-all shadow-lg shadow-black/5">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    <span className="text-[9px] font-black text-white uppercase tracking-widest">Autopilot Active</span>
                                 </Link>
                             </div>
-                            <p className="text-zinc-400 font-normal tracking-tight text-base">
+                            <p className="text-zinc-400 font-normal tracking-tight text-sm">
                                 Accelerating growth for <span className="text-white font-semibold">{product?.name || "Global Assets"}</span> through founder-led signals.
                             </p>
                         </div>

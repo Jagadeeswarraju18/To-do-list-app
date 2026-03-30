@@ -1,6 +1,6 @@
 "use client";
 
-import { Shield, Lock, Eye, FileText, ArrowLeft } from "lucide-react";
+import { Shield, Lock, Eye, FileText, ArrowLeft, Scale } from "lucide-react";
 import Link from "next/link";
 
 export default function PrivacyPolicy() {
@@ -22,15 +22,15 @@ export default function PrivacyPolicy() {
                 </Link>
 
                 <div className="space-y-4 mb-16">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-stone-300 text-xs font-bold uppercase tracking-widest">
                         <Shield className="w-3 h-3" /> Trust & Privacy
                     </div>
                     <h1 className="text-5xl font-black tracking-tight">Privacy Policy</h1>
-                    <div className="space-y-12">
+                    <div className="space-y-12 mt-8">
                         <section>
-                            <h2 className="text-xl font-bold mb-6 tracking-tight uppercase text-primary">Data Philosophy</h2>
+                            <h2 className="text-xl font-bold mb-6 tracking-tight uppercase text-stone-300">Data Philosophy</h2>
                             <p className="text-zinc-400 text-sm font-medium leading-relaxed">
-                                At Mardis, your privacy is our foundation. We use data to empower your outreach, not to exploit your identity. Our scanning engines monitor public social nodes to find intent, and we only process what is necessary for your growth.
+                                At Mardis, your privacy is our foundation. We use data to empower your outreach, not to exploit your identity. Our scanning engines monitor public social nodes to find intent, and we only process what is necessary for your growth. We operate under the principle of **privacy by design**, ensuring your data is handled with the same care we would want for our own.
                             </p>
                         </section>
                     </div>
@@ -38,45 +38,53 @@ export default function PrivacyPolicy() {
 
                 <div className="grid gap-8">
                     <Section
-                        icon={<Eye className="w-5 h-5 text-primary" />}
-                        title="Information We Collect"
+                        icon={<Eye className="w-5 h-5 text-stone-300" />}
+                        title="1. Information We Collect"
                     >
-                        <p>We collect information necessary to provide our lead discovery and DM automation services:</p>
-                        <ul className="list-disc list-inside space-y-2 mt-4 text-muted-foreground">
-                            <li>Account Information: Name, email, and profile details provided during signup.</li>
-                            <li>X (Twitter) Integration: If connected, we access your public profile data and handle to personalize your outreach.</li>
-                            <li>Discovery Context: Keywords and product descriptions you provide to find relevant leads.</li>
+                        <p className="mb-4 text-zinc-300">We collect information to provide and improve our lead discovery services:</p>
+                        <ul className="list-disc list-inside space-y-3 text-muted-foreground">
+                            <li><span className="text-zinc-200">Account Data:</span> Name, email, and billing information (processed securely through Dodo Payments).</li>
+                            <li><span className="text-zinc-200">Platform Integrations:</span> Public profile data and authentication tokens if you connect X (Twitter) or LinkedIn.</li>
+                            <li><span className="text-zinc-200">Processing Data:</span> Keywords, product descriptions, and target audience profiles you provide to calibrate our search engines.</li>
+                            <li><span className="text-zinc-200">Technical Data:</span> IP addresses and browser fingerprints used solely for platform security and fraud prevention.</li>
                         </ul>
                     </Section>
 
                     <Section
-                        icon={<Lock className="w-5 h-5 text-primary" />}
-                        title="How We Use Your Data"
+                        icon={<Lock className="w-5 h-5 text-stone-300" />}
+                        title="2. Legal Basis for Processing"
                     >
-                        <p>Your data is used exclusively to power the Mardis features:</p>
-                        <ul className="list-disc list-inside space-y-2 mt-4 text-muted-foreground">
-                            <li>To identify potential customers on X and Reddit based on your specific keywords.</li>
-                            <li>To generate personalized, AI-driven DMs.</li>
-                            <li>To improve the accuracy of our lead scanning algorithms.</li>
+                        <p className="text-zinc-400">Under GDPR and international law, we process your data based on:</p>
+                        <ul className="list-disc list-inside space-y-3 mt-4 text-muted-foreground">
+                            <li><span className="text-zinc-200">Contractual Necessity:</span> To provide the services you subscribed to.</li>
+                            <li><span className="text-zinc-200">Legitimate Interest:</span> For identifying strategic market shifts and potential lead openings from public social data.</li>
+                            <li><span className="text-zinc-200">Consent:</span> Where you explicitly grant us permission to post or interact on your behalf.</li>
                         </ul>
                     </Section>
 
                     <Section
-                        icon={<FileText className="w-5 h-5 text-primary" />}
-                        title="Data Retention & Security"
+                        icon={<Scale className="w-5 h-5 text-stone-300" />}
+                        title="3. Your Rights (GDPR/Compliance)"
                     >
-                        <p>We employ industry-standard security measures to protect your information:</p>
-                        <ul className="list-disc list-inside space-y-2 mt-4 text-muted-foreground">
-                            <li>OAuth tokens are encrypted and stored securely in our vault.</li>
-                            <li>Your data is never sold to third parties or used for external advertising.</li>
-                            <li>You can disconnect your account and request data deletion at any time via your settings.</li>
+                        <p className="text-zinc-400">Regardless of your location, we grant you the following rights:</p>
+                        <ul className="list-disc list-inside space-y-3 mt-4 text-muted-foreground">
+                            <li><span className="text-zinc-200">Right to Access:</span> Request a copy of the personal data we hold about you.</li>
+                            <li><span className="text-zinc-200">Right to Erasure:</span> Request that we delete all your data (the &quot;Right to be Forgotten&quot;).</li>
+                            <li><span className="text-zinc-200">Right to Object:</span> Object to the processing of your data for specific purposes.</li>
                         </ul>
+                    </Section>
+
+                    <Section
+                        icon={<FileText className="w-5 h-5 text-stone-300" />}
+                        title="4. Data Retention & Security"
+                    >
+                        <p className="text-zinc-400">We employ industry-grade encryption and do not store your data longer than necessary for its specific purpose. OAuth tokens are encrypted at rest and in transit. Your data is **never sold** to third-party advertisers or brokers.</p>
                     </Section>
                 </div>
 
                 <div className="mt-20 pt-10 border-t border-white/5 text-center">
                     <p className="text-sm text-muted-foreground">
-                        Last updated: February 21, 2026. If you have questions, reach out to us.
+                        Last updated: March 28, 2026. For inquiries regarding your data, contact <span className="text-white">hello@mardishub.com</span>
                     </p>
                 </div>
             </div>

@@ -76,25 +76,25 @@ export function Hero() {
         >
             <div className="max-w-[1400px] w-full mx-auto relative z-20 flex flex-col items-center text-center">
                 
-                {/* Heading - Forensic Obsidian Typography */}
+                {/* Heading - Tactical Command Typography */}
                 <div className="mb-8 relative">
                     <h1 className="heading-serif text-white text-6xl md:text-[100px] mb-6 max-w-5xl mx-auto leading-[0.95] tracking-tighter italic text-center">
-                        Find your next customer <br />
-                        <span className="not-italic opacity-40">where they are already looking.</span>
+                        Capture demand. <br />
+                        <span className="not-italic opacity-40">Own the conversation.</span>
                     </h1>
-                    <p className="text-zinc-500 text-lg md:text-[20px] max-w-2xl mx-auto font-medium leading-[1.4] tracking-tight mb-10 px-4 text-center">
-                        Mardis scans Reddit, X, and LinkedIn for high-intent signals. <br className="hidden md:block" />
-                        Identify exactly who needs your product today — zero fluff. pure demand.
+                    <p className="text-zinc-500 text-lg md:text-[20px] max-w-2xl mx-auto font-medium leading-[1.4] tracking-tight mb-10 px-4 text-center text-pretty">
+                        Mardis is the tactical operating system for precise engagement across Reddit, X, and LinkedIn. <br className="hidden md:block" />
+                        Execute native-sounding missions that convert — zero fluff. pure demand.
                     </p>
                 </div>
 
-                {/* Primary CTA - Obsidian Pill */}
+                {/* Primary CTA - Tactical Pill */}
                 <div className="mb-16">
                     <Link href="/signup">
                         <button 
                             className="px-12 py-4 rounded-full bg-white text-black font-black uppercase tracking-[0.2em] text-[15px] shadow-2xl transition-all hover:bg-zinc-200"
                         >
-                            Start Mapping Demand
+                            Open Your Playbook
                         </button>
                     </Link>
                 </div>
@@ -105,21 +105,21 @@ export function Hero() {
             >
                 <div className="absolute inset-0 obsidian-noise opacity-10" />
                     
-                    {/* Mardis Signal Ingest Interface */}
+                    {/* Mardis Tactical Ingest Interface */}
                     <div className="absolute inset-0 flex flex-col text-left overflow-hidden">
                         {/* Top Headers */}
                         <div className="flex justify-between items-center px-10 py-6 border-b border-white/5 bg-white/[0.02]">
                             <div className="flex items-center gap-6">
-                                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-white">Incoming Noise</h3>
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-white">Community Radar</h3>
                                 <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
                                     <div className="w-1.5 h-1.5 rounded-full bg-white opacity-40" />
                                     Live Ingest
                                 </div>
                             </div>
                             <div className="flex items-center gap-6">
-                                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500">Buyer Intent Detected</h3>
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500">Tactical Brief Prepared</h3>
                                 <div className="px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-[9px] font-bold text-white uppercase tracking-widest">
-                                    High Confidence
+                                    Ready to Execute
                                 </div>
                             </div>
                         </div>
@@ -207,7 +207,7 @@ export function Hero() {
                                 ))}
                             </AnimatePresence>
 
-                            {/* Left Panel: Signals Flow */}
+                            {/* Left Panel: Missions Flow */}
                             <div className="col-span-3 border-r border-white/5 p-4 space-y-3 overflow-hidden bg-black/10 flex flex-col justify-between">
                                 {sourceSignals.map((signal, idx) => (
                                     <motion.div 
@@ -243,8 +243,8 @@ export function Hero() {
                                 ))}
                             </div>
 
-                            {/* Center Panel: Logic Engine */}
-                            <div className="col-span-5 relative flex flex-col items-center justify-center p-10 border-r border-white/5">
+                            {/* Center Panel: Command Engine */}
+                            <div className="col-span-12 md:col-span-5 relative flex flex-col items-center justify-center p-10 border-r border-white/5">
                                 <div className="relative w-48 h-48 mb-8">
                                     {/* Central Radar Rings */}
                                     <div className="absolute inset-0 rounded-full border border-white/5 animate-[ping_4s_infinite]" />
@@ -269,57 +269,57 @@ export function Hero() {
                                     ))}
                                 </div>
                                 <div className="text-center">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white opacity-80 mb-6">Contextual Reasoning</h4>
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white opacity-80 mb-6">Tactical Protocol Active</h4>
                                     <div className="flex gap-3">
                                         <div className="px-3 py-1 rounded-full border border-white/10 text-[8px] font-bold text-zinc-500 uppercase tracking-widest bg-white/[0.02]">
-                                            Intent Scoring
+                                            Mission Mapping
                                         </div>
                                         <div className="px-3 py-1 rounded-full border border-white/10 text-[8px] font-bold text-zinc-500 uppercase tracking-widest bg-white/[0.02]">
-                                            Evidence Clustering
+                                            Expert Pivot
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Right Panel: Validated Demand */}
-                            <div className="col-span-4 p-8 bg-white/[0.01]">
+                            {/* Right Panel: Validated Missions */}
+                            <div className="hidden md:block col-span-4 p-8 bg-white/[0.01]">
                                 <div className="h-full flex flex-col gap-6">
-                                    {/* Main Insight Card */}
+                                    {/* Mission Card */}
                                     <div className="p-8 rounded-[32px] bg-white/[0.03] border border-white/10 flex flex-col items-center text-center">
                                         <div className="flex items-center gap-2 mb-8">
                                             <Sparkles className="w-3.5 h-3.5 text-white" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Validated Demand</span>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Mission Brief</span>
                                         </div>
                                         
                                         <p className="text-white text-[15px] font-light italic leading-relaxed mb-10 max-w-[200px] opacity-70">
-                                            How are SaaS teams tracking intent on LinkedIn and Reddit?
+                                            "Target identified in r/SaaS. User is struggling with X. Reply with Expert POV."
                                         </p>
 
                                         <div className="grid grid-cols-2 gap-4 w-full">
                                             <div className="p-5 rounded-2xl bg-white/5 border border-white/5 text-center">
-                                                <div className="text-[10px] font-black uppercase tracking-[0.1em] text-zinc-600 mb-2">Score</div>
-                                                <div className="text-3xl font-light text-white">82</div>
+                                                <div className="text-[10px] font-black uppercase tracking-[0.1em] text-zinc-600 mb-2">Confidence</div>
+                                                <div className="text-3xl font-light text-white">94%</div>
                                             </div>
                                             <div className="p-5 rounded-2xl bg-white/5 border border-white/5 text-center">
-                                                <div className="text-[10px] font-black uppercase tracking-[0.1em] text-zinc-600 mb-2">Freshness</div>
-                                                <div className="text-[13px] font-bold text-white mt-1.5 whitespace-nowrap">8m ago</div>
+                                                <div className="text-[10px] font-black uppercase tracking-[0.1em] text-zinc-600 mb-2">Priority</div>
+                                                <div className="text-[13px] font-bold text-white mt-1.5 whitespace-nowrap uppercase">High</div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Recommended Action Card */}
+                                    {/* Action Card */}
                                     <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between group cursor-pointer hover:bg-white/5 transition-colors">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center">
                                                 <Check className="w-4 h-4 text-white opacity-40 group-hover:opacity-100 transition-opacity" />
                                             </div>
                                             <div>
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-1">Recommended</p>
-                                                <p className="text-[11px] font-bold text-zinc-400">Send contextual outreach</p>
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-1">Status</p>
+                                                <p className="text-[11px] font-bold text-zinc-400">Tactical Reply Generated</p>
                                             </div>
                                         </div>
                                         <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                                            Actionable
+                                            Execute
                                         </div>
                                     </div>
                                 </div>
@@ -331,15 +331,15 @@ export function Hero() {
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-white opacity-60 shadow-[0_0_8px_white]" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white opacity-50">Omnichannel Engine Active</span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white opacity-50">Demand Playbook Active</span>
                                 </div>
                                 <div className="w-px h-4 bg-white/5" />
                                 <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
-                                    <span className="text-white">12,431</span> signals found today
+                                    <span className="text-white">651</span> missions ready today
                                 </div>
                             </div>
                             <div className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-700">
-                                3.8s Processing Latency
+                                Secure Tactical Ingest
                             </div>
                         </div>
                     </div>

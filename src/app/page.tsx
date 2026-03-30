@@ -11,6 +11,7 @@ import { MovingBackground } from "@/components/landing/MovingBackground";
 import { Footer } from "@/components/landing/Footer";
 import { FAQ } from "@/components/landing/FAQ";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 export default function LandingPage() {
     const spring = {
@@ -36,27 +37,29 @@ export default function LandingPage() {
                         style={{ opacity: 1, visibility: 'visible', display: 'block' }}
                     >
                         <h2 className="heading-serif text-6xl md:text-[120px] font-black text-white mb-16 tracking-tighter leading-none italic">
-                            Scale your pipeline <br /> 
+                            Capture demand <br /> 
                             <span className="not-italic opacity-40">on pure intent.</span>
                         </h2>
                         <p className="text-zinc-500 text-xl md:text-2xl mb-20 max-w-2xl mx-auto font-medium tracking-tight">
-                            Stop guessing and start detecting. Mardis turns social noise into high-signal opportunities. <br className="hidden md:block" />
-                            Zero fluff. Pure demand.
+                            Stop guessing and start executing. Mardis turns social noise into precise tactical missions. <br className="hidden md:block" />
+                            Reddit, X, and LinkedIn — under your command.
                         </p>
                         <div className="flex flex-col items-center gap-12">
-                            <button 
-                                className="px-16 py-6 bg-white text-black font-black uppercase tracking-[0.2em] rounded-full text-xl shadow-2xl transition-all hover:bg-zinc-200"
-                            >
-                                Find Your People
-                            </button>
+                            <Link href="/signup">
+                                <button 
+                                    className="px-16 py-6 bg-white text-black font-black uppercase tracking-[0.2em] rounded-full text-xl shadow-2xl transition-all hover:bg-zinc-200"
+                                >
+                                    Open Your Playbook
+                                </button>
+                            </Link>
                             <div className="flex items-center gap-12 opacity-30">
                                 <div className="flex items-center gap-3">
                                     <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Zero Latency</span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Rule-Aware Engine</span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Unlimited Scale</span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Multichannel Command</span>
                                 </div>
                             </div>
                         </div>

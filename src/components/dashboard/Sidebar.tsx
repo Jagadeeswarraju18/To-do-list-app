@@ -74,7 +74,7 @@ export function Sidebar() {
     ];
 
     const sidebarContent = (
-        <div className="flex flex-col h-full gap-4 p-4 no-scrollbar">
+        <div className="flex flex-col h-full gap-3 p-4 no-scrollbar">
             {/* Module 1: Brand Pod */}
             <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-5 shadow-2xl flex items-center justify-between group/brand transition-all hover:bg-black/80">
                 <div className="flex items-center gap-4">
@@ -101,7 +101,7 @@ export function Sidebar() {
             {/* Module 2: Navigation Pod */}
             <div className="flex-1 bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[40px] p-3 shadow-2xl flex flex-col gap-1 overflow-y-auto no-scrollbar relative overflow-hidden transition-all hover:bg-black/80">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.05] to-transparent pointer-events-none" />
-                <div className="text-[10px] font-black tracking-[0.3em] text-zinc-400 px-4 py-4 uppercase opacity-60">Command Units</div>
+                <div className="text-[10px] font-black tracking-[0.3em] text-zinc-400 px-4 pt-3 pb-4 uppercase opacity-60">Command Units</div>
                 {navItems.map((item) => (
                     <NavItem key={item.href} {...item} />
                 ))}

@@ -90,13 +90,6 @@ export function Footer() {
                 {/* Bottom Row */}
                 <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-[11px] font-medium text-gray-600 tracking-tight">
                     <span>&copy; 2026 MardisHub Technologies Limited. MardisHub is the registered trademark.</span>
-                    <div className="flex items-center gap-4">
-                        <span className="opacity-40">Powered by</span>
-                        <div className="flex items-center gap-2 text-white/50">
-                            <Radar className="w-3.5 h-3.5" />
-                            <span className="font-black uppercase tracking-tighter">RockCore</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </footer>
