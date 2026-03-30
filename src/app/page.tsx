@@ -21,7 +21,13 @@ export default function LandingPage() {
     };
 
     return (
-        <div className="relative min-h-screen bg-black overflow-x-hidden selection:bg-white/20 selection:text-white">
+        <div 
+            className="relative min-h-screen bg-black overflow-x-hidden selection:bg-white/20 selection:text-white"
+            itemScope 
+            itemType="https://schema.org/Product"
+        >
+            <meta itemProp="name" content="Mardis Hub" />
+            <meta itemProp="description" content="Tactical demand playbook and operating system for Reddit, X, and LinkedIn." />
             <Navbar />
             <main className="isolate">
                 <Hero />

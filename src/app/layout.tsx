@@ -31,16 +31,25 @@ function SchemaMarkup() {
             dangerouslySetInnerHTML={{
                 __html: JSON.stringify({
                     "@context": "https://schema.org",
-                    "@type": "SoftwareApplication",
+                    "@type": "Product",
                     "name": "Mardis Hub",
-                    "operatingSystem": "Web",
-                    "applicationCategory": "BusinessApplication",
-                    "description": "Tactical operating system for community-led growth and multi-channel engagement on Reddit, X, and LinkedIn.",
+                    "alternateName": "Mardis Hub Tactical Demand Playbook",
+                    "description": "The tactical operating system for precise community engagement across Reddit, X, and LinkedIn. Mardis Hub helps teams capture demand by identifying high-intent conversations and executing native-sounding missions.",
+                    "brand": {
+                        "@type": "Brand",
+                        "name": "Mardis Hub",
+                        "logo": "https://www.mardishub.com/icon.svg"
+                    },
+                    "image": "https://www.mardishub.com/icon.svg",
                     "offers": {
                         "@type": "Offer",
+                        "url": "https://www.mardishub.com",
+                        "priceCurrency": "USD",
                         "price": "0",
-                        "priceCurrency": "USD"
-                    }
+                        "availability": "https://schema.org/InStock"
+                    },
+                    "applicationCategory": "BusinessApplication",
+                    "operatingSystem": "Web"
                 })
             }}
         />
