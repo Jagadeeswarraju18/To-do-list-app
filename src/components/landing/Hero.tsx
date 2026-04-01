@@ -89,28 +89,6 @@ export function Hero() {
                     </Link>
                 </div>
 
-                <div className="mb-10 w-full max-w-[1240px]">
-                    <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-5">
-                        <div className="mb-3 flex items-center justify-between px-1">
-                            <div className="text-[11px] font-black uppercase tracking-[0.28em] text-zinc-500">
-                                Landing Preview
-                            </div>
-                            <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-600">
-                                Crawler-visible hero image
-                            </div>
-                        </div>
-                        <img
-                            src="/og-image.png"
-                            alt="Mardis landing preview"
-                            width={1200}
-                            height={630}
-                            loading="eager"
-                            fetchPriority="high"
-                            className="h-auto w-full rounded-[22px] border border-white/8 bg-black object-cover"
-                        />
-                    </div>
-                </div>
-
                 <div className="group relative h-[600px] w-full max-w-[1440px] overflow-hidden rounded-[32px] border border-white/[0.08] bg-black shadow-[0_50px_100px_rgba(0,0,0,0.8)]">
                     <div className="obsidian-noise absolute inset-0 opacity-10" />
 
