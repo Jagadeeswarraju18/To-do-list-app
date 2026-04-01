@@ -22,13 +22,22 @@ export const metadata: Metadata = {
         description:
             "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
         url: "/",
-        type: "website"
+        type: "website",
+        images: [
+            {
+                url: "/opengraph-image",
+                width: 1200,
+                height: 630,
+                alt: "Mardis demand capture software preview"
+            }
+        ]
     },
     twitter: {
         card: "summary_large_image",
         title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
         description:
-            "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts."
+            "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
+        images: ["/twitter-image"]
     }
 };
 
@@ -131,7 +140,7 @@ export default function LandingPage() {
                                     <Link href="/signup" className="rounded-full bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-black transition hover:bg-zinc-200">
                                         Start Free
                                     </Link>
-                                    <Link href="/product" className="rounded-full border border-white/15 px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-white transition hover:bg-white/5">
+                                    <Link href="/product" className="rounded-full border border-white/20 px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-white transition hover:bg-white/5">
                                         Product Details
                                     </Link>
                                 </div>
@@ -140,7 +149,7 @@ export default function LandingPage() {
 
                         <div className="mt-8 grid gap-4 md:grid-cols-3">
                             {summaryCards.map((card) => (
-                                <div key={card.label} className="rounded-2xl border border-white/8 bg-black/30 p-5">
+                                <div key={card.label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
                                     <p className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">{card.label}</p>
                                     <p className="mb-1 text-lg font-semibold text-white">{card.value}</p>
                                     <p className="text-sm text-zinc-400">{card.detail}</p>

@@ -3,54 +3,38 @@ import "./globals.css";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-    title: "Mardis Hub - The Tactical Demand Playbook",
-    description: "Multi-channel mission control for Reddit, X, and LinkedIn. Capture demand with precise, rule-aware engagement that bypasses the AI noise.",
+    title: {
+        default: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
+        template: "%s | Mardis"
+    },
+    description: "Mardis is demand capture software that finds high-intent conversations across Reddit, X, and LinkedIn, ranks them, and helps teams respond with rule-aware drafts.",
     metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
     icons: {
         icon: "/icon.svg",
         shortcut: "/icon.svg",
         apple: "/icon.svg",
     },
-    keywords: ["demand playbook", "reddit command center", "intent detection", "Mardis", "LinkedIn outreach", "X marketing"],
+    keywords: ["demand capture software", "reddit marketing", "intent detection", "Mardis", "LinkedIn outreach", "X marketing"],
     openGraph: {
-        title: "Mardis Hub - The Tactical Demand Playbook",
-        description: "Capture demand across Reddit, X, and LinkedIn with precision and safety.",
+        title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
+        description: "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
         type: "website",
+        images: [
+            {
+                url: "/opengraph-image",
+                width: 1200,
+                height: 630,
+                alt: "Mardis demand capture software preview"
+            }
+        ]
     },
     twitter: {
         card: "summary_large_image",
-        title: "Mardis Hub - The Tactical Demand Playbook",
-        description: "Capture demand across Reddit, X, and LinkedIn with precision and safety.",
+        title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
+        description: "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
+        images: ["/twitter-image"]
     },
 };
-
-function SchemaMarkup() {
-    return (
-        <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-                __html: JSON.stringify({
-                    "@context": "https://schema.org",
-                    "@graph": [
-                        {
-                            "@type": "WebSite",
-                            name: "Mardis Hub",
-                            url: "https://www.mardishub.com",
-                            description: "Multi-channel mission control for Reddit, X, and LinkedIn."
-                        },
-                        {
-                            "@type": "Organization",
-                            name: "Mardis Hub",
-                            url: "https://www.mardishub.com",
-                            logo: "https://www.mardishub.com/icon.svg",
-                            description: "Demand capture software for Reddit, X, and LinkedIn."
-                        }
-                    ]
-                })
-            }}
-        />
-    );
-}
 
 export default function RootLayout({
     children,
@@ -59,9 +43,6 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="dark">
-            <head>
-                <SchemaMarkup />
-            </head>
             <body className="min-h-screen bg-[#050505] antialiased">
                 <div className="stealth-grid-bg">
                     <div className="stealth-grid" />
