@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         type: "website",
         images: [
             {
-                url: "/opengraph-image",
+                url: "/og-image.png",
                 width: 1200,
                 height: 630,
                 alt: "Mardis demand capture software preview"
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
         description: "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
-        images: ["/twitter-image"]
+        images: ["/twitter-image.png"]
     },
 };
 

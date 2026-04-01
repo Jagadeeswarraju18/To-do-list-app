@@ -100,7 +100,7 @@ export function Hero() {
                             </div>
                         </div>
                         <img
-                            src="/opengraph-image"
+                            src="/og-image.png"
                             alt="Mardis landing preview"
                             width={1200}
                             height={630}
