@@ -119,7 +119,7 @@ function DiscoverLoginContent() {
                 {/* Footer Brand */}
                 <div className="mt-16 text-center opacity-10 hover:opacity-50 transition-opacity duration-1000">
                     <span className="text-[9px] font-bold uppercase tracking-[0.6em] text-zinc-900">
-                        Obsidian Core
+                        Mardis Core
                     </span>
                 </div>
             </motion.div>

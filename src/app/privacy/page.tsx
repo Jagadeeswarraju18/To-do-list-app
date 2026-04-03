@@ -1,7 +1,15 @@
-"use client";
+import type { Metadata } from "next";
 
 import { Shield, Lock, Eye, FileText, ArrowLeft, Scale } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+    title: "Privacy Policy",
+    description: "Read the Mardis privacy policy and how we handle account, platform, and processing data.",
+    alternates: {
+        canonical: "/privacy"
+    }
+};
 
 export default function PrivacyPolicy() {
     return (

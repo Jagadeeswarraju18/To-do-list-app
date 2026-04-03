@@ -3,15 +3,39 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Users, Target, ArrowLeft, ArrowUpRight, CheckCircle2, Radar, Twitter, Linkedin, Heart } from "lucide-react";
 import { SignalButton } from "@/components/ui/SignalButton";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
     const { data: product } = await getPublicProductDetails(params.id);
     if (!product) return { title: "App Not Found | Mardis" };
+    
     return {
         title: `${product.name} | Mardis Apps`,
         description: product.description || product.pain_solved,
+        alternates: {
+            canonical: `/discover/${params.id}`
+        },
+        openGraph: {
+            title: `${product.name} | Mardis Apps`,
+            description: product.description || product.pain_solved,
+            url: `/discover/${params.id}`,
+            images: [
+                {
+                    url: "/og-image.png",
+                    width: 1200,
+                    height: 630,
+                    alt: `Preview of ${product.name}`
+                }
+            ]
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: `${product.name} | Mardis Apps`,
+            description: product.description || product.pain_solved,
+            images: ["/twitter-image.png"]
+        }
     };
 }
 

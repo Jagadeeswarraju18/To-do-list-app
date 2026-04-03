@@ -8,7 +8,7 @@ export const metadata: Metadata = {
         template: "%s | Mardis"
     },
     description: "Mardis is demand capture software that finds high-intent conversations across Reddit, X, and LinkedIn, ranks them, and helps teams respond with rule-aware drafts.",
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.mardishub.com"),
     icons: {
         icon: "/icon.svg",
         shortcut: "/icon.svg",

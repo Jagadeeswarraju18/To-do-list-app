@@ -1,7 +1,15 @@
-"use client";
+import type { Metadata } from "next";
 
 import { FileText, Scale, Zap, Globe, ArrowLeft, Shield } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+    title: "Terms of Service",
+    description: "Review the Mardis terms of service, acceptable use policy, and platform responsibilities.",
+    alternates: {
+        canonical: "/terms"
+    }
+};
 
 export default function TermsOfService() {
     return (
