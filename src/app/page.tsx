@@ -43,24 +43,18 @@ export const metadata: Metadata = {
 
 const homepageProductSchema = {
     "@context": "https://schema.org",
-    "@type": "Product",
+    "@type": "WebApplication",
     name: "Mardis",
     description:
         "Demand capture software for Reddit, X, and LinkedIn. Mardis finds high-intent conversations, ranks them, and helps teams respond with rule-aware drafts.",
-    category: "Demand Capture Software",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
     brand: {
         "@type": "Brand",
         name: "Mardis Hub"
     },
     image: "https://www.mardishub.com/icon.svg",
     url: "https://www.mardishub.com/",
-    offers: {
-        "@type": "Offer",
-        url: "https://www.mardishub.com/signup",
-        priceCurrency: "USD",
-        price: "0",
-        availability: "https://schema.org/InStock"
-    },
     additionalProperty: [
         {
             "@type": "PropertyValue",
@@ -82,11 +76,7 @@ const homepageProductSchema = {
 
 export default function LandingPage() {
     return (
-        <div
-            className="relative min-h-screen overflow-x-hidden bg-black selection:bg-white/20 selection:text-white"
-            itemScope
-            itemType="https://schema.org/Product"
-        >
+        <div className="relative min-h-screen overflow-x-hidden bg-black selection:bg-white/20 selection:text-white">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageProductSchema) }} />
             <Navbar />
             <main className="isolate">

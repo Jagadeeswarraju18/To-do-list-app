@@ -38,24 +38,18 @@ function ProductSchema() {
             dangerouslySetInnerHTML={{
                 __html: JSON.stringify({
                     "@context": "https://schema.org",
-                    "@type": "Product",
+                    "@type": "WebApplication",
                     name: "Mardis",
                     description:
                         "Demand capture software for Reddit, X, and LinkedIn. Mardis finds high-intent conversations, ranks them, shows live opportunities, and drafts rule-aware replies.",
-                    category: "Demand Capture Software",
+                    applicationCategory: "BusinessApplication",
+                    operatingSystem: "Web",
                     brand: {
                         "@type": "Brand",
                         name: "Mardis Hub"
                     },
                     image: "https://www.mardishub.com/icon.svg",
                     url: productUrl,
-                    offers: {
-                        "@type": "Offer",
-                        url: productUrl,
-                        priceCurrency: "USD",
-                        price: "0",
-                        availability: "https://schema.org/InStock"
-                    },
                     additionalProperty: [
                         {
                             "@type": "PropertyValue",
