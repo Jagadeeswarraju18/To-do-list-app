@@ -7,7 +7,7 @@ import { normalizePlanId, PLAN_BY_ID } from '@/lib/pricing';
 function getDodoClient() {
     const apiKey = process.env.DODO_PAYMENTS_API_KEY;
     if (!apiKey) return null;
-    const mode = process.env.DODO_PAYMENTS_MODE === 'test' ? 'test_mode' : 'live_mode';
+    const mode = process.env.DODO_PAYMENTS_MODE === 'live' ? 'live_mode' : 'test_mode';
     return new DodoPayments({ 
         bearerToken: apiKey,
         environment: mode as 'live_mode' | 'test_mode'

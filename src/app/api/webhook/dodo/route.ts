@@ -136,6 +136,7 @@ function getWebhookClients() {
     return {
         dodo: new DodoPayments({
             bearerToken: apiKey,
+            environment: process.env.DODO_PAYMENTS_MODE === 'live' ? 'live_mode' : 'test_mode',
             webhookKey: webhookSecret,
         }),
         supabaseAdmin: createClient(supabaseUrl, serviceRoleKey),
