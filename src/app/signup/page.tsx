@@ -61,7 +61,7 @@ export default function SignupPage() {
 
             // Check if user has a profile for the selected role
             if (role === "founder") {
-                router.push("/founder/onboarding");
+                router.push("/founder/products?setup=1");
             } else {
                 router.push("/creator/onboarding");
             }
@@ -70,10 +70,11 @@ export default function SignupPage() {
 
     const handleGoogleLogin = async () => {
         try {
+            const nextPath = role === "founder" ? "/founder/products?setup=1" : "/creator/onboarding";
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/auth/callback`
+                    redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
                 }
             });
             if (error) throw error;
@@ -194,8 +195,8 @@ export default function SignupPage() {
                             transition={{ duration: 1, delay: 0.2 }}
                             className="text-3xl lg:text-5xl font-bold tracking-tight leading-[1.1]"
                         >
-                            Scale your vision <br />
-                            <span className="text-zinc-400">with precision.</span>
+                            Turn conversations into <br />
+                            <span className="text-zinc-400">qualified demand.</span>
                         </motion.h2>
                         <motion.p 
                             initial={{ opacity: 0 }}
@@ -203,7 +204,7 @@ export default function SignupPage() {
                             transition={{ duration: 1, delay: 0.5 }}
                             className="text-zinc-400 text-sm font-medium leading-relaxed max-w-md"
                         >
-                            Join the elite network of founders and creators using Mardis to bridge the gap between product and market fit.
+                            Set up your workspace, add your product, and start finding relevant conversations across Reddit, X, and LinkedIn.
                         </motion.p>
                     </div>
                 </div>
@@ -216,9 +217,9 @@ export default function SignupPage() {
                         className="space-y-4"
                     >
                         <div className="w-10 h-0.5 rounded-full bg-primary" />
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-white">Creator Network</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-white">Demand Discovery</h3>
                         <p className="text-zinc-400 text-[11px] font-medium leading-relaxed uppercase tracking-widest">
-                            Access a global pool of verified creators ready to amplify your brand story.
+                            Spot conversations where people are actively asking for help, alternatives, or recommendations.
                         </p>
                     </motion.div>
                     <motion.div 
@@ -228,9 +229,9 @@ export default function SignupPage() {
                         className="space-y-4"
                     >
                         <div className="w-10 h-0.5 rounded-full bg-zinc-800" />
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Growth Engine</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Reply Workflow</h3>
                         <p className="text-zinc-400 text-[11px] font-medium leading-relaxed uppercase tracking-widest">
-                            Unified dashboard for tracking engagement, ROI, and signal velocity.
+                            Review matched opportunities, generate reply options, and keep your messaging consistent.
                         </p>
                     </motion.div>
                 </div>
@@ -248,7 +249,7 @@ export default function SignupPage() {
                         </div>
 
                         <div className="text-center mb-5">
-                            <h1 className="text-lg sm:text-xl font-bold mb-1 tracking-tight uppercase">Initialize Account</h1>
+                            <h1 className="text-lg sm:text-xl font-bold mb-1 tracking-tight uppercase">Create Account</h1>
                             <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
                                 Role: <span className="text-white">{role}</span>
                                 <button
@@ -283,7 +284,7 @@ export default function SignupPage() {
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Identity</label>
+                                <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Email</label>
                                 <div className="relative group">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 group-focus-within:text-white transition-colors" />
                                     <input
@@ -299,7 +300,7 @@ export default function SignupPage() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Access Key</label>
+                                    <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Password</label>
                                     <div className="relative group">
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600 group-focus-within:text-primary transition-colors" />
                                         <input
@@ -321,7 +322,7 @@ export default function SignupPage() {
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Confirm Key</label>
+                                    <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Confirm Password</label>
                                     <div className="relative group">
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600 group-focus-within:text-primary transition-colors" />
                                         <input
@@ -348,11 +349,11 @@ export default function SignupPage() {
                                 disabled={loading}
                                 className="w-full py-3.5 bg-primary hover:bg-[#423E3E] text-white font-bold rounded-2xl transition-all shadow-[0_0_20px_rgba(54,34,34,0.3)] active:scale-[0.98] text-[10px] uppercase tracking-widest disabled:opacity-50"
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Initialize Account"}
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Create Account"}
                             </button>
 
                             <p className="text-[10px] text-zinc-500 text-center px-4 leading-relaxed">
-                                By clicking "Initialize Account", you agree to our{" "}
+                                By clicking "Create Account", you agree to our{" "}
                                 <Link href="/terms" className="text-zinc-400 hover:text-white transition-colors underline underline-offset-4">Terms</Link>
                                 {" "}and acknowledge our{" "}
                                 <Link href="/privacy" className="text-zinc-400 hover:text-white transition-colors underline underline-offset-4">Privacy Policy</Link>.
@@ -391,15 +392,15 @@ export default function SignupPage() {
                                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                                     />
                                 </svg>
-                                Google Identity
+                                Continue with Google
                             </button>
                         </div>
 
                         <div className="text-center mt-6">
                             <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-                                Already have an access key?{" "}
+                                Already have an account?{" "}
                                 <Link href="/login" className="text-white hover:text-primary transition-colors underline underline-offset-4">
-                                    Authorize Access
+                                    Sign in
                                 </Link>
                             </p>
                         </div>

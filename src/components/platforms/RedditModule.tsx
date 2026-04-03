@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -18,8 +18,17 @@ import {
     Sparkles,
     Star,
     Target,
-    Zap
+    Zap,
+    Radar,
+    Terminal,
+    Command,
+    Activity,
+    Globe,
+    Layers,
+    Cpu,
+    Filter
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { generateContentAction } from "@/app/actions/generate-content";
 import { regenerateSingleDM } from "@/app/actions/discover-opportunities";
 import {
@@ -29,6 +38,7 @@ import {
 } from "@/lib/platforms/reddit-generator";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { DeleteButton } from "@/components/ui/DeleteButton";
+import { toast } from "sonner";
 
 function getCommunityPlan(sub: SubredditSuggestion | null, isProductLed: boolean, preferredLength: "short" | "balanced" | "deep") {
     if (!sub) return [];
@@ -178,6 +188,7 @@ export default function RedditModule({ product }: { product: any }) {
     const [selectedSub, setSelectedSub] = useState<SubredditSuggestion | null>(null);
     const [view, setView] = useState<"command" | "saved">("command");
     const [generatedPost, setGeneratedPost] = useState<RedditPost | null>(null);
+    const [generatedComments, setGeneratedComments] = useState<string[]>([]);
     const [generating, setGenerating] = useState(false);
     const [saving, setSaving] = useState(false);
     const [savedDrafts, setSavedDrafts] = useState<any[]>([]);
@@ -193,14 +204,24 @@ export default function RedditModule({ product }: { product: any }) {
     const [loadingStep, setLoadingStep] = useState(0);
     const [showSavedToast, setShowSavedToast] = useState(false);
     const [showDuplicateToast, setShowDuplicateToast] = useState(false);
+    const [generationError, setGenerationError] = useState<string | null>(null);
+    const [generationMode, setGenerationMode] = useState<"draft" | "refine">("draft");
+    const [redditMode, setRedditMode] = useState<"safe" | "balanced" | "product_led">("balanced");
+    const [generationTarget, setGenerationTarget] = useState<"post" | "comments">("post");
 
-    const loadingMessages = [
-        "Reading subreddit rules...",
-        "Removing obvious promo language...",
-        "Adjusting tone to fit the community...",
-        "Making the draft sound more human...",
-        "Final human pass..."
-    ];
+    const loadingMessages = generationMode === "refine"
+        ? [
+            "Switching to GPT-5.2...",
+            "Refining title and body...",
+            "Removing AI gloss...",
+            "Polishing the final draft..."
+        ]
+        : [
+            "Using GPT-5-mini for a fast first pass...",
+            "Applying subreddit rules...",
+            "Writing in the community's tone...",
+            "Validating the draft..."
+        ];
 
     useEffect(() => {
         void loadSavedSubs();
@@ -239,7 +260,7 @@ export default function RedditModule({ product }: { product: any }) {
         if (generating) {
             interval = setInterval(() => {
                 setLoadingStep((prev) => (prev + 1) % loadingMessages.length);
-            }, 850);
+            }, 600);
         } else {
             setLoadingStep(0);
         }
@@ -334,39 +355,78 @@ export default function RedditModule({ product }: { product: any }) {
         }
     };
 
+    const redditModeLabel = redditMode === "safe" ? "Safe" : redditMode === "product_led" ? "Product-Led" : "Balanced";
+    const outputTargetLabel = generationTarget === "comments" ? "Karma Builder" : "Draft Post";
+
     const handleSearch = () => {
         if (!niche.trim()) return;
         const results = findSubreddits(niche);
         setSubreddits(results);
         setSelectedSub(results[0] || null);
         setGeneratedPost(null);
+        setGeneratedComments([]);
     };
 
     const handleGeneratePost = async () => {
-        if (!selectedSub || !product) return;
+        if (!selectedSub) {
+            const message = "Pick a subreddit first so we know which community rules to follow.";
+            setGenerationError(message);
+            toast.error(message);
+            return;
+        }
+        if (!niche.trim()) {
+            const message = "Add the prompt or angle you want to turn into a Reddit draft.";
+            setGenerationError(message);
+            toast.error(message);
+            return;
+        }
 
+        setGenerationError(null);
+        setGeneratedPost(null);
+        setGeneratedComments([]);
+        setGenerationMode("draft");
         setGenerating(true);
         try {
             const generated = await generateContentAction({
-                type: "reddit_post",
+                type: generationTarget === "comments" ? "reply" : "reddit_post",
                 topic: niche,
-                productName: product.name,
-                painSolved: product.pain_solved || "this problem",
-                description: product.description || "",
+                productName: product?.name || "your product",
+                painSolved: product?.pain_solved || niche,
+                description: product?.description || niche,
                 targetAudience: `Users of r/${selectedSub.name}`,
-                differentiation: product.differentiation || "",
+                differentiation: product?.differentiation || "",
                 additionalContext: `Community: r/${selectedSub.name}. Tone: ${selectedSub.tone}. Rules: ${selectedSub.rules_summary.join(" | ")}. Recommended approach: ${commandPlan.join(" ")}`,
                 preferredLength,
                 urgency: "low",
                 isProductLed,
                 subredditName: selectedSub.name,
                 subredditRules: selectedSub.rules_summary,
-                subredditTone: selectedSub.tone
+                subredditTone: selectedSub.tone,
+                redditMode,
+                commentCount: 4
             });
 
+            if (generationTarget === "comments") {
+                const comments = Array.isArray((generated as any).comments)
+                    ? (generated as any).comments.filter((item: string) => item?.trim())
+                    : [];
+                if (!comments.length) {
+                    throw new Error("The comment generator came back empty. Try again or tighten the angle.");
+                }
+                setGeneratedComments(comments);
+                return;
+            }
+
+            const title = (generated as any).title || `Question for r/${selectedSub.name}`;
+            const body = (generated as any).body || "";
+
+            if (!title.trim() || !body.trim()) {
+                throw new Error("The draft generator came back empty. Try again or slightly tighten the prompt.");
+            }
+
             setGeneratedPost({
-                title: (generated as any).title || `Question for r/${selectedSub.name}`,
-                body: (generated as any).body || "",
+                title,
+                body,
                 subreddit: selectedSub.name,
                 flair: "Discussion",
                 format: "discussion",
@@ -378,6 +438,54 @@ export default function RedditModule({ product }: { product: any }) {
             });
         } catch (error) {
             console.error("Reddit Gen Failed:", error);
+            const message = error instanceof Error ? error.message : "Draft generation failed. Please try again.";
+            setGenerationError(message);
+            toast.error(message);
+        } finally {
+            setGenerating(false);
+        }
+    };
+
+    const handleImproveDraft = async () => {
+        if (!generatedPost || !selectedSub) return;
+
+        setGenerationError(null);
+        setGenerationMode("refine");
+        setGenerating(true);
+        try {
+            const refined = await generateContentAction({
+                type: "reddit_post",
+                topic: niche,
+                productName: product?.name || "your product",
+                painSolved: product?.pain_solved || niche,
+                description: product?.description || niche,
+                targetAudience: `Users of r/${selectedSub.name}`,
+                isRefinement: true,
+                existingContent: { title: generatedPost.title, body: generatedPost.body },
+                subredditName: selectedSub.name,
+                subredditRules: selectedSub.rules_summary,
+                subredditTone: selectedSub.tone
+            });
+
+            const title = (refined as any).title || generatedPost.title;
+            const body = (refined as any).body || "";
+
+            if (!body.trim()) {
+                throw new Error("Refinement failed to produce content.");
+            }
+
+            setGeneratedPost({
+                ...generatedPost,
+                title,
+                body,
+                strategy: "Improved (" + generatedPost.strategy + ")"
+            });
+            toast.success("Draft humanized with premium pass.");
+        } catch (error) {
+            console.error("Refinement Failed:", error);
+            const message = error instanceof Error ? error.message : "Refinement failed. Try again.";
+            setGenerationError(message);
+            toast.error("Refinement failed. Try again.");
         } finally {
             setGenerating(false);
         }
@@ -525,215 +633,287 @@ export default function RedditModule({ product }: { product: any }) {
 
     if (view === "saved") {
         return (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+            <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-8"
+            >
+                <div className="flex items-center justify-between pb-6 border-b border-white/5">
+                    <div className="flex items-center gap-4">
                         <button
                             type="button"
                             onClick={() => setView("command")}
-                            className="rounded-full p-2 transition-colors hover:bg-white/10"
+                            className="group flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 transition-all hover:bg-white/10 hover:scale-110"
                         >
-                            <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+                            <ChevronLeft className="h-5 w-5 text-white" />
                         </button>
                         <div>
-                            <h2 className="text-2xl font-bold text-white">Saved Reddit Drafts</h2>
-                            <p className="text-sm text-zinc-400">Your safer drafts live here until you are ready to post.</p>
+                            <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Mission Vault</h2>
+                            <p className="text-sm text-zinc-500 font-medium tracking-tight">Secured Reddit drafts and strategic captures.</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid gap-4">
+                <div className="grid gap-6">
                     {savedDrafts.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-white/10 p-12 text-center">
-                            <p className="text-zinc-400">No Reddit drafts saved yet.</p>
+                        <div className="flex flex-col items-center justify-center py-20 rounded-[32px] border border-dashed border-white/10 bg-white/[0.02]">
+                            <Layers className="h-10 w-10 text-zinc-800 mb-4" />
+                            <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Vault Is Empty</p>
                         </div>
                     ) : (
-                        savedDrafts.map((draft) => (
-                            <div key={draft.id} className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-                                <div className="flex flex-1 items-start gap-4">
-                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#FF4500]/15">
-                                        <MessageSquare className="h-5 w-5 text-[#FF4500]" />
+                        <div className="grid gap-4">
+                            {savedDrafts.map((draft, i) => (
+                                <motion.div 
+                                    key={draft.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="glass-card p-8 group/draft relative overflow-hidden"
+                                >
+                                    <div className="absolute top-0 right-0 p-8 opacity-0 group-hover/draft:opacity-10 transition-opacity">
+                                        <MessageSquare className="w-24 h-24 text-white" />
                                     </div>
-                                    <div className="flex-1">
-                                        <div className="mb-2 flex items-center gap-2">
-                                            <span className="text-sm font-bold text-white">You</span>
-                                            <span className="text-xs text-zinc-500">{new Date(draft.created_at).toLocaleDateString()}</span>
+                                    <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
+                                        <div className="flex-1 space-y-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-[#FF8A5B] text-[10px] font-black uppercase tracking-widest">
+                                                    r/{draft.subreddit || "Reddit"}
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                                    {new Date(draft.created_at).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <h3 className="text-xl font-bold text-white tracking-tight leading-tight">{draft.title}</h3>
+                                            <p className="text-zinc-400 text-sm leading-relaxed max-w-2xl">{draft.body}</p>
                                         </div>
-                                        <p className="mb-2 text-sm font-bold text-white">{draft.title}</p>
-                                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">{draft.body}</p>
+
+                                        <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto mt-4 md:mt-0">
+                                            <button
+                                                onClick={() => handleRedditIntent(draft.title, draft.body)}
+                                                className="premium-button flex-1 md:w-full py-2.5 shadow-orange-500/10"
+                                            >
+                                                <BookOpen className="h-4 w-4" />
+                                                Deploy Now
+                                            </button>
+                                            <div className="flex gap-2 flex-1 md:w-full">
+                                                <button
+                                                    onClick={() => handleCopy(draft.body, draft.id)}
+                                                    className={`flex-1 rounded-xl border px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.18em] transition-all ${copiedIdx === draft.id ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"}`}
+                                                >
+                                                    {copiedIdx === draft.id ? "Copied" : "Copy"}
+                                                </button>
+                                                <DeleteButton onClick={() => handleArchive(draft.id)} />
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div className="flex min-w-[140px] flex-col gap-2">
-                                    <button
-                                        onClick={() => handleRedditIntent(draft.title, draft.body)}
-                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#FF4500] px-4 py-2 text-xs font-bold text-white transition-all hover:bg-[#d93d00]"
-                                    >
-                                        <BookOpen className="h-3.5 w-3.5" />
-                                        Post Now
-                                    </button>
-
-                                    <button
-                                        onClick={() => handleMarkPosted(draft.id, draft.status || "draft")}
-                                        className="rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-xs font-medium text-zinc-300 transition-all hover:bg-white/5 hover:text-white"
-                                    >
-                                        {draft.status === "posted" ? "Undo Posted" : "Mark Posted"}
-                                    </button>
-
-                                    <button
-                                        onClick={() => handleCopy(draft.body, draft.id)}
-                                        className={`rounded-lg border px-4 py-2 text-xs font-medium transition-all ${copiedIdx === draft.id ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : "border-white/10 bg-black/40 text-zinc-300 hover:bg-white/5 hover:text-white"}`}
-                                    >
-                                        {copiedIdx === draft.id ? "Copied" : "Copy"}
-                                    </button>
-
-                                    <DeleteButton onClick={() => handleArchive(draft.id)} className="mt-1" />
-                                </div>
-                            </div>
-                        ))
+                                </motion.div>
+                            ))}
+                        </div>
                     )}
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
     return (
-        <div className="space-y-8">
-            <div className="rounded-[28px] border border-[#FF4500]/15 bg-gradient-to-br from-[#FF4500]/10 to-transparent p-6">
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="max-w-2xl">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-[#FF4500]/20 bg-[#FF4500]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#FF8A5B]">
-                            <ShieldCheck className="h-3.5 w-3.5" />
-                            Reddit Command Center
-                        </div>
-                        <h2 className="mt-4 text-2xl font-bold tracking-tight text-white">Pick the right community. Follow its rules. Write like you belong there.</h2>
-                        <p className="mt-3 max-w-xl text-sm leading-7 text-zinc-400">
-                            This flow does not just generate Reddit text. It picks a community angle, applies the subreddit rules automatically,
-                            and pushes the draft away from polished AI slop.
-                        </p>
-                    </div>
+        <div className="w-full space-y-12">
+            {/* Tactical Command Console & Controls Container */}
+            <div className="flex flex-col xl:flex-row gap-12">
+                {/* Left Side: Main Console */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex-1 space-y-8"
+                >
+                    <div className="glass-card p-10 border-white/10 relative overflow-hidden rounded-[40px] shadow-2xl group">
+                        <div className="absolute inset-0 cyber-grid opacity-30 pointer-events-none" />
+                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px]" />
+                        
+                        <div className="relative z-10 grid gap-10 lg:grid-cols-[1.5fr_1fr]">
+                            <div className="space-y-6">
+                                <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-[#FF8A5B] shadow-lg">
+                                    <Terminal className="h-3.5 w-3.5" />
+                                    Reddit Deployment Protocol
+                                </div>
+                                <h2 className="mt-8 text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
+                                    Community <span className="text-orange-500">Signal</span> Lab
+                                </h2>
+                                <p className="mt-6 text-base text-zinc-400 font-medium leading-relaxed max-w-xl italic">
+                                    Run surgical missions across niche communities. Target high-intent threads, sound like a peer, and capture demand without noise.
+                                </p>
+                                
+                                <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                                    <div className="relative flex-1">
+                                        <input
+                                            value={niche}
+                                            onChange={(e) => setNiche(e.target.value)}
+                                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                            className="w-full h-14 rounded-2xl border border-white/10 bg-white/5 px-6 pl-12 text-sm text-white placeholder:text-zinc-600 focus:border-orange-500/50 outline-none transition-all shadow-inner"
+                                            placeholder="Enter niche or community signal..."
+                                        />
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                    </div>
+                                    <button
+                                        onClick={handleSearch}
+                                        disabled={!niche.trim() || generating}
+                                        className="premium-button h-14 px-10 shadow-orange-500/20"
+                                    >
+                                        {generating ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Radar className="h-4 w-4" />}
+                                        {generating ? "SCANNING..." : "SCAN"}
+                                    </button>
+                                </div>
 
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        <div className="rounded-2xl border border-white/10 bg-black/30 px-4 py-4">
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Saved Subs</p>
-                            <p className="mt-2 text-2xl font-bold text-white">{savedSubs.length}</p>
-                        </div>
-                        <div className="rounded-2xl border border-white/10 bg-black/30 px-4 py-4">
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Drafts</p>
-                            <p className="mt-2 text-2xl font-bold text-white">{savedDrafts.length}</p>
-                        </div>
-                        <button
-                            onClick={() => { setView("saved"); void loadSavedDrafts(); }}
-                            className="rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-left transition-all hover:bg-white/5"
-                        >
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">History</p>
-                            <p className="mt-2 text-sm font-bold text-white">Open Draft Vault</p>
-                        </button>
-                    </div>
-                </div>
+                                <div className="mt-6 flex items-center gap-6">
+                                    <button 
+                                        onClick={() => { setView("saved"); void loadSavedDrafts(); }} 
+                                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
+                                    >
+                                        <Layers className="h-3.5 w-3.5" />
+                                        <span className="text-white">{savedDrafts.length}</span> Drafts in Vault
+                                    </button>
+                                    <div className="h-4 w-px bg-white/10" />
+                                    <button 
+                                        onClick={() => { setView("saved"); void loadSavedDrafts(); }} 
+                                        className="flex items-center gap-2 text-[10px) font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
+                                    >
+                                        <Star className="h-3.5 w-3.5" />
+                                        <span className="text-white">{savedSubs.length}</span> Tracked Subs
+                                    </button>
+                                </div>
+                            </div>
 
-                <div className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-                    <div className="flex gap-3">
-                        <input
-                            value={niche}
-                            onChange={(e) => setNiche(e.target.value)}
-                            className="flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-zinc-600 focus:border-[#FF4500]/30"
-                            placeholder="ex: B2B SaaS onboarding pain / tracking trial churn / AI workflow for marketers"
-                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                        />
-                        <button
-                            onClick={handleSearch}
-                            disabled={!niche.trim()}
-                            className="flex items-center gap-2 rounded-xl bg-[#FF4500] px-6 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-white transition-all hover:bg-[#d93d00] disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            <Search className="h-4 w-4" />
-                            Find Subs
-                        </button>
+                            <div className="grid grid-cols-2 gap-4">
+                                {[
+                                    { label: "Signals Found", value: redditOpportunities.length, icon: Activity, color: "text-orange-500" },
+                                    { label: "Sub Frequencies", value: subreddits.length, icon: Globe, color: "text-emerald-400" },
+                                    { label: "AI Fidelity", value: "Level 4", icon: Cpu, color: "text-purple-400" },
+                                    { label: "Protocol", value: redditMode === "safe" ? "Stealth" : "Direct", icon: ShieldCheck, color: "text-indigo-400" }
+                                ].map((stat, i) => (
+                                    <div key={i} className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-md group-hover:bg-white/[0.05] transition-all hover:border-white/10">
+                                        <stat.icon className={`h-5 w-5 ${stat.color} mb-4`} />
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{stat.label}</p>
+                                        <p className="mt-1 text-2xl font-black text-white tabular-nums">{stat.value}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
+                </motion.div>
 
-                    <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/30 p-1.5">
-                            {(["short", "balanced", "deep"] as const).map((length) => (
+                {/* Right Side: Sleek Controls */}
+                <div className="flex w-full flex-col gap-8 xl:w-80 xl:flex-shrink-0">
+                    {/* Tactical Switch: Output Target */}
+                    <div>
+                        <label className="mb-3 block text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">Protocol Target</label>
+                        <div className="flex p-1.5 bg-black/60 rounded-2xl border border-white/5 shadow-inner backdrop-blur-xl">
+                            {(["post", "comments"] as const).map((target) => (
                                 <button
-                                    key={length}
-                                    onClick={() => setPreferredLength(length)}
-                                    className={`rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] transition-all ${preferredLength === length ? "bg-white text-black" : "text-zinc-400 hover:text-white"}`}
+                                    key={target}
+                                    onClick={() => {
+                                        setGenerationTarget(target);
+                                        setGeneratedPost(null);
+                                        setGeneratedComments([]);
+                                        setGenerationError(null);
+                                    }}
+                                    className={`flex-1 rounded-xl py-3 text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${generationTarget === target ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.15)]" : "text-zinc-500 hover:text-white"}`}
                                 >
-                                    {length}
+                                    {target === "post" ? "Draft" : "Karma Builder"}
                                 </button>
                             ))}
                         </div>
+                    </div>
 
-                        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/30 p-1.5">
-                            <button
-                                onClick={() => setIsProductLed(true)}
-                                className={`rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] transition-all ${isProductLed ? "bg-[#FF4500] text-white" : "text-zinc-400 hover:text-white"}`}
-                            >
-                                Product-Led
-                            </button>
-                            <button
-                                onClick={() => setIsProductLed(false)}
-                                className={`rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] transition-all ${!isProductLed ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"}`}
-                            >
-                                Value-Led
-                            </button>
+                    {/* Mission Parameters */}
+                    <div className="grid gap-6">
+                        <div>
+                            <label className="mb-3 block text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">Tactical Aggression</label>
+                            <div className="grid grid-cols-1 gap-2">
+                                {([
+                                    { key: "safe", label: "Stealth (Safe)", desc: "Maximum native feel" },
+                                    { key: "balanced", label: "Balanced", desc: "Value + Soft Pivot" },
+                                    { key: "product_led", label: "Direct (Product)", desc: "High Intent Capture" }
+                                ] as const).map((mode) => (
+                                    <button
+                                        key={mode.key}
+                                        onClick={() => setRedditMode(mode.key)}
+                                        className={`group flex flex-col items-start p-4 rounded-2xl border transition-all duration-300 ${redditMode === mode.key ? "border-orange-500/30 bg-orange-500/10 orange-glow" : "border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10"}`}
+                                    >
+                                        <span className={`text-[10px] font-black uppercase tracking-widest ${redditMode === mode.key ? "text-orange-500" : "text-zinc-400 group-hover:text-white"}`}>{mode.label}</span>
+                                        <span className="text-[9px] text-zinc-600 mt-1 font-medium italic">{mode.desc}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="pt-2">
+                            <label className="mb-3 block text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">Mission Angle</label>
+                            <div className="flex gap-2 p-1.5 bg-black/60 rounded-2xl border border-white/5">
+                                {[
+                                    { id: false, label: "Value-First" },
+                                    { id: true, label: "Product-Led" }
+                                ].map(angle => (
+                                    <button
+                                        key={angle.label}
+                                        onClick={() => setIsProductLed(angle.id)}
+                                        className={`flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isProductLed === angle.id ? "bg-white/10 text-white border border-white/10" : "text-zinc-600 hover:text-white"}`}
+                                    >
+                                        {angle.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {selectedSub && dailyBrief && (
-                <div className="grid gap-4 lg:grid-cols-3">
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Mission Scope</p>
-                        <p className="mt-2 text-2xl font-bold text-white">{dailyBrief.exactCount}</p>
-                        <p className="mt-2 text-sm leading-6 text-zinc-400">Live opportunities inside r/{selectedSub.name} right now.</p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Best Move Today</p>
-                        <p className="mt-2 text-sm font-semibold leading-6 text-white">{dailyBrief.bestMove}</p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Timing Bias</p>
-                        <p className="mt-2 text-sm font-semibold leading-6 text-white">{dailyBrief.bestWindow}</p>
-                    </div>
-                </div>
-            )}
+
             {subreddits.length > 0 && (
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-[#FF8A5B]">Community Radar</h3>
-                            <p className="mt-1 text-sm text-zinc-500">Choose the subreddit where the post has the best chance of feeling native.</p>
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                        <div className="flex items-center gap-3">
+                            <Radar className="h-5 w-5 text-orange-500 animate-pulse" />
+                            <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500">Active Frequencies</h3>
                         </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#FF8A5B] bg-[#FF4500]/10 px-3 py-1 rounded-full border border-[#FF4500]/20">
+                            Live Scan Optimized
+                        </span>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        {subreddits.map((sub) => {
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {subreddits.map((sub, i) => {
                             const active = selectedSub?.name === sub.name;
                             return (
-                                <button
+                                <motion.button
                                     key={sub.name}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: i * 0.05 }}
                                     onClick={() => { setSelectedSub(sub); setGeneratedPost(null); }}
-                                    className={`rounded-2xl border p-5 text-left transition-all ${active ? "border-[#FF4500]/30 bg-[#FF4500]/10" : "border-white/10 bg-white/[0.03] hover:border-[#FF4500]/20 hover:bg-[#FF4500]/5"}`}
+                                    className={`group relative flex flex-col p-6 rounded-[32px] border text-left transition-all duration-500 overflow-hidden ${active ? "border-orange-500/50 bg-orange-500/10 orange-glow" : "border-white/10 bg-black/40 hover:border-white/20 hover:bg-white/[0.03]"}`}
                                 >
-                                    <div className="flex items-center justify-between gap-3">
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-base font-bold text-white">{sub.name}</span>
-                                                {active && <Star className="h-4 w-4 text-[#FF8A5B]" />}
-                                            </div>
-                                            <p className="mt-1 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">{sub.members} members</p>
+                                    {active && <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />}
+                                    <div className="flex items-start justify-between gap-4 mb-6">
+                                        <div className="flex-1">
+                                            <h4 className={`text-xl font-black italic uppercase tracking-tighter transition-colors ${active ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"}`}>
+                                                r/{sub.name}
+                                            </h4>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 mt-1">{sub.members} Signal Points</p>
                                         </div>
-                                        <span className={`rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] ${sub.relevance === "high" ? "bg-emerald-500/10 text-emerald-300" : "bg-amber-500/10 text-amber-300"}`}>
-                                            {sub.relevance}
+                                        <div className={`p-2 rounded-xl transition-all ${active ? "bg-orange-500 text-white" : "bg-white/5 text-zinc-600 group-hover:text-zinc-400"}`}>
+                                            <Target className="h-4 w-4" />
+                                        </div>
+                                    </div>
+                                    <p className="text-xs leading-relaxed text-zinc-500 group-hover:text-zinc-400 transition-colors line-clamp-3 italic mb-6">
+                                        "{sub.reason}"
+                                    </p>
+                                    <div className="mt-auto flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Shield className={`h-3 w-3 ${active ? "text-orange-500" : "text-zinc-700"}`} />
+                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">{sub.tone}</span>
+                                        </div>
+                                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${sub.relevance === "high" ? "border-emerald-500/20 text-emerald-400 bg-emerald-500/5" : "border-amber-500/20 text-amber-400 bg-amber-500/5"}`}>
+                                            {sub.relevance} Signal
                                         </span>
                                     </div>
-                                    <p className="mt-4 text-sm leading-6 text-zinc-400">{sub.reason}</p>
-                                    <div className="mt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
-                                        <Shield className="h-3.5 w-3.5" />
-                                        {sub.tone}
-                                    </div>
-                                </button>
+                                </motion.button>
                             );
                         })}
                     </div>
@@ -753,420 +933,363 @@ export default function RedditModule({ product }: { product: any }) {
             )}
 
             {selectedSub && (
-                <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="grid gap-8 lg:grid-cols-[400px_1fr]"
+                >
+                    {/* Signal Brief (Left) */}
                     <div className="space-y-6">
-                        <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
-                            <div className="flex items-start justify-between gap-4">
-                                <div>
-                                    <div className="inline-flex items-center gap-2 rounded-full border border-[#FF4500]/20 bg-[#FF4500]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#FF8A5B]">
-                                        <Target className="h-3.5 w-3.5" />
-                                        r/{selectedSub.name}
-                                    </div>
-                                    <h3 className="mt-4 text-xl font-bold text-white">Best move for this community</h3>
+                        <div className="glass-card p-8 border-white/10 relative group overflow-hidden">
+                            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity">
+                                <Target className="w-20 h-20 text-white" />
+                            </div>
+                            
+                            <div className="relative z-10">
+                                <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#FF8A5B]">
+                                    <Shield className="h-3 w-3" />
+                                    r/{selectedSub.name} Frequency
                                 </div>
-                                <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${riskLevel.className}`}>
-                                    {riskLevel.label}
-                                </span>
-                            </div>
-
-                            <div className="mt-5 rounded-2xl border border-white/10 bg-black/30 p-4">
-                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Community Tone</p>
-                                <p className="mt-2 text-sm leading-7 text-zinc-300">{selectedSub.tone}</p>
-                            </div>
-
-                            <div className="mt-4 space-y-3">
-                                {commandPlan.map((step, index) => (
-                                    <div key={step} className="flex gap-3 rounded-2xl border border-white/10 bg-black/20 p-4">
-                                        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white/5 text-[11px] font-black text-white">
-                                            {index + 1}
-                                        </div>
-                                        <p className="text-sm leading-7 text-zinc-300">{step}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
-                            <div className="flex items-center gap-2">
-                                <ShieldAlert className="h-4 w-4 text-amber-300" />
-                                <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-white">Rules You Need To Respect</h3>
-                            </div>
-                            <div className="mt-4 space-y-3">
-                                {selectedSub.rules_summary.map((rule) => (
-                                    <div key={rule} className="flex gap-3 rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4">
-                                        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-300" />
-                                        <p className="text-sm leading-7 text-zinc-300">{rule}</p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-4 flex gap-3">
-                                <button
-                                    onClick={handleSaveSub}
-                                    className="rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white transition-all hover:bg-white/5"
-                                >
-                                    Save Community
-                                </button>
-                                <div className="rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-zinc-400">
-                                    Auto-rules on
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
-                            <div className="flex flex-wrap items-center justify-between gap-4">
-                                <div>
-                                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">
-                                        <Sparkles className="h-3.5 w-3.5" />
-                                        Humanized Reddit Drafting
-                                    </div>
-                                    <h3 className="mt-4 text-xl font-bold text-white">Draft for r/{selectedSub.name}</h3>
-                                    <p className="mt-2 text-sm leading-7 text-zinc-400">
-                                        The generator now uses this subreddit's rules and tone as hard constraints, not decorative metadata.
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={handleGeneratePost}
-                                    disabled={generating}
-                                    className="flex items-center gap-2 rounded-xl bg-[#FF4500] px-5 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-white transition-all hover:bg-[#d93d00] disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {generating ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-                                    {generatedPost ? "Regenerate Draft" : "Generate Draft"}
-                                </button>
-                            </div>
-                            <div className="mt-5 grid gap-3 md:grid-cols-3">
-                                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Post Mode</p>
-                                    <p className="mt-2 text-sm font-semibold text-white">{isProductLed ? "Product-Led" : "Value-Led"}</p>
-                                </div>
-                                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Length</p>
-                                    <p className="mt-2 text-sm font-semibold capitalize text-white">{preferredLength}</p>
-                                </div>
-                                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Safety Bias</p>
-                                    <p className="mt-2 text-sm font-semibold text-white">Rule-first</p>
-                                </div>
-                            </div>
-
-                            <div className="mt-5 min-h-[320px] rounded-[24px] border border-white/10 bg-[#090909] p-5">
-                                {generating ? (
-                                    <div className="flex h-full min-h-[280px] flex-col items-center justify-center text-center">
-                                        <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#FF4500]/10">
-                                            <MessageSquare className="h-7 w-7 text-[#FF4500]" />
-                                        </div>
-                                        <p className="text-sm font-bold text-white">{loadingMessages[loadingStep]}</p>
-                                        <p className="mt-2 max-w-sm text-sm leading-7 text-zinc-500">
-                                            Making sure the draft feels native to r/{selectedSub.name}, not like an AI trying to sneak past mods.
+                                <h3 className="mt-6 text-2xl font-black italic uppercase tracking-tighter text-white">Target Intelligence</h3>
+                                
+                                <div className="mt-8 space-y-8">
+                                    <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-2">Primary Objective</p>
+                                        <p className="text-sm font-medium leading-relaxed text-zinc-300 italic">
+                                            "{dailyBrief?.bestMove || "Neutralize promotional noise and deliver peer-level value."}"
                                         </p>
                                     </div>
-                                ) : generatedPost ? (
-                                    <div className="space-y-5">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <span className="rounded-full bg-[#FF4500]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#FF8A5B]">
-                                                r/{generatedPost.subreddit}
-                                            </span>
-                                            <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">
-                                                Rules Applied
-                                            </span>
-                                            <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                                                {generatedPost.strategy}
-                                            </span>
-                                        </div>
 
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Title</p>
-                                            <h4 className="mt-2 text-xl font-bold leading-tight text-white">{generatedPost.title}</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-1">Atmosphere</p>
+                                            <p className="text-sm font-bold text-white italic">{selectedSub.tone}</p>
                                         </div>
-
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Body</p>
-                                            <div className="mt-2 rounded-2xl border border-white/10 bg-black/30 p-4">
-                                                <p className="whitespace-pre-wrap text-sm leading-7 text-zinc-300">{generatedPost.body}</p>
-                                            </div>
+                                        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-1">Threat Level</p>
+                                            <p className="text-sm font-bold text-orange-400 italic uppercase">{riskLevel.label}</p>
                                         </div>
+                                    </div>
 
-                                        <div className="grid gap-3 md:grid-cols-2">
-                                            {generatedPost.compliance_notes.map((note) => (
-                                                <div key={note} className="flex gap-3 rounded-2xl border border-white/10 bg-black/20 p-3">
-                                                    <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-300" />
-                                                    <p className="text-sm leading-6 text-zinc-300">{note}</p>
+                                    <div>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-4">Community Protocols</p>
+                                        <div className="space-y-3">
+                                            {selectedSub.rules_summary.map((rule, idx) => (
+                                                <div key={idx} className="flex items-start gap-3 group/rule">
+                                                    <div className="h-1.5 w-1.5 rounded-full bg-orange-500/40 mt-1.5 group-hover/rule:bg-orange-500 transition-colors" />
+                                                    <p className="text-[13px] text-zinc-400 leading-snug group-hover:text-zinc-200 transition-colors">{rule}</p>
                                                 </div>
                                             ))}
                                         </div>
+                                    </div>
 
-                                        <div className="flex flex-wrap gap-3 pt-2">
-                                            <button
-                                                onClick={() => handleRedditIntent(generatedPost.title, generatedPost.body)}
-                                                className="flex items-center gap-2 rounded-xl bg-[#FF4500] px-5 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-white transition-all hover:bg-[#d93d00]"
-                                            >
-                                                <BookOpen className="h-4 w-4" />
-                                                Copy + Open Reddit
-                                            </button>
-                                            <button
-                                                onClick={() => handleCopy(`${generatedPost.title}\n\n${generatedPost.body}`, "draft")}
-                                                className={`rounded-xl border px-5 py-3 text-[11px] font-black uppercase tracking-[0.16em] transition-all ${copiedIdx === "draft" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : "border-white/10 bg-black/30 text-white hover:bg-white/5"}`}
-                                            >
-                                                {copiedIdx === "draft" ? "Copied" : "Copy Draft"}
-                                            </button>
-                                            <SaveButton onClick={handleSavePostDraft} loading={saving} label="Save Draft" className="h-[46px]" />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex h-full min-h-[280px] flex-col items-center justify-center text-center">
-                                        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
-                                            <PenTool className="h-6 w-6 text-white" />
-                                        </div>
-                                        <p className="text-base font-bold text-white">Ready when you are</p>
-                                        <p className="mt-2 max-w-sm text-sm leading-7 text-zinc-500">
-                                            We already know the subreddit rules, tone, and safest posting posture. Generate when you want the first draft.
-                                        </p>
-                                    </div>
-                                )}
+                                    <button
+                                        onClick={handleSaveSub}
+                                        className="w-full py-3 rounded-2xl border border-white/5 bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:bg-white/10 hover:text-white transition-all"
+                                    >
+                                        Track Frequency
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+
+                    {/* Operational Composer (Right) */}
+                    <div className="space-y-6 flex flex-col h-full">
+                        <div className="glass-card p-10 flex-1 flex flex-col border-white/10 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-10 opacity-5">
+                                <Cpu className="w-40 h-40 text-white" />
+                            </div>
+                            
+                            <div className="relative z-10 flex flex-col h-full">
+                                <div className="flex flex-wrap items-center justify-between gap-6 mb-10 pb-8 border-b border-white/5">
+                                    <div>
+                                        <div className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.3em] text-emerald-400">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                            Signal Processor
+                                        </div>
+                                        <h3 className="mt-4 text-3xl font-black italic uppercase tracking-tighter text-white">
+                                            {generationTarget === "comments" ? "Dynamic Response" : "Surgical Draft"}
+                                        </h3>
+                                    </div>
+                                    
+                                    <button
+                                        onClick={handleGeneratePost}
+                                        disabled={generating}
+                                        className="premium-button px-8 h-14 shadow-emerald-500/10"
+                                    >
+                                        {generating ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                                        {generatedPost || generatedComments.length > 0 ? "RE-PROCESS" : "EXECUTE"}
+                                    </button>
+                                </div>
+
+                                <div className="flex-1 min-h-[400px] flex flex-col">
+                                    {generating ? (
+                                        <div className="flex-1 flex flex-col items-center justify-center space-y-6">
+                                            <div className="relative h-24 w-24">
+                                                <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+                                                <div className="absolute inset-0 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <Cpu className="h-8 w-8 text-white opacity-20" />
+                                                </div>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-sm font-black uppercase tracking-widest text-white">{loadingMessages[loadingStep]}</p>
+                                                <p className="text-xs text-zinc-600 mt-2 italic">Synthesizing native personality...</p>
+                                            </div>
+                                        </div>
+                                    ) : generationTarget === "comments" && generatedComments.length > 0 ? (
+                                        <div className="grid gap-6">
+                                            {generatedComments.map((comment, index) => (
+                                                <motion.div 
+                                                    key={index}
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: index * 0.1 }}
+                                                    className="group relative p-6 rounded-3xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all"
+                                                >
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Variant {index + 1}</span>
+                                                        <button
+                                                            onClick={() => handleCopy(comment, `comment-${index}`)}
+                                                            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${copiedIdx === `comment-${index}` ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-zinc-500 hover:text-white"}`}
+                                                        >
+                                                            {copiedIdx === `comment-${index}` ? "Copied" : "Copy"}
+                                                        </button>
+                                                    </div>
+                                                    <p className="text-[15px] leading-relaxed text-zinc-300 italic">"{comment}"</p>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    ) : generatedPost ? (
+                                        <div className="space-y-8 animate-in fade-in duration-700">
+                                            <div className="space-y-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-1 w-8 bg-orange-500 rounded-full" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Finalized Script</span>
+                                                </div>
+                                                <h4 className="text-2xl font-black text-white italic tracking-tighter">{generatedPost.title}</h4>
+                                                <div className="p-8 rounded-[32px] bg-white/[0.02] border border-white/5 shadow-inner">
+                                                    <p className="text-[15px] leading-relaxed text-zinc-300 whitespace-pre-wrap">{generatedPost.body}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {generatedPost.compliance_notes.map((note, i) => (
+                                                    <div key={i} className="flex gap-3 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                                                        <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                                                        <p className="text-[11px] font-medium text-emerald-400/80 leading-relaxed italic">{note}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-4 pt-6 border-t border-white/5">
+                                                <button
+                                                    onClick={() => handleRedditIntent(generatedPost.title, generatedPost.body)}
+                                                    className="premium-button h-12 shadow-orange-500/20"
+                                                >
+                                                    <BookOpen className="h-4 w-4" />
+                                                    DEPLOY TO REDDIT
+                                                </button>
+                                                <button
+                                                    onClick={() => handleCopy(`${generatedPost.title}\n\n${generatedPost.body}`, "draft")}
+                                                    className="px-6 h-12 rounded-2xl border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+                                                >
+                                                    {copiedIdx === "draft" ? "COPIED" : "COPY TO CLIPBOARD"}
+                                                </button>
+                                                <SaveButton onClick={handleSavePostDraft} loading={saving} label="STASH IN VAULT" className="h-12" />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex-1 flex flex-col items-center justify-center">
+                                            <div className="p-8 rounded-full bg-white/5 mb-6">
+                                                <PenTool className="h-8 w-8 text-zinc-700" />
+                                            </div>
+                                            <p className="text-sm font-black uppercase tracking-widest text-zinc-500">Awaiting Signal Input</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
             )}
 
             {filteredOpportunities.length > 0 && (
-                <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="space-y-10"
+                >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-white/5 pb-8">
                         <div>
-                            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">
-                                <Sparkles className="h-3.5 w-3.5" />
-                                Targeted Missions
+                            <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-[#FF8A5B] shadow-lg">
+                                <Radar className="h-3.5 w-3.5 animate-pulse" />
+                                Tactical Missions Available
                             </div>
-                            <h3 className="mt-4 text-xl font-bold text-white">
-                                {selectedSub ? `Live threads for r/${selectedSub.name}` : "Real posts worth replying to"}
+                            <h3 className="mt-6 text-3xl font-black italic uppercase tracking-tighter text-white">
+                                {selectedSub ? `Active Threads: r/${selectedSub.name}` : "Global Signal Feed"}
                             </h3>
-                            <p className="mt-2 max-w-2xl text-sm leading-7 text-zinc-400">
-                                These are real Reddit signals already found by your discovery engine. Use them to comment where demand already exists instead of posting blindly.
+                            <p className="mt-4 max-w-2xl text-base text-zinc-500 font-medium italic">
+                                Intercept high-intent conversations where your product solves immediate pain. Sound like a peer, act like a pro.
                             </p>
                         </div>
-                        {selectedSub && (
-                            <div className="rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-right">
-                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Mission Filter</p>
-                                <p className="mt-1 text-sm font-semibold text-white">r/{selectedSub.name}</p>
-                                <p className="mt-1 text-[11px] text-zinc-400">{dailyBrief?.missionCount || filteredOpportunities.length} threads in scope</p>
-                            </div>
-                        )}
                     </div>
 
-                    <div className="mt-5 grid gap-4 xl:grid-cols-2">
-                        {filteredOpportunities.map((opp) => {
+                    <div className="grid gap-8">
+                        {filteredOpportunities.map((opp, i) => {
                             const variants = replyVariantsMap[opp.id] || { helpful: opp.suggested_dm || "" };
                             const activeMode = replyModeMap[opp.id] || "helpful";
                             const activeReplyText = variants[activeMode] || opp.suggested_dm || "";
                             const safety = computeSafetyScore(opp, selectedSub && selectedSub.name === opp.subreddit ? selectedSub : selectedSub, activeReplyText);
                             const missionRecommendation = getMissionRecommendation(opp, selectedSub, safety.score);
+                            
                             return (
-                            <div key={opp.id} className="rounded-2xl border border-white/10 bg-black/25 p-5">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="rounded-full bg-[#FF4500]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#FF8A5B]">
-                                                r/{opp.subreddit || "reddit"}
-                                            </span>
-                                            <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                                                {opp.intent_level || "medium"} intent
-                                            </span>
-                                        </div>
-                                        <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                                            {opp.tweet_author || "reddit user"}
-                                        </p>
+                                <motion.div 
+                                    key={opp.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="glass-card p-10 border-white/10 group/mission relative overflow-hidden"
+                                >
+                                    <div className="absolute top-0 right-0 p-10 opacity-5 group-hover/mission:opacity-10 transition-opacity">
+                                        <Activity className="w-32 h-32 text-orange-500" />
                                     </div>
-                                    <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">
-                                        {Math.round(opp.match_score || opp.relevance_score || 0)}% match
-                                    </span>
-                                </div>
 
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${safety.tone}`}>
-                                        Safety {safety.score}/100
-                                    </span>
-                                    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${safety.tone}`}>
-                                        {safety.label}
-                                    </span>
-                                    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${missionRecommendation.tone}`}>
-                                        {missionRecommendation.label}
-                                    </span>
-                                </div>
+                                    <div className="relative z-10 grid gap-10 lg:grid-cols-[1fr_400px]">
+                                        <div className="space-y-8">
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <span className="px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-[#FF8A5B] text-[10px] font-black uppercase tracking-widest">
+                                                    r/{opp.subreddit || "Reddit"}
+                                                </span>
+                                                <span className="px-3 py-1 rounded-lg bg-white/5 border border-white/5 text-zinc-500 text-[10px] font-black uppercase tracking-widest">
+                                                    {opp.intent_level || "Medium"} Intent
+                                                </span>
+                                                <div className="flex-1 h-px bg-white/5" />
+                                                <span className="text-emerald-400 text-[10px] font-black uppercase tracking-widest">
+                                                    {Math.round(opp.match_score || opp.relevance_score || 0)}% Signal Match
+                                                </span>
+                                            </div>
 
-                                <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Recommended Action</p>
-                                    <p className="mt-2 text-sm font-semibold text-white">{missionRecommendation.reason}</p>
-                                </div>
+                                            <div className="space-y-4">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-700 italic">User: {opp.tweet_author || "Anonymous"}</p>
+                                                <p className="text-[17px] leading-relaxed text-zinc-300 font-medium italic">
+                                                    "{opp.tweet_content}"
+                                                </p>
+                                            </div>
 
-                                <p className="mt-4 line-clamp-4 text-sm leading-7 text-zinc-300">
-                                    {opp.tweet_content}
-                                </p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="p-5 rounded-[24px] bg-white/[0.02] border border-white/5">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Shield className={`h-3.5 w-3.5 ${safety.tone.includes('emerald') ? 'text-emerald-500' : 'text-amber-500'}`} />
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600">Protocol Integrity</span>
+                                                    </div>
+                                                    <p className={`text-sm font-bold uppercase italic ${safety.tone.includes('emerald') ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                                        {safety.label} ({safety.score}/100)
+                                                    </p>
+                                                </div>
+                                                <div className="p-5 rounded-[24px] bg-white/[0.02] border border-white/5">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Zap className="h-3.5 w-3.5 text-orange-500" />
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600">Strategic Call</span>
+                                                    </div>
+                                                    <p className="text-sm font-bold text-white uppercase italic">{missionRecommendation.label}</p>
+                                                </div>
+                                            </div>
 
-                                {opp.suggested_dm && (
-                                    <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                                        <div className="flex items-center justify-between gap-3">
-                                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Suggested Reply</p>
-                                            <span className="rounded-full bg-white/5 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                                                {replyModeMap[opp.id] || "helpful"} angle
-                                            </span>
-                                        </div>
-                                        <p className="mt-2 line-clamp-4 text-sm leading-7 text-zinc-300">
-                                            {opp.suggested_dm}
-                                        </p>
-                                    </div>
-                                )}
-
-                                <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-                                    <div className="flex flex-wrap items-center justify-between gap-3">
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Side-by-Side Modes</p>
-                                            <p className="mt-1 text-sm font-semibold text-white">Compare reply angles, then choose one as the active reply</p>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {(["helpful", "expert", "technical"] as const).map((mode) => (
+                                            <div className="flex flex-wrap gap-4 pt-4">
                                                 <button
-                                                    key={mode}
-                                                    onClick={() => handleRegenerateOpportunity(opp, mode)}
-                                                    disabled={regenMap[opp.id]}
-                                                    className={`rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] transition-all ${activeMode === mode ? "bg-white text-black" : "border border-white/10 bg-black/30 text-zinc-300 hover:bg-white/5"} disabled:opacity-60`}
+                                                    onClick={() => handleCopy(activeReplyText, `opp-${opp.id}`)}
+                                                    className="premium-button h-12 shadow-orange-500/10"
                                                 >
-                                                    {regenMap[opp.id] && activeMode === mode ? "Loading..." : mode}
+                                                    <BookOpen className="h-4 w-4" />
+                                                    DEPLOY ACTIVE REPLY
                                                 </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-4 grid gap-3 lg:grid-cols-3">
-                                        {(["helpful", "expert", "technical"] as const).map((mode) => {
-                                            const variantText = variants[mode] || "";
-                                            const variantSafety = variantText
-                                                ? computeSafetyScore(opp, selectedSub && selectedSub.name === opp.subreddit ? selectedSub : selectedSub, variantText)
-                                                : null;
-                                            const modeBadge = getModeBadge(mode);
-                                            return (
-                                            <div key={mode} className={`rounded-2xl border p-3 ${activeMode === mode ? "border-white/20 bg-white/[0.04]" : "border-white/10 bg-black/20"}`}>
-                                                <div className="flex items-start justify-between gap-2">
-                                                    <div>
-                                                        <div className={`inline-flex rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] ${modeBadge.tone}`}>
-                                                            {modeBadge.label}
-                                                        </div>
-                                                        <p className="mt-2 text-[11px] font-semibold text-zinc-400">{modeBadge.hint}</p>
-                                                    </div>
-                                                    {activeMode === mode && (
-                                                        <span className="rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white">
-                                                            Active
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                {variantSafety && (
-                                                    <div className="mt-2 flex flex-wrap gap-2">
-                                                        <span className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] ${variantSafety.tone}`}>
-                                                            {variantSafety.score}/100
-                                                        </span>
-                                                        <span className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] ${variantSafety.tone}`}>
-                                                            {variantSafety.label}
-                                                        </span>
-                                                    </div>
+                                                {opp.tweet_url && (
+                                                    <a
+                                                        href={opp.tweet_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-6 h-12 rounded-2xl border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                                                    >
+                                                        OPEN THREAD
+                                                    </a>
                                                 )}
-                                                <p className="mt-2 text-sm leading-6 text-zinc-300">
-                                                    {variantText ? variantText : `Generate the ${mode} version to compare it side-by-side.`}
-                                                </p>
-                                                <div className="mt-3 flex flex-wrap gap-2">
-                                                    {variantText && (
-                                                        <>
-                                                            <button
-                                                                onClick={() => handleUseVariant(opp.id, mode)}
-                                                                className={`rounded-xl border px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] transition-all ${activeMode === mode ? "border-white/15 bg-white text-black" : "border-white/10 bg-black/30 text-white hover:bg-white/5"}`}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-6">
+                                            <div className="p-6 rounded-[32px] bg-black/40 border border-white/10 relative overflow-hidden group/logic">
+                                                <div className="absolute inset-0 cyber-grid opacity-10" />
+                                                <div className="relative z-10">
+                                                    <div className="flex items-center justify-between mb-6">
+                                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Angle Tuning</p>
+                                                        <div className="flex gap-1.5">
+                                                            {(["helpful", "expert", "technical"] as const).map((mode) => (
+                                                                <button
+                                                                    key={mode}
+                                                                    onClick={() => handleRegenerateOpportunity(opp, mode)}
+                                                                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${activeMode === mode ? "bg-white text-black" : "bg-white/5 text-zinc-600 hover:text-white"}`}
+                                                                >
+                                                                    <div className={`h-1.5 w-1.5 rounded-full ${activeMode === mode ? "bg-black" : "bg-current"}`} />
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-4">
+                                                        <div className={`p-4 rounded-2xl border transition-all duration-500 ${activeMode ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-white/5 bg-white/[0.02]'}`}>
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Current Payload</span>
+                                                                <span className="text-[9px] font-bold text-zinc-700 italic uppercase">{activeMode}</span>
+                                                            </div>
+                                                            <p className="text-[13px] leading-relaxed text-zinc-300 italic">"{activeReplyText}"</p>
+                                                        </div>
+
+                                                        <div className="pt-4 border-t border-white/5">
+                                                            <button 
+                                                                onClick={() => setLogicOpen((prev) => ({ ...prev, [opp.id]: !prev[opp.id] }))}
+                                                                className="flex items-center justify-between w-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition-colors"
                                                             >
-                                                                {activeMode === mode ? "Using This" : "Use This Reply"}
+                                                                STRATEGIC TRANSPARENCY
+                                                                <ChevronDown className={`h-4 w-4 transition-transform ${logicOpen[opp.id] ? 'rotate-180' : ''}`} />
                                                             </button>
-                                                            <button
-                                                                onClick={() => handleCopy(variantText, `${opp.id}-${mode}`)}
-                                                                className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-300 transition-all hover:bg-white/5 hover:text-white"
-                                                            >
-                                                                {copiedIdx === `${opp.id}-${mode}` ? "Copied" : "Copy"}
-                                                            </button>
-                                                        </>
-                                                    )}
+                                                            
+                                                            {logicOpen[opp.id] && (
+                                                                <motion.div 
+                                                                    initial={{ height: 0, opacity: 0 }}
+                                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                                    className="mt-6 space-y-6 pt-6 border-t border-white/5 overflow-hidden"
+                                                                >
+                                                                    <div>
+                                                                        <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500 mb-2">Match Logic</p>
+                                                                        <p className="text-xs text-zinc-400 leading-relaxed italic">
+                                                                            Intersected at {Math.round(opp.match_score || opp.relevance_score || 0)}% density based on detected pain: "{opp.pain_detected || "niche demand"}".
+                                                                        </p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-[9px] font-black uppercase tracking-widest text-orange-500 mb-2">Safety Guardrails</p>
+                                                                        <div className="space-y-1.5">
+                                                                            {safety.reasons.slice(0, 3).map((r, idx) => (
+                                                                                <p key={idx} className="text-[11px] text-zinc-500 italic flex items-center gap-2">
+                                                                                    <div className="h-1 w-1 bg-zinc-800 rounded-full" /> {r}
+                                                                                </p>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                </motion.div>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        )})}
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div className="mt-4 rounded-2xl border border-white/10 bg-black/20">
-                                    <button
-                                        onClick={() => setLogicOpen((prev) => ({ ...prev, [opp.id]: !prev[opp.id] }))}
-                                        className="flex w-full items-center justify-between px-4 py-3 text-left"
-                                    >
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Strategic Transparency</p>
-                                            <p className="mt-1 text-sm font-semibold text-white">Match logic and safety logic</p>
-                                        </div>
-                                        <ChevronDown className={`h-4 w-4 text-zinc-500 transition-transform ${logicOpen[opp.id] ? "rotate-180" : ""}`} />
-                                    </button>
-
-                                    {logicOpen[opp.id] && (
-                                        <div className="space-y-3 border-t border-white/10 px-4 py-4">
-                                            <div>
-                                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">Why This Matched</p>
-                                                <p className="mt-1 text-sm leading-6 text-zinc-300">
-                                                    Flagged because the post contains clear pain around {opp.pain_detected || product?.pain_solved || "the product problem"} and scored
-                                                    {" "}{Math.round(opp.match_score || opp.relevance_score || 0)}% against your current product context.
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-300">Why The Reply Is Safer</p>
-                                                <p className="mt-1 text-sm leading-6 text-zinc-300">
-                                                    The suggestion stays value-first, avoids links, and respects {selectedSub?.name === opp.subreddit ? `r/${opp.subreddit}` : "Reddit"} anti-promo behavior.
-                                                    {" "}{selectedSub?.rules_summary?.[0] ? `Primary guardrail: ${selectedSub.rules_summary[0]}.` : ""}
-                                                </p>
-                                                <ul className="mt-2 space-y-1">
-                                                    {safety.reasons.slice(0, 3).map((reason) => (
-                                                        <li key={reason} className="text-xs leading-5 text-zinc-400">- {reason}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#FF8A5B]">Angle Tuning</p>
-                                                <p className="mt-1 text-sm leading-6 text-zinc-300">
-                                                    Current mode: {replyModeMap[opp.id] || "helpful"}. {getReplyFlavor(replyModeMap[opp.id] || "helpful")}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white">Mission Call</p>
-                                                <p className="mt-1 text-sm leading-6 text-zinc-300">
-                                                    {missionRecommendation.label}: {missionRecommendation.reason}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="mt-4 flex flex-wrap gap-3">
-                                    <button
-                                        onClick={() => handleCopy(opp.suggested_dm || opp.tweet_content || "", `opp-${opp.id}`)}
-                                        className={`rounded-xl border px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] transition-all ${copiedIdx === `opp-${opp.id}` ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : "border-white/10 bg-black/30 text-white hover:bg-white/5"}`}
-                                    >
-                                        {copiedIdx === `opp-${opp.id}` ? "Copied" : "Copy Reply"}
-                                    </button>
-                                    {opp.tweet_url && (
-                                        <a
-                                            href={opp.tweet_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-white transition-all hover:bg-white/5"
-                                        >
-                                            Open Thread
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
-                        )})}
+                                </motion.div>
+                            );
+                        })}
                     </div>
-                </div>
+                </motion.div>
             )}
             {showSavedToast && (
                 <div className="fixed bottom-8 right-8 z-50 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-6 py-4 text-emerald-300 shadow-2xl backdrop-blur-xl">

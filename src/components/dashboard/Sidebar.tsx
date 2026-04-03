@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { useUser } from "@/components/providers/UserProvider";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export function Sidebar() {
     const { user, product } = useUser();
@@ -74,14 +75,18 @@ export function Sidebar() {
     ];
 
     const sidebarContent = (
-        <div className="flex flex-col h-full gap-3 p-4 no-scrollbar">
+        <div className="flex flex-col h-full gap-2.5 p-3 no-scrollbar overflow-y-auto">
             {/* Module 1: Brand Pod */}
             <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-5 shadow-2xl flex items-center justify-between group/brand transition-all hover:bg-black/80">
                 <div className="flex items-center gap-4">
                     <div className="relative">
-                        <div className={`relative w-10 h-10 rounded-2xl flex items-center justify-center border border-white/10 ${isCreatorView ? 'bg-zinc-800' : 'bg-primary text-white shadow-sm'}`}>
-                            {isCreatorView ? <UserCircle className="w-5 h-5" /> : <Radar className="w-5 h-5 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />}
-                        </div>
+                        {isCreatorView ? (
+                            <div className="relative w-10 h-10 rounded-2xl bg-zinc-800 flex items-center justify-center border border-white/10">
+                                <UserCircle className="w-5 h-5 text-zinc-400" />
+                            </div>
+                        ) : (
+                            <BrandLogo size="md" />
+                        )}
                     </div>
                     <div className="flex flex-col">
                         <span className={`leading-none text-white whitespace-nowrap ${isCreatorView ? 'font-bold text-base tracking-tight' : 'text-xl brand-title uppercase'}`}>
@@ -118,7 +123,7 @@ export function Sidebar() {
                 <button
                     onClick={handleSignOut}
                     disabled={isSignOutLoading}
-                    className="flex items-center gap-4 px-5 py-4 w-full text-[11px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all group"
+                    className="flex items-center gap-4 px-5 py-3 w-full text-[11px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all group"
                 >
                     <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-all">
                         <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -134,9 +139,13 @@ export function Sidebar() {
             {/* Mobile Top Bar */}
             <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-black/60 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-6">
                 <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isCreatorView ? 'bg-zinc-800' : 'bg-primary'}`}>
-                        {isCreatorView ? <UserCircle className="w-4 h-4 text-white" /> : <Radar className="w-4 h-4 text-white" />}
-                    </div>
+                    {isCreatorView ? (
+                        <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center">
+                            <UserCircle className="w-4 h-4 text-white" />
+                        </div>
+                    ) : (
+                        <BrandLogo size="sm" className="scale-75" />
+                    )}
                     <span className={`text-white uppercase ${isCreatorView ? 'font-bold text-sm tracking-tight' : 'text-lg brand-title'}`}>
                         {isCreatorView ? 'Creator Hub' : 'Mardis'}
                     </span>
@@ -165,7 +174,7 @@ export function Sidebar() {
                             animate={{ x: 0 }}
                             exit={{ x: "-100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="md:hidden fixed inset-y-0 left-0 z-[70] w-[85%] sm:w-80 flex flex-col"
+                            className="md:hidden fixed inset-y-0 left-0 z-[70] w-[70%] sm:w-64 flex flex-col"
                         >
                             {sidebarContent}
                         </motion.aside>
@@ -185,7 +194,7 @@ function NavItem({ href, icon, label, active = false }: { href: string; icon: Re
     return (
         <Link
             href={href}
-            className={`relative flex items-center gap-4 px-5 py-4 rounded-[22px] text-[11px] font-bold tracking-widest uppercase transition-all group ${active
+            className={`relative flex items-center gap-4 px-5 py-3 rounded-[22px] text-[11px] font-bold tracking-widest uppercase transition-all group ${active
                 ? "text-white"
                 : "text-zinc-400 hover:text-white hover:bg-white/[0.03]"
                 }`}

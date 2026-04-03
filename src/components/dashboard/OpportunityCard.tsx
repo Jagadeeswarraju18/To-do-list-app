@@ -9,9 +9,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { regenerateSingleDM, updateDMText, updateStatus } from "@/app/actions/discover-opportunities";
+import type { LimitPayload } from "@/lib/limit-utils";
 
 export type Opportunity = {
     id: string;
+    product_id?: string;
+    product_name?: string;
     tweet_url: string;
     tweet_content: string;
     tweet_author: string;
@@ -37,6 +40,7 @@ interface OpportunityCardProps {
     opportunity: Opportunity;
     onStatusUpdate: (id: string, status: string) => void;
     onRefresh?: () => void;
+    onLimitReached?: (limit: LimitPayload) => void;
 }
 
 function getFreshnessMeta(timestamp?: string) {
@@ -53,7 +57,7 @@ function getFreshnessMeta(timestamp?: string) {
     return { label: "Historical", tone: "text-zinc-500", dot: "bg-zinc-600" };
 }
 
-export function OpportunityCard({ opportunity, onStatusUpdate, onRefresh }: OpportunityCardProps) {
+export function OpportunityCard({ opportunity, onStatusUpdate, onRefresh, onLimitReached }: OpportunityCardProps) {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editText, setEditText] = useState(opportunity.suggested_dm);
     const [savingId, setSavingId] = useState<string | null>(null);
@@ -83,6 +87,8 @@ export function OpportunityCard({ opportunity, onStatusUpdate, onRefresh }: Oppo
             opportunity.suggested_dm = res.newDM;
             toast.success("Message regenerated!");
             if (onRefresh) onRefresh();
+        } else if ((res as any).limit) {
+            onLimitReached?.((res as any).limit);
         } else if (res.error) {
             toast.error(res.error);
         }
@@ -119,6 +125,14 @@ export function OpportunityCard({ opportunity, onStatusUpdate, onRefresh }: Oppo
                                             'text-white'
                                     }`}>{isReddit ? 'Reddit' : isLinkedIn ? 'LinkedIn' : 'X'} Signal</div>
                                 <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                                {opportunity.product_name && (
+                                    <>
+                                        <div className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black uppercase tracking-wider text-zinc-300">
+                                            {opportunity.product_name}
+                                        </div>
+                                        <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                                    </>
+                                )}
                                 <div className={`text-[9px] font-black uppercase tracking-wider ${getFreshnessMeta(opportunity.tweet_posted_at).tone}`}>
                                     {getFreshnessMeta(opportunity.tweet_posted_at).label}
                                 </div>

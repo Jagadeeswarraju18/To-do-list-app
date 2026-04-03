@@ -1,5 +1,4 @@
 import { Sidebar } from "@/components/dashboard/Sidebar";
-import { AIChatBubble } from "@/components/dashboard/AIChatBubble";
 import { UserProvider } from "@/components/providers/UserProvider";
 
 export default function DashboardLayout({
@@ -21,7 +20,6 @@ export default function DashboardLayout({
                         {children}
                     </div>
                 </main>
-                <AIChatBubble />
             </div>
         </UserProvider>
     );

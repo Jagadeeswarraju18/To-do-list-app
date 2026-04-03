@@ -5,12 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import {
     Loader2, Swords, RefreshCw, MessageCircle, AlertCircle,
-    Zap, Sparkles, Filter, ChevronDown, ListFilter, Radar, Settings
+    Zap, Sparkles, ListFilter, Radar, Settings, ShieldAlert, BarChart3
 } from "lucide-react";
 import { useUser } from "@/components/providers/UserProvider";
 import { toast } from "sonner";
 import { updateStatus, discoverOpportunitiesAction } from "@/app/actions/discover-opportunities";
 import { OpportunityCard, Opportunity } from "@/components/dashboard/OpportunityCard";
+import { UpgradePromptModal } from "@/components/billing/UpgradePromptModal";
+import type { LimitPayload } from "@/lib/limit-utils";
 
 export default function BattlefieldPage() {
     const { user, product, loading: userLoading } = useUser();
@@ -18,6 +20,7 @@ export default function BattlefieldPage() {
     const [loading, setLoading] = useState(true);
     const [discovering, setDiscovering] = useState(false);
     const [activeTab, setActiveTab] = useState<'all' | 'x' | 'reddit' | 'linkedin'>('all');
+    const [upgradeLimit, setUpgradeLimit] = useState<LimitPayload | null>(null);
     const supabase = createClient();
 
     const fetchOpportunities = async () => {
@@ -61,9 +64,14 @@ export default function BattlefieldPage() {
         const res = await discoverOpportunitiesAction();
         if (res.success) {
             toast.success(`Scanning complete! Found ${res.addedCount} new signals.`);
+            if ((res as any).limit) setUpgradeLimit((res as any).limit);
             fetchOpportunities();
         } else {
-            toast.error(res.error || "Discovery failed.");
+            if ((res as any).limit) {
+                setUpgradeLimit((res as any).limit);
+            } else {
+                toast.error(res.error || "Discovery failed.");
+            }
         }
         setDiscovering(false);
     };
@@ -98,7 +106,75 @@ export default function BattlefieldPage() {
         return true;
     });
 
+    const alternatives = product?.alternatives || [];
+    const competitors = product?.competitors || [];
+    const strongestObjection = product?.strongest_objection?.trim();
+
+    const lowerSignals = filteredOpportunities.map(opp => ({
+        id: opp.id,
+        text: `${opp.tweet_content || ""} ${opp.pain_detected || ""}`.toLowerCase(),
+        score: opp.match_score ?? opp.relevance_score ?? 0,
+        competitor: opp.competitor_name || null
+    }));
+
+    const competitorThreats = competitors.map((competitor: string) => {
+        const matches = lowerSignals.filter(signal =>
+            signal.competitor?.toLowerCase() === competitor.toLowerCase() ||
+            signal.text.includes(competitor.toLowerCase())
+        );
+        const avgScore = matches.length
+            ? Math.round(matches.reduce((sum, signal) => sum + signal.score, 0) / matches.length)
+            : 0;
+        return {
+            label: competitor,
+            count: matches.length,
+            avgScore,
+            type: "competitor" as const
+        };
+    });
+
+    const alternativeThreats = alternatives.map((alternative: string) => {
+        const matches = lowerSignals.filter(signal => signal.text.includes(alternative.toLowerCase()));
+        const avgScore = matches.length
+            ? Math.round(matches.reduce((sum, signal) => sum + signal.score, 0) / matches.length)
+            : 0;
+        return {
+            label: alternative,
+            count: matches.length,
+            avgScore,
+            type: "alternative" as const
+        };
+    });
+
+    const threatBoard = [...competitorThreats, ...alternativeThreats]
+        .filter(item => item.count > 0)
+        .sort((a, b) => {
+            if (b.count !== a.count) return b.count - a.count;
+            return b.avgScore - a.avgScore;
+        })
+        .slice(0, 6);
+
+    const objectionKeywords = strongestObjection
+        ? strongestObjection
+            .toLowerCase()
+            .split(/[\s,./!?()-]+/)
+            .filter((token: string) => token.length > 3)
+        : [];
+
+    const objectionMatches = strongestObjection
+        ? lowerSignals.filter(signal => objectionKeywords.some((token: string) => signal.text.includes(token)))
+        : [];
+
+    const objectionSummary = strongestObjection
+        ? {
+            objection: strongestObjection,
+            count: objectionMatches.length,
+            highIntentCount: objectionMatches.filter(signal => signal.score >= 80).length
+        }
+        : null;
+
     return (
+        <>
         <div className="space-y-10 pb-20 animate-fade-up">
             {/* Header Area */}
             <div className="relative group/header">
@@ -149,12 +225,106 @@ export default function BattlefieldPage() {
 
             {/* Main Content Area */}
             <div className="space-y-6">
+                {product && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div className="glass-panel p-5 border-white/5">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                                    <BarChart3 className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Threat Board</p>
+                                    <h3 className="text-sm font-bold text-white">What buyers mention most</h3>
+                                </div>
+                            </div>
+
+                            {threatBoard.length > 0 ? (
+                                <div className="space-y-3">
+                                    {threatBoard.map(item => (
+                                        <div key={`${item.type}-${item.label}`} className="flex items-center justify-between rounded-2xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                                            <div>
+                                                <p className="text-xs font-bold text-white">{item.label}</p>
+                                                <p className="text-[10px] uppercase tracking-[0.15em] text-zinc-500">
+                                                    {item.type === "competitor" ? "Competitor" : "Current alternative"}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-sm font-bold text-white">{item.count}</p>
+                                                <p className="text-[10px] uppercase tracking-[0.15em] text-zinc-500">{item.avgScore}% avg match</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-zinc-500 leading-relaxed">
+                                    No competitor or workaround mentions have been intercepted yet in the current battlefield set.
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="glass-panel p-5 border-white/5">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                                    <ShieldAlert className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Objection Map</p>
+                                    <h3 className="text-sm font-bold text-white">What may block conversion</h3>
+                                </div>
+                            </div>
+
+                            {objectionSummary ? (
+                                <div className="space-y-3">
+                                    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
+                                        <p className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mb-2">Primary objection</p>
+                                        <p className="text-sm text-white font-medium leading-relaxed">{objectionSummary.objection}</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
+                                            <p className="text-xl font-bold text-white">{objectionSummary.count}</p>
+                                            <p className="text-[10px] uppercase tracking-[0.15em] text-zinc-500">matching signals</p>
+                                        </div>
+                                        <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
+                                            <p className="text-xl font-bold text-white">{objectionSummary.highIntentCount}</p>
+                                            <p className="text-[10px] uppercase tracking-[0.15em] text-zinc-500">high-intent matches</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-sm text-zinc-500 leading-relaxed">
+                                    Add a strongest objection in Product Settings so Battlefield can flag hesitation patterns before you reply.
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="glass-panel p-5 border-white/5">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                                    <Zap className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Battle Read</p>
+                                    <h3 className="text-sm font-bold text-white">How to use this tab</h3>
+                                </div>
+                            </div>
+                            <div className="space-y-3 text-sm text-zinc-400 leading-relaxed">
+                                <p>
+                                    Competitor mentions show direct switching pressure. Alternative mentions show the non-obvious tools or workflows you are actually fighting.
+                                </p>
+                                <p>
+                                    If objection matches are rising, replies should reduce hesitation with proof or clearer positioning instead of pitching harder.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/5 w-fit">
-                        <button onClick={() => setActiveTab('all')} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>Tactical View</button>
-                        <button onClick={() => setActiveTab('x')} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'x' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>X Intelligence</button>
-                        <button onClick={() => setActiveTab('reddit')} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'reddit' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>Reddit Intelligence</button>
-                        <button onClick={() => setActiveTab('linkedin')} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'linkedin' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>LinkedIn Intelligence</button>
+                    <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/5 w-full md:w-fit overflow-x-auto no-scrollbar">
+                        <button onClick={() => setActiveTab('all')} className={`px-4 sm:px-8 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>Tactical View</button>
+                        <button onClick={() => setActiveTab('x')} className={`px-4 sm:px-8 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'x' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>X Intelligence</button>
+                        <button onClick={() => setActiveTab('reddit')} className={`px-4 sm:px-8 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'reddit' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>Reddit Intelligence</button>
+                        <button onClick={() => setActiveTab('linkedin')} className={`px-4 sm:px-8 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'linkedin' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>LinkedIn Intelligence</button>
                     </div>
 
                     <div className="flex items-center gap-3 text-zinc-500">
@@ -222,6 +392,7 @@ export default function BattlefieldPage() {
                                         opportunity={opp}
                                         onStatusUpdate={handleStatusUpdate}
                                         onRefresh={fetchOpportunities}
+                                        onLimitReached={setUpgradeLimit}
                                     />
                                 </motion.div>
                             ))
@@ -230,5 +401,11 @@ export default function BattlefieldPage() {
                 </div>
             </div>
         </div>
+        <UpgradePromptModal
+            open={Boolean(upgradeLimit)}
+            onClose={() => setUpgradeLimit(null)}
+            limit={upgradeLimit}
+        />
+        </>
     );
 }

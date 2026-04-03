@@ -18,6 +18,9 @@ import { useUser } from "@/components/providers/UserProvider";
 import { OpportunityCard } from "@/components/dashboard/OpportunityCard";
 import { toast } from "sonner";
 import React from "react";
+import { notifyActiveProductChanged } from "@/lib/active-product";
+import { UpgradePromptModal } from "@/components/billing/UpgradePromptModal";
+import type { LimitPayload } from "@/lib/limit-utils";
 
 type TabFilter = 'all' | 'x' | 'reddit' | 'linkedin';
 type ScanWindow = '24h' | '72h' | '7d' | '30d' | '90d' | '180d';
@@ -40,7 +43,7 @@ const SCAN_WINDOW_OPTIONS: Array<{ value: ScanWindow; label: string; hint: strin
 ];
 
 export default function OpportunitiesPage() {
-    const { user, loading: userLoading } = useUser();
+    const { user, loading: userLoading, refreshData } = useUser();
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
     const [showForm, setShowForm] = useState(false);
@@ -60,6 +63,7 @@ export default function OpportunitiesPage() {
     const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
     const [switchingProduct, setSwitchingProduct] = useState(false);
     const [scanWindow, setScanWindow] = useState<ScanWindow>('30d');
+    const [upgradeLimit, setUpgradeLimit] = useState<LimitPayload | null>(null);
 
     const [newOpp, setNewOpp] = useState({
         url: "",
@@ -69,12 +73,13 @@ export default function OpportunitiesPage() {
     });
 
     const supabase = createClient();
+    const selectedProduct = allProducts.find(product => product.id === activeProductId);
+    const isAllProductsView = activeProductId === null;
+    const uniqueProductCount = new Set(opportunities.map(opp => opp.product_id).filter(Boolean)).size;
 
     useEffect(() => {
         if (user) {
-            fetchOpportunities();
             fetchProducts();
-            fetchDiscoveryRuns();
         } else if (!userLoading) {
             setLoading(false);
         }
@@ -87,9 +92,20 @@ export default function OpportunitiesPage() {
         }
     }, [activeProductId, allProducts]);
 
-    const fetchDiscoveryRuns = async (productId?: string) => {
+    useEffect(() => {
+        if (allProducts.length === 0) return;
+
+        setOpportunities(prev =>
+            prev.map(opp => ({
+                ...opp,
+                product_name: allProducts.find(product => product.id === opp.product_id)?.name || opp.product_name || null,
+            }))
+        );
+    }, [allProducts]);
+
+    const fetchDiscoveryRuns = async (productId?: string | null) => {
         if (!user) return;
-        const pId = productId || activeProductId;
+        const pId = productId === undefined ? activeProductId : productId;
         let query = supabase.from('discovery_runs').select('*').eq('user_id', user.id).order('started_at', { ascending: false });
         if (pId) query = query.eq('product_id', pId);
         const { data } = await query;
@@ -104,13 +120,31 @@ export default function OpportunitiesPage() {
             setActiveProductId(profile.active_product_id);
             const activeProduct = data?.find(product => product.id === profile.active_product_id);
             if (activeProduct?.scan_window) setScanWindow(activeProduct.scan_window);
+            fetchOpportunities(profile.active_product_id);
+            fetchDiscoveryRuns(profile.active_product_id);
         } else if (data && data.length > 0) {
             setActiveProductId(data[0].id);
             if (data[0].scan_window) setScanWindow(data[0].scan_window);
+            fetchOpportunities(data[0].id);
+            fetchDiscoveryRuns(data[0].id);
+        } else {
+            setActiveProductId(null);
+            fetchOpportunities(null);
+            fetchDiscoveryRuns(null);
         }
     };
 
-    const handleSwitchProduct = async (productId: string) => {
+    const handleSwitchProduct = async (productId: string | null) => {
+        if (productId === null) {
+            setActiveProductId(null);
+            setIsProductSelectorOpen(false);
+            setActiveRunId(null);
+            fetchOpportunities(null);
+            fetchDiscoveryRuns(null);
+            toast.success("Showing opportunities from all products.");
+            return;
+        }
+
         setSwitchingProduct(true);
         const res = await setActiveProductAction(productId);
         if (res.error) {
@@ -120,6 +154,8 @@ export default function OpportunitiesPage() {
             const selectedProduct = allProducts.find(product => product.id === productId);
             if (selectedProduct?.scan_window) setScanWindow(selectedProduct.scan_window);
             toast.success("Product context updated!");
+            notifyActiveProductChanged(productId);
+            await refreshData();
             setIsProductSelectorOpen(false);
             fetchOpportunities(productId);
             fetchDiscoveryRuns(productId);
@@ -127,12 +163,15 @@ export default function OpportunitiesPage() {
         setSwitchingProduct(false);
     };
 
-    async function fetchOpportunities(productId?: string) {
+    async function fetchOpportunities(productId?: string | null) {
         try {
             if (!user) return;
             setLoading(true);
-            let pId = productId || activeProductId;
-            if (!pId) {
+            let pId = productId === undefined ? activeProductId : productId;
+            if (pId === undefined) {
+                pId = activeProductId;
+            }
+            if (pId === undefined) {
                 const { data: profile } = await supabase.from('profiles').select('active_product_id').eq('id', user.id).single();
                 pId = profile?.active_product_id;
             }
@@ -144,7 +183,11 @@ export default function OpportunitiesPage() {
                 .order("relevance_score", { ascending: false })
                 .order("created_at", { ascending: false });
             if (error) throw error;
-            setOpportunities(data || []);
+            const decorated = (data || []).map(opp => ({
+                ...opp,
+                product_name: allProducts.find(product => product.id === opp.product_id)?.name || null,
+            }));
+            setOpportunities(decorated);
         } catch (err) {
             console.error("Error fetching opportunities:", err);
         } finally {
@@ -153,6 +196,11 @@ export default function OpportunitiesPage() {
     }
 
     const handleDiscovery = async (platform: 'x' | 'reddit' | 'linkedin') => {
+        if (!activeProductId) {
+            toast.error("Select a product before running a scan.");
+            return;
+        }
+
         if (platform === 'x') setDiscovering(true);
         if (platform === 'reddit') setDiscoveringReddit(true);
         if (platform === 'linkedin') setDiscoveringLinkedIn(true);
@@ -164,9 +212,16 @@ export default function OpportunitiesPage() {
 
             const res = await action(scanWindow, undefined, activeProductId || undefined);
             if (res.error) {
-                toast.error(res.error);
+                if (res.limit) {
+                    setUpgradeLimit(res.limit);
+                } else {
+                    toast.error(res.error);
+                }
             } else {
                 toast.success(`Discovered ${res.addedCount} new signals on ${platform.toUpperCase()} in ${scanWindow}`);
+                if (res.limit) {
+                    setUpgradeLimit(res.limit);
+                }
                 if (res.runId) {
                     setActiveRunId(res.runId);
                     setActiveTab(platform);
@@ -186,10 +241,20 @@ export default function OpportunitiesPage() {
 
     const handleAddManual = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!activeProductId) {
+            toast.error("Select a product before adding a manual signal.");
+            return;
+        }
         setAdding(true);
         try {
             const res = await addManualOpportunityAction(newOpp);
-            if (res.error) throw new Error(res.error);
+            if (res.error) {
+                if (res.limit) {
+                    setUpgradeLimit(res.limit);
+                    return;
+                }
+                throw new Error(res.error);
+            }
             toast.success("Manual signal added!");
             setShowForm(false);
             setNewOpp({ url: "", content: "", author: "", platform: "x" });
@@ -234,23 +299,38 @@ export default function OpportunitiesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                 <div className="space-y-1">
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase">
-                        Demand Signals
+                        Opportunities
                     </h1>
-                    <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">Capture high-intent leads from across the web.</p>
+                    <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest">Find relevant conversations from across the web.</p>
+                    <p className="text-sm text-zinc-300">
+                        Showing results for: <span className="text-white font-semibold">{selectedProduct?.name || "All products"}</span>
+                    </p>
+                    {isAllProductsView && (
+                        <p className="text-xs text-zinc-500">
+                            {opportunities.length} opportunities across {uniqueProductCount || 0} products
+                        </p>
+                    )}
                 </div>
 
                 <div className="relative">
                     <button
                         onClick={() => setIsProductSelectorOpen(!isProductSelectorOpen)}
-                        className="bg-white/5 border border-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-white/10 transition-all group"
+                        className="bg-white/5 border border-white/10 text-white px-3 sm:px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-white/10 transition-all group"
                     >
                         <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(54,34,34,0.6)]" />
-                        CONTEXT: {allProducts.find(p => p.id === activeProductId)?.name || "SELECT PRODUCT"}
+                        Viewing: {selectedProduct?.name || "ALL PRODUCTS"}
                         <ChevronDown className={`w-3 h-3 transition-transform ${isProductSelectorOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {isProductSelectorOpen && (
                         <div className="absolute left-0 mt-2 w-56 bg-[#111111] border border-white/10 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden backdrop-blur-xl">
+                            <button
+                                onClick={() => handleSwitchProduct(null)}
+                                className="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-sm text-gray-400 hover:text-white transition-all flex items-center justify-between group"
+                            >
+                                All products
+                                {activeProductId === null && <Check className="w-4 h-4 text-white" />}
+                            </button>
                             {allProducts.map(p => (
                                 <button
                                     key={p.id}
@@ -270,15 +350,19 @@ export default function OpportunitiesPage() {
             <div className="glass-panel p-5 sm:p-6 space-y-6">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="space-y-0.5">
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-white">Strategic Discovery</h3>
-                        <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Select lookback window and scan for high-intent signals.</p>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-white">Scan</h3>
+                        <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">
+                            {isAllProductsView
+                                ? "Viewing all products. Select one product to run a scan."
+                                : "Select a lookback window and scan for high-intent signals."}
+                        </p>
                     </div>
-                    <div className="flex bg-black p-1 rounded-3xl border border-white/10 w-fit overflow-x-auto no-scrollbar">
+                    <div className="flex bg-black p-1 rounded-3xl border border-white/10 w-full md:w-fit overflow-x-auto no-scrollbar">
                         {SCAN_WINDOW_OPTIONS.map(option => (
                             <button
                                 key={option.value}
                                 onClick={() => setScanWindow(option.value)}
-                                className={`px-4 py-2 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${scanWindow === option.value
+                                className={`px-2.5 sm:px-4 py-2 rounded-2xl text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${scanWindow === option.value
                                     ? 'bg-zinc-800 text-white border border-white/20 shadow-lg'
                                     : 'text-zinc-500 hover:text-white hover:bg-white/5'
                                     }`}
@@ -294,7 +378,8 @@ export default function OpportunitiesPage() {
                         label="Manual Signal"
                         sublabel="Import target source"
                         icon={<Plus />}
-                        onClick={() => setShowForm(true)}
+                        onClick={() => !isAllProductsView && setShowForm(true)}
+                        disabled={isAllProductsView}
                     />
 
                     <DiscoveryButton
@@ -304,6 +389,7 @@ export default function OpportunitiesPage() {
                         onClick={() => handleDiscovery('x')}
                         label="Scout X Feed"
                         sublabel="Network Intelligence"
+                        disabled={isAllProductsView}
                     />
 
                     <DiscoveryButton
@@ -313,6 +399,7 @@ export default function OpportunitiesPage() {
                         onClick={() => handleDiscovery('reddit')}
                         label="Scout r/Feed"
                         sublabel="Community Signals"
+                        disabled={isAllProductsView}
                     />
 
                     <DiscoveryButton
@@ -322,6 +409,7 @@ export default function OpportunitiesPage() {
                         onClick={() => handleDiscovery('linkedin')}
                         label="Scout LinkedIn"
                         sublabel="Enterprise Signals"
+                        disabled={isAllProductsView}
                     />
                 </div>
             </div>
@@ -329,16 +417,16 @@ export default function OpportunitiesPage() {
             {/* Filter Bar */}
             <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5 relative z-40">
                 <div className="flex flex-nowrap items-center justify-start gap-4 shrink-0 w-full lg:w-auto overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <div className="flex items-center gap-1.5 bg-black p-1.5 rounded-3xl border border-white/10 shrink-0">
+                    <div className="flex items-center gap-1.5 bg-black p-1.5 rounded-3xl border border-white/10 shrink-0 w-full sm:w-auto">
                         <button
                             onClick={() => setShowArchived(false)}
-                            className={`px-8 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${!showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+                            className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 rounded-2xl text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${!showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
                         >
                             Active Intelligence
                         </button>
                         <button
                             onClick={() => setShowArchived(true)}
-                            className={`px-8 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+                            className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 rounded-2xl text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
                         >
                             Historical Archive
                         </button>
@@ -487,7 +575,7 @@ export default function OpportunitiesPage() {
                                     setActiveTab(tab.id as TabFilter);
                                     setActiveRunId(null);
                                 }}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shrink-0 whitespace-nowrap ${activeTab === tab.id
+                                className={`flex items-center gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all shrink-0 whitespace-nowrap ${activeTab === tab.id
                                     ? tab.color === 'orange' ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/20'
                                         : tab.color === 'blue' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                                             : tab.color === 'emerald' ? 'bg-zinc-800 text-white border border-white/20 shadow-xl'
@@ -495,7 +583,7 @@ export default function OpportunitiesPage() {
                                     : 'text-zinc-500 hover:text-white hover:bg-white/10'
                                     }`}
                             >
-                                {tab.icon}
+                                {tab.icon && React.cloneElement(tab.icon as React.ReactElement, { className: "w-3 h-3 sm:w-3.5 sm:h-3.5" })}
                                 {tab.label} ({tab.count})
                             </button>
                         ))}
@@ -517,7 +605,7 @@ export default function OpportunitiesPage() {
                                 <Loader2 className="w-12 h-12 animate-spin text-white" />
                                 <div className="absolute inset-0 blur-xl bg-white/10 rounded-full" />
                             </div>
-                            <p className="font-bold tracking-widest uppercase text-[10px]">Scanning Global Streams...</p>
+                            <p className="font-bold tracking-widest uppercase text-[10px]">Loading opportunities...</p>
                         </motion.div>
                     ) : filteredOpportunities.length > 0 ? (
                         filteredOpportunities.map((opp, idx) => (
@@ -531,6 +619,7 @@ export default function OpportunitiesPage() {
                                     opportunity={opp}
                                     onStatusUpdate={handleStatusUpdate}
                                     onRefresh={() => fetchOpportunities()}
+                                    onLimitReached={setUpgradeLimit}
                                 />
                             </motion.div>
                         ))
@@ -543,8 +632,12 @@ export default function OpportunitiesPage() {
                             <div className="bg-white/5 p-8 rounded-full mb-8 border border-white/5">
                                 <Target className="w-12 h-12 text-zinc-700" />
                             </div>
-                            <h3 className="text-2xl font-bold text-white/90 mb-3 tracking-tight uppercase">No Signals Found</h3>
-                            <p className="max-w-md text-zinc-400 text-base leading-relaxed font-normal">Your strategic radar is clear. Use the discovery tools above to scan for new demand signals.</p>
+                            <h3 className="text-2xl font-bold text-white/90 mb-3 tracking-tight uppercase">No Opportunities Found</h3>
+                            <p className="max-w-md text-zinc-400 text-base leading-relaxed font-normal">
+                                {isAllProductsView
+                                    ? "No opportunities found across your products yet. Select a product and run a scan to start populating this view."
+                                    : "No opportunities found for this product yet. Run a scan to find matching conversations."}
+                            </p>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -639,11 +732,16 @@ export default function OpportunitiesPage() {
                     </div>
                 )
             }
+            <UpgradePromptModal
+                open={Boolean(upgradeLimit)}
+                onClose={() => setUpgradeLimit(null)}
+                limit={upgradeLimit}
+            />
         </div>
     );
 }
 
-function DiscoveryButton({ platform, icon, loading, onClick, label, sublabel }: any) {
+function DiscoveryButton({ platform, icon, loading, onClick, label, sublabel, disabled }: any) {
     const isReddit = platform === 'reddit';
     const isLinkedIn = platform === 'linkedin';
     const isX = platform === 'x';
@@ -661,8 +759,8 @@ function DiscoveryButton({ platform, icon, loading, onClick, label, sublabel }: 
     return (
         <button
             onClick={onClick}
-            disabled={loading}
-            className="group relative flex flex-col items-center justify-center gap-2 p-4 rounded-[20px] bg-black/40 border border-white/5 hover:border-white/20 transition-all overflow-hidden disabled:opacity-50 text-white"
+            disabled={loading || disabled}
+            className="group relative flex flex-col items-center justify-center gap-2 p-4 rounded-[20px] bg-black/40 border border-white/5 hover:border-white/20 transition-all overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed text-white"
         >
             <div className={`absolute inset-0 bg-gradient-to-br ${glowColors} to-transparent pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity`} />
             <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors" />

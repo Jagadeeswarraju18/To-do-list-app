@@ -30,7 +30,8 @@ export function Footer() {
                         
                         <div className="space-y-6 max-w-[280px]">
                             <p className="text-gray-500 text-[13px] font-medium leading-relaxed">
-                                Obsidian Technologies Limited is a company registered in England & Wales with company number 16328982.
+                                The command layer for social demand capture. <br />
+                                Reddit, X, and LinkedIn under one unified playbook.
                             </p>
                             
                             {/* Technical Badges as seen in reference */}
@@ -89,7 +90,7 @@ export function Footer() {
 
                 {/* Bottom Row */}
                 <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-[11px] font-medium text-gray-600 tracking-tight">
-                    <span>&copy; 2026 MardisHub Technologies Limited. MardisHub is the registered trademark.</span>
+                    <span>&copy; 2026 MardisHub. All rights reserved.</span>
                 </div>
             </div>
         </footer>

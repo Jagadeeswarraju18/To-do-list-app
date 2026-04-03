@@ -17,7 +17,7 @@ export function MovingBackground() {
         return () => window.removeEventListener("mousemove", handleMouseMove);
     }, []);
 
-    // Forensic Obsidian Asset URLs - Optimized with width params for better loading
+    // Forensic Mardis Asset URLs - Optimized with width params for better loading
     const rockLeft = "https://framerusercontent.com/images/N1UDrKC6s6rURa30UKQYRQjANQ.png?width=1200";
     const rockRight = "https://framerusercontent.com/images/9EJeyFceJGm62l9YWlTkTJBOS8.png?width=1200";
     const rockCenter = "https://framerusercontent.com/images/7Ad0iDQ1ukBberjdFFY4ydtrRys.png?width=2000";
@@ -33,7 +33,7 @@ export function MovingBackground() {
             />
 
             {/* Noise Overlay */}
-            <div className="absolute inset-0 obsidian-noise mix-blend-soft-light opacity-10" />
+            <div className="absolute inset-0 mardis-noise mix-blend-soft-light opacity-10" />
             
             {/* Textured Rock Assets - Sides (Forensic Positioning) */}
             <div className="absolute inset-0 z-10 overflow-hidden">

@@ -51,7 +51,7 @@ export function DiscoverClientPage({ products: initialProducts }: { products: an
             </div>
 
             <header className="w-full max-w-7xl mx-auto px-6 pt-8 pb-4 relative z-50">
-                {/* Navbar - Obsidian Style */}
+                {/* Navbar - Mardis Style */}
                 <div className="flex items-center justify-between mb-10">
                     <Link href="/" className="group flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-xl group-hover:border-white/20 transition-all duration-500">
@@ -71,7 +71,7 @@ export function DiscoverClientPage({ products: initialProducts }: { products: an
                     </div>
                 </div>
 
-                {/* Hero Section - Obsidian Typography */}
+                {/* Hero Section - Mardis Typography */}
                 <div className="flex flex-col items-center text-center mb-6 px-4">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}

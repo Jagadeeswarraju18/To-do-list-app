@@ -90,7 +90,7 @@ export function Hero() {
                 </div>
 
                 <div className="group relative h-[600px] w-full max-w-[1440px] overflow-hidden rounded-[32px] border border-white/[0.08] bg-black shadow-[0_50px_100px_rgba(0,0,0,0.8)]">
-                    <div className="obsidian-noise absolute inset-0 opacity-10" />
+                    <div className="mardis-noise absolute inset-0 opacity-10" />
 
                     <div className="absolute inset-0 flex flex-col overflow-hidden text-left">
                         <div className="flex items-center justify-between border-b border-white/5 bg-white/[0.02] px-10 py-6">

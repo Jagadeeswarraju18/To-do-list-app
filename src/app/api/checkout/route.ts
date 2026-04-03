@@ -1,79 +1,81 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DodoPayments } from 'dodopayments';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseApiClient } from '@supabase/supabase-js';
+import { normalizePlanId, PLAN_BY_ID } from '@/lib/pricing';
 
 function getDodoClient() {
     const apiKey = process.env.DODO_PAYMENTS_API_KEY;
-    if (!apiKey) {
-        return null;
-    }
-    return new DodoPayments({ bearerToken: apiKey });
+    if (!apiKey) return null;
+    const mode = process.env.DODO_PAYMENTS_MODE === 'test' ? 'test_mode' : 'live_mode';
+    return new DodoPayments({ 
+        bearerToken: apiKey,
+        environment: mode as 'live_mode' | 'test_mode'
+    });
 }
-
-// Map plan types to Dodo Payments Product IDs
-const PLAN_PRODUCT_MAPPING: Record<string, string> = {
-    'starter': 'pdt_0NaU6c5M4YvwAgt2CrbWH',
-    'pro': 'pdt_0NaU6ggtnzI3ubzMxoqhh',
-    'ultra': 'pdt_0NaU6jiAbYoMeoZKf3O7p',
-};
-
-const PLAN_PRICES: Record<string, string> = {
-    'starter': '15',
-    'pro': '39',
-    'ultra': '69',
-};
 
 export async function POST(req: NextRequest) {
     try {
         const dodo = getDodoClient();
-        if (!dodo) {
-            return NextResponse.json(
-                { error: 'Payments are not configured on this environment' },
-                { status: 500 }
-            );
-        }
+        if (!dodo) return NextResponse.json({ error: 'Payments not configured' }, { status: 500 });
 
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        let { data: { user } } = await supabase.auth.getUser();
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const body = await req.json();
+        const { planId, billingCycle = 'monthly' } = body;
+        const normalizedPlanId = normalizePlanId(planId);
+        const plan = PLAN_BY_ID[normalizedPlanId];
+        if (!plan) return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
+
+        let productId = '';
+        const normalizedBillingCycle = billingCycle === 'yearly' ? 'yearly' : 'monthly';
+        let price = normalizedBillingCycle === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice;
+
+        // DYNAMIC SWITCH LOGIC
+        if (normalizedPlanId === 'starter') {
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            const adminClient = createSupabaseApiClient(supabaseUrl!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+            const { count } = await adminClient
+                .from('subscriptions')
+                .select('*', { count: 'exact', head: true })
+                .eq('plan_type', 'starter')
+                .eq('status', 'active');
+
+            if ((count || 0) < 10) {
+                // Use $15 Promo ID (User is recreating this now)
+                productId = (process.env.DODO_PAYMENTS_PRODUCT_STARTER_PROMO || '').trim();
+                price = 15;
+            } else {
+                // Use $19 Regular ID
+                productId = (process.env.DODO_PAYMENTS_PRODUCT_STARTER || '').trim();
+                price = 19;
+            }
+        } else {
+            if (normalizedPlanId === 'pro') productId = (process.env.DODO_PAYMENTS_PRODUCT_PRO || '').trim();
+            if (normalizedPlanId === 'scale') productId = (process.env.DODO_PAYMENTS_PRODUCT_SCALE || '').trim();
         }
 
-        const { planId } = await req.json();
-
-        if (!planId || !PLAN_PRODUCT_MAPPING[planId]) {
-            return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 });
-        }
-
-        const productId = PLAN_PRODUCT_MAPPING[planId];
-
-        // Create a Dodo checkout session
         const session = await dodo.checkoutSessions.create({
             product_cart: [{
                 product_id: productId,
                 quantity: 1,
             }],
-            customer: {
-                email: user.email!,
-                name: user.user_metadata?.full_name || user.email!.split('@')[0],
-            },
-            billing_address: {
-                country: 'US', // Default
-            },
+            customer: { email: user.email! },
             metadata: {
                 user_id: user.id,
-                plan_type: planId,
-                original_price_usd: PLAN_PRICES[planId],
-                billing_cycle: 'monthly',
-                mrr_cents: (parseInt(PLAN_PRICES[planId]) * 100).toString(),
+                plan_type: normalizedPlanId,
+                billing_cycle: normalizedBillingCycle,
+                mrr_cents: (price * 100).toString(),
+                original_price_usd: price.toString(),
             },
-            return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/success?session_id={checkout_session_id}`,
+            return_url: `${process.env.NEXT_PUBLIC_APP_URL}/founder/settings/success?session_id={checkout_session_id}`,
         });
 
         return NextResponse.json({ url: session.checkout_url });
     } catch (error: any) {
         console.error('Checkout error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

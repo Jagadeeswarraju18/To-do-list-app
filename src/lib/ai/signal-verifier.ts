@@ -17,7 +17,17 @@ export interface VerifiedSignal {
 }
 
 export async function verifySignalsWithAI(
-    product: { name: string, description: string, pain_solved: string, target_audience: string, competitors?: string[] },
+    product: {
+        name: string,
+        description: string,
+        pain_solved: string,
+        target_audience: string,
+        competitors?: string[],
+        alternatives?: string[],
+        strongest_objection?: string,
+        prioritize_communities?: string[],
+        avoid_communities?: string[]
+    },
     tweets: { id: string, text: string }[],
     precomputedSignals: LeadSignalBreakdown[] = []
 ) {
@@ -38,6 +48,10 @@ export async function verifySignalsWithAI(
     - Pain Solved: ${product.pain_solved}
     - Ideal Customer: ${product.target_audience}
     - Competitors to watch: ${product.competitors?.length ? product.competitors.join(", ") : "None specified"}
+    - Alternatives people use now: ${product.alternatives?.length ? product.alternatives.join(", ") : "None specified"}
+    - Strongest objection: ${product.strongest_objection || "None specified"}
+    - Prioritized communities: ${product.prioritize_communities?.length ? product.prioritize_communities.join(", ") : "None specified"}
+    - Avoid communities: ${product.avoid_communities?.length ? product.avoid_communities.join(", ") : "None specified"}
 
     STRICT FILTERING CRITERIA (0-100 Score):
     - 0-30: NOISE. General chatter, memes, news shares, self-promotion, or broad topics with no specific pain.
@@ -56,6 +70,9 @@ export async function verifySignalsWithAI(
     2. EXCLUDE "How-to" threads that are just educational unless the author expresses a personal need.
     3. PRIORITIZE specific problem statements over general "this is interesting" comments.
     4. If it mentions a competitor (${product.competitors?.join(", ")}), verify if they are unhappy with it.
+    5. If it mentions current alternatives (${product.alternatives?.join(", ")}), treat that as stronger intent when paired with friction, dissatisfaction, or switching language.
+    6. If the post reflects the strongest objection, include that in the reason because it helps the founder tailor the reply.
+    7. Community preferences are ranking hints, not hard filters. Favor prioritized communities and be more skeptical in avoid communities.
 
     RETURN FORMAT:
     {

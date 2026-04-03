@@ -49,9 +49,37 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
     const { profiles: rawProfiles } = product;
     const profile = Array.isArray(rawProfiles) ? rawProfiles[0] : rawProfiles;
 
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://www.mardishub.com/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Discover",
+                "item": "https://www.mardishub.com/discover"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": product.name,
+                "item": `https://www.mardishub.com/discover/${params.id}`
+            }
+        ]
+    };
+
     return (
         <div className="min-h-screen flex flex-col bg-black text-gray-100 font-sans selection:bg-white/20">
-            {/* Minimalist Grid Background */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+            />
             <div className="absolute inset-0 z-0 pointer-events-none bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
             <div className="absolute inset-0 z-0 pointer-events-none bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 

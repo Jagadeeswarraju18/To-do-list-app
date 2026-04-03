@@ -8,6 +8,8 @@ export default function TestGenPage() {
     const [platform, setPlatform] = useState("twitter_post");
     const [goal, setGoal] = useState("build_authority");
     const [urgency, setUrgency] = useState("medium");
+    const [redditMode, setRedditMode] = useState("balanced");
+    const [commentCount, setCommentCount] = useState(3);
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
@@ -25,6 +27,11 @@ export default function TestGenPage() {
                 description: "AI-powered subscription tracking and optimization",
                 targetAudience: "Founders and indie hackers",
                 signalContext: topic,
+                subredditName: "SaaS",
+                subredditTone: "professional, practical",
+                subredditRules: ["No spam", "Be specific", "Add value first"],
+                redditMode: redditMode as any,
+                commentCount,
             });
             setResult(res);
         } catch (e: any) {
@@ -61,6 +68,7 @@ export default function TestGenPage() {
                                 <option value="twitter_post">Twitter</option>
                                 <option value="linkedin_post">LinkedIn</option>
                                 <option value="reddit_post">Reddit</option>
+                                <option value="reply">Reddit Comments</option>
                             </select>
                         </div>
 
@@ -90,6 +98,33 @@ export default function TestGenPage() {
                                 <option value="medium">Medium</option>
                                 <option value="high">High</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-bold mb-2 text-gray-400">Reddit Mode</label>
+                            <select
+                                value={redditMode}
+                                onChange={e => setRedditMode(e.target.value)}
+                                className="w-full bg-gray-900 border border-gray-700 p-3 rounded-xl focus:border-primary outline-none"
+                            >
+                                <option value="safe">Safe</option>
+                                <option value="balanced">Balanced</option>
+                                <option value="product_led">Product-Led</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold mb-2 text-gray-400">Comment Count</label>
+                            <input
+                                type="number"
+                                min={1}
+                                max={5}
+                                value={commentCount}
+                                onChange={e => setCommentCount(Number(e.target.value) || 3)}
+                                className="w-full bg-gray-900 border border-gray-700 p-3 rounded-xl focus:border-primary outline-none"
+                            />
                         </div>
                     </div>
 

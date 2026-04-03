@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/resend";
 import UpgradeReminderEmail from "@/components/emails/UpgradeReminderEmail";
+import { getPlanForTier, normalizePlanId, PLAN_BY_ID, type PricingPlanId } from "@/lib/pricing";
+
+const NEXT_PLAN_MAP: Record<PricingPlanId, PricingPlanId> = {
+    free: "starter",
+    starter: "pro",
+    pro: "scale",
+    scale: "scale",
+};
 
 export async function POST(req: Request) {
     try {
@@ -12,11 +20,10 @@ export async function POST(req: Request) {
         }
 
         const supabase = createClient();
-        
-        // Fetch user data including current plan
+
         const { data: user, error: userError } = await supabase
             .from("profiles")
-            .select("email, display_name, plan_id")
+            .select("email, display_name, subscription_tier")
             .eq("id", userId)
             .single();
 
@@ -24,40 +31,20 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "User not found or missing email" }, { status: 404 });
         }
 
-        // Define plan progression
-        const plans: Record<string, any> = {
-            "free": { 
-                name: "Free", 
-                next: { name: "Starter", features: ["150 Signals / mo", "3 Product Slots", "300 Post Drafts / mo"] } 
-            },
-            "starter": { 
-                name: "Starter", 
-                next: { name: "Pro", features: ["500 Signals / mo", "10 Product Slots", "1,000 Post Drafts / mo"] } 
-            },
-            "pro": { 
-                name: "Pro", 
-                next: { name: "Ultra", features: ["1,500 Signals / mo", "25 Product Slots", "Hourly Refreshes"] } 
-            },
-            "ultra": { 
-                name: "Ultra", 
-                next: { name: "Scale", features: ["Custom Limits", "Whitelabeling", "Dedicated Support"] } 
-            }
-        };
-
-        const currentPlanId = user.plan_id || "free";
-        const planData = plans[currentPlanId] || plans["free"];
-        const nextPlan = planData.next;
+        const normalizedPlanId = normalizePlanId(user.subscription_tier || "free");
+        const currentPlan = getPlanForTier(user.subscription_tier || "free");
+        const nextPlan = PLAN_BY_ID[NEXT_PLAN_MAP[normalizedPlanId]];
 
         const result = await sendEmail({
             to: user.email,
-            subject: `⚡ Limit Reached: ${limitType.toUpperCase()}`,
+            subject: `Plan limit reached: ${String(limitType).toUpperCase()}`,
             react: UpgradeReminderEmail({
                 userName: user.display_name || "Founder",
                 limitType,
                 usageCount: usageCount || 0,
-                currentPlanName: planData.name,
+                currentPlanName: currentPlan.name,
                 nextPlanName: nextPlan.name,
-                nextPlanFeatures: nextPlan.features
+                nextPlanFeatures: nextPlan.features.slice(0, 5),
             }),
         });
 

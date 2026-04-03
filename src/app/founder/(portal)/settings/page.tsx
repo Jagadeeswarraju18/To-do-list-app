@@ -10,6 +10,16 @@ import { useUser } from "@/components/providers/UserProvider";
 import { getXAuthUrl, disconnectXAccount } from "@/app/actions/x-auth";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { DeleteButton } from "@/components/ui/DeleteButton";
+import { toast } from "sonner";
+import {
+    getCompareAtForBilling,
+    getPlanBadge,
+    getPlanForTier,
+    getPlanNote,
+    getPriceForBilling,
+    PRICING_PLANS,
+} from "@/lib/pricing";
+import { buildCheckoutHeaders } from "@/lib/billing/client-checkout";
 
 type ProfileData = {
     full_name: string;
@@ -37,13 +47,14 @@ function UserSettingsContent() {
     const [connectingX, setConnectingX] = useState(false);
     const [disconnectingX, setDisconnectingX] = useState(false);
 
-    const [currentPlan, setCurrentPlan] = useState("Free");
+    const [currentPlan, setCurrentPlan] = useState("free");
+    const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
     const [profile, setProfile] = useState<ProfileData>({
         full_name: "",
         email: "",
         avatar_url: "",
         social_links: {},
-        subscription_tier: "Seed"
+        subscription_tier: "free"
     });
 
     const [passwords, setPasswords] = useState({
@@ -51,7 +62,7 @@ function UserSettingsContent() {
         confirm: ""
     });
 
-    const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
+    const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
     const [newSocial, setNewSocial] = useState({ platform: "", url: "" });
     const [isAddingSocial, setIsAddingSocial] = useState(false);
 
@@ -128,9 +139,9 @@ function UserSettingsContent() {
                     avatar_url: data.avatar_url || "",
                     created_at: data.created_at,
                     social_links: data.social_links || {},
-                    subscription_tier: data.subscription_tier || "Seed"
+                    subscription_tier: data.subscription_tier || "free"
                 });
-                setCurrentPlan(data.subscription_tier || "Seed");
+                setCurrentPlan(data.subscription_tier || "free");
             }
         } catch (err) {
             console.error("Error:", err);
@@ -192,6 +203,31 @@ function UserSettingsContent() {
         setIsAddingSocial(false);
     };
 
+    const handleCheckout = async (planId: string) => {
+        if (planId === "free") return;
+
+        setLoadingPlan(planId);
+        try {
+            const response = await fetch("/api/checkout", {
+                method: "POST",
+                headers: await buildCheckoutHeaders(),
+                body: JSON.stringify({ planId, billingCycle }),
+            });
+
+            const data = await response.json();
+
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                toast.error(data.error || "Failed to start checkout");
+            }
+        } catch {
+            toast.error("Something went wrong. Please try again.");
+        } finally {
+            setLoadingPlan(null);
+        }
+    };
+
     const removeSocial = (key: string) => {
         const newLinks = { ...profile.social_links };
         delete newLinks[key];
@@ -249,6 +285,7 @@ function UserSettingsContent() {
     if (loading) return <div className="flex items-center justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-white" /></div>;
 
     const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Unknown';
+    const currentPlanInfo = getPlanForTier(currentPlan);
 
     // Helper to get icon for social platform
     const getSocialIcon = (platform: string) => {
@@ -334,163 +371,97 @@ function UserSettingsContent() {
                 <div className="mt-12 space-y-12">
                     <Section title="Plans & Billing" icon={<CreditCard className="w-5 h-5 text-white" />}>
                         {/* Billing Toggle (iki.ai style) */}
-                        <div className="flex flex-col items-center justify-center mt-2 mb-6 transition-all duration-700">
-                            <div className="inline-flex p-1 bg-zinc-950/80 backdrop-blur-3xl rounded-[20px] border border-white/10 relative overflow-hidden w-full max-w-[420px] group/toggle shadow-2xl">
-                                {/* Yearly Button (Primary Selection, Left-aligned) */}
-                                <button
-                                    onClick={() => setBillingCycle("yearly")}
-                                    className={`relative z-10 flex-1 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 flex items-center justify-center gap-3 rounded-[16px] ${billingCycle === "yearly" ? "text-black" : "text-zinc-500 hover:text-zinc-300"}`}
-                                >
-                                    Yearly
-                                    <span className={`text-[8px] font-black px-2 py-0.5 rounded-md border transition-all ${billingCycle === "yearly" ? "bg-black/5 border-black/10 text-black/40" : "bg-white/5 border-white/10 text-zinc-600"}`}>
-                                        Save 25% Off
-                                    </span>
-                                </button>
-
-                                {/* Monthly Button */}
-                                <button
-                                    onClick={() => setBillingCycle("monthly")}
-                                    className={`relative z-10 flex-1 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 rounded-[16px] flex items-center justify-center ${billingCycle === "monthly" ? "text-black" : "text-zinc-500 hover:text-zinc-300"}`}
-                                >
-                                    Monthly
-                                </button>
-
-                                {/* Sliding Active Indicator (Equal Width Logic) */}
-                                <motion.div
-                                    className="absolute top-1 bottom-1 bg-white shadow-[0_0_30px_rgba(255,255,255,0.3)] pointer-events-none"
-                                    initial={false}
-                                    animate={{
-                                        left: billingCycle === "yearly" ? 4 : "50%",
-                                        width: "calc(50% - 4px)",
-                                    }}
-                                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                                    style={{ borderRadius: 16 }}
-                                />
-                            </div>
-                            <p className="mt-8 text-[9px] font-black text-zinc-900 uppercase tracking-[0.6em] flex items-center gap-3 mb-8">
-                                <div className="w-1.5 h-1.5 rounded-full bg-zinc-900" />
-                                Secure Checkout / Billed {billingCycle === "yearly" ? "Annually" : "Monthly"}
+                        <div className="flex flex-col items-center justify-center mt-2 mb-6">
+                            <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.6em] flex items-center gap-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                                Secure Checkout / Billed Monthly
                             </p>
                         </div>
 
                         <div className="grid lg:grid-cols-4 gap-6 mb-12">
-                            {/* Seed Plan */}
-                            <div className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] border-white/10 hover:border-white/20 hover:shadow-2xl hover:shadow-white/[0.02]`}>
-                                {currentPlan === 'Free' && (
-                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-zinc-800 text-white text-[10px] font-black uppercase tracking-widest rounded-full border border-white/20 shadow-xl z-10">
-                                        Current Logic
-                                    </div>
-                                )}
-                                <div className="flex items-center justify-between mb-8">
-                                    <span className="text-zinc-600 text-[11px] font-black uppercase tracking-[0.2em]">Legacy / Seed</span>
-                                </div>
-                                <div className="mb-10">
-                                    <div className="flex items-baseline gap-1 mb-2">
-                                        <span className="text-4xl font-black text-white tracking-widest">$0</span>
-                                        <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
-                                    </div>
-                                    <p className="text-zinc-600 text-xs font-bold uppercase tracking-tight">Pre-launch exploration.</p>
-                                </div>
-                                <ul className="space-y-4 mb-10 flex-grow">
-                                    <FeatureItem text="1 Active Product" />
-                                    <FeatureItem text="5 Intent Signals / day" />
-                                    <FeatureItem text="Basic Discovery Mode" />
-                                </ul>
-                                <button className="w-full py-4 rounded-xl bg-white/5 text-zinc-700 font-black text-[10px] uppercase tracking-widest border border-white/5 opacity-50 pointer-events-none mt-auto">
-                                    Active Account
-                                </button>
-                            </div>
+                            {PRICING_PLANS.map((plan) => {
+                                const isCurrentPlan = currentPlanInfo.id === plan.id;
+                                const price = getPriceForBilling(plan.id, billingCycle);
+                                const note = getPlanNote(plan.id, billingCycle);
 
-                            {/* Startup Plan */}
-                            <div className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] border-white/10 hover:border-white/20 hover:shadow-2xl hover:shadow-white/[0.02]`}>
-                                <div className="flex items-center justify-between mb-8">
-                                    <span className="text-zinc-600 text-[11px] font-black uppercase tracking-[0.2em]">Startup</span>
-                                </div>
-                                <div className="mb-10">
-                                    <div className="flex items-baseline gap-2 mb-2">
-                                        <span className="text-4xl font-black text-white tracking-widest">
-                                            ${billingCycle === "yearly" ? "15" : "19"}
-                                        </span>
-                                        <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
-                                    </div>
-                                    <div className="text-[10px] font-black text-zinc-700 uppercase tracking-widest mb-3">
-                                        {billingCycle === "yearly" ? "Billed Annually" : "Flex Monthly"}
-                                    </div>
-                                    <p className="text-zinc-600 text-xs font-bold uppercase tracking-tight">For serious solo builders.</p>
-                                </div>
-                                <ul className="space-y-4 mb-10 flex-grow">
-                                    <FeatureItem text="3 Active Products" />
-                                    <FeatureItem text="Deep Intent Analysis" />
-                                    <FeatureItem text="Personalized Hooks" />
-                                    <FeatureItem text="Real-time Alerts" />
-                                </ul>
-                                <button className="w-full py-4 rounded-xl bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-xl active:scale-95 mt-auto">
-                                    Initialize Startup
-                                </button>
-                            </div>
+                                return (
+                                    <div
+                                        key={plan.id}
+                                        className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] ${plan.popular ? "border-white/20 shadow-2xl shadow-white/[0.05] hover:border-white/40" : "border-white/10 hover:border-white/20 hover:shadow-2xl hover:shadow-white/[0.02]"}`}
+                                    >
+                                        {isCurrentPlan && (
+                                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-zinc-800 text-white text-[10px] font-black uppercase tracking-widest rounded-full border border-white/20 shadow-xl z-10">
+                                                Current Plan
+                                            </div>
+                                        )}
 
-                            {/* Scale Plan (Recommended) */}
-                            <div className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] border-white/20 shadow-2xl shadow-white/[0.05] hover:border-white/40`}>
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
-                                    <Badge text="Recommended Priority" color="silver" />
-                                </div>
-                                <div className="flex items-center justify-between mb-8 mt-4">
-                                    <span className="text-white text-[11px] font-black uppercase tracking-[0.2em]">Scale</span>
-                                </div>
-                                <div className="mb-10">
-                                    <div className="flex items-baseline gap-1 mb-2">
-                                        <span className="text-5xl font-black text-white tracking-widest">
-                                            ${billingCycle === "yearly" ? "30" : "39"}
-                                        </span>
-                                        <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
-                                    </div>
-                                    <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-3">
-                                        {billingCycle === "yearly" ? "Save 25% Active" : "Dynamic Monthly"}
-                                    </div>
-                                    <p className="text-zinc-500 text-xs font-bold uppercase tracking-tight">Complete Autopilot suite.</p>
-                                </div>
-                                <ul className="space-y-4 mb-10 flex-grow">
-                                    <FeatureItem text="10 Active Products" />
-                                    <FeatureItem text="Autopilot Engagement" />
-                                    <FeatureItem text="Market Intel API" />
-                                    <FeatureItem text="Priority Lead Signal" />
-                                    <FeatureItem text="Strategy Dashboard" />
-                                </ul>
-                                <button className="w-full py-4 rounded-xl bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-xl active:scale-95 mt-auto shadow-white/10">
-                                    Scale Operations
-                                </button>
-                            </div>
+                                        {!isCurrentPlan && plan.popular && (
+                                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                                                <Badge text="Recommended" color="silver" />
+                                            </div>
+                                        )}
 
-                            {/* Unlimited Plan */}
-                            <div className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] border-white/5 hover:border-white/20 hover:shadow-2xl hover:shadow-white/[0.02]`}>
-                                <div className="flex items-center justify-between mb-8">
-                                    <span className="text-zinc-600 text-[11px] font-black uppercase tracking-[0.2em]">Unlimited</span>
-                                </div>
-                                <div className="mb-10">
-                                    <div className="flex items-baseline gap-1 mb-2">
-                                        <span className="text-4xl font-black text-white tracking-widest">
-                                            ${billingCycle === "yearly" ? "45" : "59"}
-                                        </span>
-                                        <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
+                                        <div className={`flex items-center justify-between mb-8 ${plan.popular && !isCurrentPlan ? "mt-4" : ""}`}>
+                                            <span className={`${plan.popular ? "text-white" : "text-zinc-600"} text-[11px] font-black uppercase tracking-[0.2em]`}>
+                                                {plan.name}
+                                            </span>
+                                        </div>
+
+                                        <div className="mb-10">
+                                            <div className={`flex items-baseline gap-2 mb-2 ${plan.popular ? "text-5xl" : "text-4xl"}`}>
+                                                <span className="font-black text-white tracking-widest">
+                                                    ${price}
+                                                </span>
+                                                <span className="text-zinc-700 text-[10px] font-black uppercase tracking-widest">/mo</span>
+                                            </div>
+
+                                            <div className="text-[10px] font-black text-zinc-700 uppercase tracking-widest mb-3">
+                                                Billed Monthly
+                                            </div>
+
+                                            <p className="text-zinc-400 text-xs font-bold uppercase tracking-tight">
+                                                {plan.description}
+                                            </p>
+                                            {note && (
+                                                <p className="mt-3 text-[11px] text-zinc-400 leading-relaxed font-medium">
+                                                    {note}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <ul className="space-y-4 mb-10 flex-grow">
+                                            {plan.features.map((feature) => (
+                                                <FeatureItem key={feature} text={feature} />
+                                            ))}
+                                        </ul>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCheckout(plan.id)}
+                                            disabled={plan.id === "free" || isCurrentPlan || loadingPlan === plan.id}
+                                            className={`w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 mt-auto ${plan.id === "free" || isCurrentPlan
+                                                ? "bg-white/5 text-zinc-700 border border-white/5 opacity-50 pointer-events-none"
+                                                : plan.popular
+                                                    ? "bg-white text-black hover:bg-zinc-200 shadow-xl shadow-white/10"
+                                                    : "bg-white/5 text-white border border-white/10 hover:bg-white/10"}`}
+                                        >
+                                            {loadingPlan === plan.id ? (
+                                                <Loader2 className="w-4 h-4 animate-spin mx-auto text-inherit" />
+                                            ) : isCurrentPlan ? (
+                                                "Current Plan"
+                                            ) : (
+                                                plan.cta
+                                            )}
+                                        </button>
                                     </div>
-                                    <p className="text-zinc-600 text-xs font-bold uppercase tracking-tight">Strategic market control.</p>
-                                </div>
-                                <ul className="space-y-4 mb-10 flex-grow">
-                                    <FeatureItem text="Unlimited Products" />
-                                    <FeatureItem text="Custom Lead Scoping" />
-                                    <FeatureItem text="Strategic Overview" />
-                                    <FeatureItem text="White-label Portal" />
-                                </ul>
-                                <button className="w-full py-4 rounded-xl bg-white/5 text-white font-black text-[10px] uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all active:scale-95 mt-auto">
-                                    Claim Unlimited
-                                </button>
-                            </div>
+                                );
+                            })}
                         </div>
 
 
                         {/* Billing Support Note */}
                         <p className="text-center text-xs text-muted-foreground pb-4">
-                            Secure payments powered by Dodo Payments. All plans are billed {billingCycle === "yearly" ? "annually" : "monthly"}. Need a custom plan for your agency? <span className="text-white hover:underline cursor-pointer">Contact us.</span>
+                            Secure payments powered by Dodo Payments. Need a custom plan for your agency? <span className="text-white hover:underline cursor-pointer">Contact us.</span>
                         </p>
                     </Section>
 
@@ -525,7 +496,7 @@ function UserSettingsContent() {
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        System / Identity / Edit
+                                        Account / Profile / Edit
                                     </div>
                                     <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Edit Profile</h2>
                                 </div>
@@ -567,11 +538,11 @@ function UserSettingsContent() {
                                                         className="hidden"
                                                     />
                                                 </div>
-                                                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest font-black">Profile ID Photo</p>
+                                                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest font-black">Profile Photo</p>
                                             </div>
                                             <div className="flex-1 w-full space-y-6">
                                                 <Input
-                                                    label="Operator Name"
+                                                    label="Full Name"
                                                     value={profile.full_name}
                                                     onChange={(v: string) => setProfile({ ...profile, full_name: v })}
                                                     required
@@ -589,38 +560,38 @@ function UserSettingsContent() {
 
 
                                     {/* Socials */}
-                                    <Section title="External Comm Channels" icon={<LinkIcon className="w-5 h-5 text-white" />}>
+                                    <Section title="Social Links" icon={<LinkIcon className="w-5 h-5 text-white" />}>
                                         <div className="grid md:grid-cols-2 gap-8">
                                             {/* Standard Socials */}
                                             <Input label="X / Twitter" icon={<XLogo className="w-3 h-3" />} value={profile.social_links.twitter || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, twitter: v } })} placeholder="@username or URL" />
                                             <Input label="LinkedIn" icon={<Linkedin className="w-3 h-3" />} value={profile.social_links.linkedin || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, linkedin: v } })} placeholder="LinkedIn URL" />
                                             <Input label="Instagram" icon={<Instagram className="w-3 h-3" />} value={profile.social_links.instagram || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, instagram: v } })} placeholder="@username" />
-                                            <Input label="Global Hub" icon={<Globe className="w-3 h-3" />} value={profile.social_links.website || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, website: v } })} placeholder="https://..." />
+                                            <Input label="Website" icon={<Globe className="w-3 h-3" />} value={profile.social_links.website || ""} onChange={(v: string) => setProfile({ ...profile, social_links: { ...profile.social_links, website: v } })} placeholder="https://..." />
                                         </div>
                                     </Section>
 
                                     {/* Security */}
-                                    <Section title="Security Protocol" icon={<Shield className="w-5 h-5 text-white" />}>
+                                    <Section title="Password" icon={<Shield className="w-5 h-5 text-white" />}>
                                         {!showPasswordFields ? (
                                             <div className="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-xl">
                                                 <div className="space-y-1">
                                                     <h3 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2 text-white">
-                                                        <Lock className="w-3 h-3 text-primary/60" /> Access Key
+                                                        <Lock className="w-3 h-3 text-primary/60" /> Password
                                                     </h3>
-                                                    <p className="text-[10px] text-zinc-600 font-mono">Rotate security credentials.</p>
+                                                    <p className="text-[10px] text-zinc-600 font-mono">Change the password for this account.</p>
                                                 </div>
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPasswordFields(true)}
                                                     className="px-6 py-2 border border-white/10 hover:border-primary/40 hover:bg-primary/5 text-zinc-400 hover:text-primary text-[10px] font-black uppercase tracking-widest transition-all rounded-lg"
                                                 >
-                                                    INITIALIZE ROTATION
+                                                    CHANGE PASSWORD
                                                 </button>
                                             </div>
                                         ) : (
                                             <div className="space-y-6 bg-white/[0.02] p-8 border border-white/5 rounded-xl animate-in fade-in slide-in-from-top-2">
-                                                <Input label="New Access Key" type="password" icon={<Lock className="w-3 h-3" />} value={passwords.new} onChange={(v: string) => setPasswords({ ...passwords, new: v })} placeholder="Enter new password" />
-                                                <Input label="Confirm Rotation" type="password" icon={<Lock className="w-3 h-3" />} value={passwords.confirm} onChange={(v: string) => setPasswords({ ...passwords, confirm: v })} placeholder="Confirm new password" />
+                                                <Input label="New Password" type="password" icon={<Lock className="w-3 h-3" />} value={passwords.new} onChange={(v: string) => setPasswords({ ...passwords, new: v })} placeholder="Enter new password" />
+                                                <Input label="Confirm Password" type="password" icon={<Lock className="w-3 h-3" />} value={passwords.confirm} onChange={(v: string) => setPasswords({ ...passwords, confirm: v })} placeholder="Confirm new password" />
                                             </div>
                                         )}
                                     </Section>
@@ -770,9 +741,9 @@ function FeatureItem({ text, color = "cocoa", icon }: { text: string; color?: st
     return (
         <li className="flex items-center gap-3 group/item">
             <div className={`flex-shrink-0 p-1 rounded-lg border border-white/5 bg-white/[0.02] transition-all duration-300 group-hover/item:scale-110`}>
-                {icon || <Check className="w-3.5 h-3.5 text-zinc-600 group-hover/item:text-white transition-colors" />}
+                {icon || <Check className="w-3.5 h-3.5 text-zinc-400 group-hover/item:text-white transition-colors" />}
             </div>
-            <span className={`text-[11px] font-medium tracking-tight text-zinc-500 group-hover/item:text-zinc-300 transition-colors`}>
+            <span className={`text-[11px] font-medium tracking-tight text-zinc-400 group-hover/item:text-white transition-colors`}>
                 {text}
             </span>
         </li>

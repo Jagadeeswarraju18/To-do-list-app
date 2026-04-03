@@ -16,6 +16,8 @@ import {
 } from "@/lib/ai/dm-generator";
 import { searchRedditOpportunities } from "@/lib/reddit/client";
 import { searchLinkedInOpportunities } from "@/lib/linkedin/client";
+import { getUserUsageSnapshot, logDraftUsage } from "@/lib/usage-limits";
+import { buildLimitPayload } from "@/lib/limit-utils";
 
 async function checkRateLimits(supabase: any, userId: string, platform: string) {
     // 1. Concurrency Check: Is there a scan already RUNNING for this user?
@@ -33,20 +35,30 @@ async function checkRateLimits(supabase: any, userId: string, platform: string) 
         };
     }
 
-    // 2. Daily Quota Check: How many successful scans in the last 24h?
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { count, error: countError } = await supabase
+    // 2. Short-term anti-spam protection
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: hourlyCount, error: hourlyError } = await supabase
         .from("discovery_runs")
-        .select("*", { count: 'exact', head: true })
+        .select("*", { count: "exact", head: true })
         .eq("user_id", userId)
-        .eq("status", "completed")
-        .gte("created_at", twentyFourHoursAgo);
+        .gte("created_at", oneHourAgo);
 
-    const DAILY_LIMIT = 10; // Default daily limit
-    if (!countError && count !== null && count >= DAILY_LIMIT) {
-        return { 
-            error: `Daily discovery limit reached (${DAILY_LIMIT}/${DAILY_LIMIT}). Please try again tomorrow.`,
-            type: 'quota'
+    const HOURLY_RATE_LIMIT = 3;
+    if (!hourlyError && hourlyCount !== null && hourlyCount >= HOURLY_RATE_LIMIT) {
+        return {
+            error: `You have reached the short-term scan limit (${HOURLY_RATE_LIMIT} scans in the last hour). Please wait a bit before scanning again.`,
+            type: "rate_limit"
+        };
+    }
+
+    // 3. Monthly plan quota
+    const { plan, tier, usage } = await getUserUsageSnapshot(userId);
+    if (usage.scans >= plan.scanLimit) {
+        const limit = buildLimitPayload("scans", tier, usage.scans, plan.scanLimit);
+        return {
+            error: limit.message,
+            type: "plan_limit",
+            limit,
         };
     }
 
@@ -178,7 +190,7 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
         
         // Rate Limit & Concurrency Check
         const limitCheck = await checkRateLimits(supabase, targetUserId, 'x');
-        if (limitCheck.error) return { error: limitCheck.error };
+        if (limitCheck.error) return { error: limitCheck.error, code: limitCheck.limit?.code, limit: limitCheck.limit };
 
         const { data: run } = await supabase
             .from("discovery_runs")
@@ -239,10 +251,25 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
             painSolved: product.pain_solved,
             productUrl: product.website_url || product.product_url,
             targetAudience: product.target_audience,
-            outreachTone: product.outreach_tone
+            outreachTone: product.outreach_tone,
+            competitors: product.competitors || [],
+            alternatives: product.alternatives || [],
+            strongestObjection: product.strongest_objection || "",
+            proofResults: product.proof_results || [],
+            pricingPosition: product.pricing_position || "",
+            founderStory: product.founder_story || ""
         })));
 
-        const insertions = finalRelevant.map(t => {
+        const { plan, tier, usage } = await getUserUsageSnapshot(targetUserId);
+        const remainingSignals = Math.max(plan.signalLimit - usage.signals, 0);
+
+        if (remainingSignals <= 0) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0, completed_at: new Date().toISOString() }).eq("id", run.id);
+            const limit = buildLimitPayload("signals", tier, usage.signals, plan.signalLimit);
+            return { error: limit.message, code: limit.code, limit };
+        }
+
+        const insertions = finalRelevant.slice(0, remainingSignals).map(t => {
             const v = finalVerifiedMap.get(t.id);
             const s = scoredMap.get(t.id) || initialScoreMap.get(t.id);
             const author = t.author_username || "unknown";
@@ -277,7 +304,13 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
         }
 
         revalidatePath("/founder/opportunities");
-        return { success: true, addedCount: insertions.length, runId: run?.id };
+        const signalLimitReached = finalRelevant.length > insertions.length;
+        return {
+            success: true,
+            addedCount: insertions.length,
+            runId: run?.id,
+            limit: signalLimitReached ? buildLimitPayload("signals", tier, usage.signals + insertions.length, plan.signalLimit) : undefined,
+        };
     } catch (e: any) {
         return { error: e.message };
     }
@@ -306,7 +339,7 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
         
         // Rate Limit & Concurrency Check
         const limitCheck = await checkRateLimits(supabase, targetUserId, 'reddit');
-        if (limitCheck.error) return { error: limitCheck.error };
+        if (limitCheck.error) return { error: limitCheck.error, code: limitCheck.limit?.code, limit: limitCheck.limit };
 
         const { data: run } = await supabase
             .from("discovery_runs")
@@ -342,12 +375,27 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
             postText: p.text || "", author: p.author || "unknown", subreddit: p.subreddit || "unknown", postType: p.post_type || "post",
             productName: product.name, productDescription: product.description, painSolved: product.pain_solved,
             // productUrl: product.website_url || product.product_url, // Disabled for Reddit safety
-            targetAudience: product.target_audience, outreachTone: product.outreach_tone
+            targetAudience: product.target_audience, outreachTone: product.outreach_tone,
+            competitors: product.competitors || [],
+            alternatives: product.alternatives || [],
+            strongestObjection: product.strongest_objection || "",
+            proofResults: product.proof_results || [],
+            pricingPosition: product.pricing_position || "",
+            founderStory: product.founder_story || ""
         })));
 
         const currentRunId = run?.id;
 
-        const insertions = relevant.map(p => {
+        const { plan, tier, usage } = await getUserUsageSnapshot(targetUserId);
+        const remainingSignals = Math.max(plan.signalLimit - usage.signals, 0);
+
+        if (remainingSignals <= 0) {
+            if (currentRunId) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0, completed_at: new Date().toISOString() }).eq("id", currentRunId);
+            const limit = buildLimitPayload("signals", tier, usage.signals, plan.signalLimit);
+            return { error: limit.message, code: limit.code, limit };
+        }
+
+        const insertions = relevant.slice(0, remainingSignals).map(p => {
             const v = verifiedMap.get(p.id);
             const s = scoredMap.get(p.id);
             const author = p.author || "unknown";
@@ -385,11 +433,12 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
         }
 
         revalidatePath("/founder/opportunities");
-        return { 
-            success: !insertError, 
-            addedCount: insertError ? 0 : insertions.length, 
+        return {
+            success: !insertError,
+            addedCount: insertError ? 0 : insertions.length,
             runId: currentRunId,
-            error: insertError?.message
+            error: insertError?.message,
+            limit: !insertError && relevant.length > insertions.length ? buildLimitPayload("signals", tier, usage.signals + insertions.length, plan.signalLimit) : undefined,
         };
     } catch (e: any) {
         return { error: e.message };
@@ -419,7 +468,7 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
         
         // Rate Limit & Concurrency Check
         const limitCheck = await checkRateLimits(supabase, targetUserId, 'linkedin');
-        if (limitCheck.error) return { error: limitCheck.error };
+        if (limitCheck.error) return { error: limitCheck.error, code: limitCheck.limit?.code, limit: limitCheck.limit };
 
         const { data: run } = await supabase
             .from("discovery_runs")
@@ -455,10 +504,25 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
             postText: p.text || "", author: p.author || "unknown",
             productName: product.name, productDescription: product.description, painSolved: product.pain_solved,
             productUrl: product.website_url || product.product_url,
-            targetAudience: product.target_audience, outreachTone: product.outreach_tone
+            targetAudience: product.target_audience, outreachTone: product.outreach_tone,
+            competitors: product.competitors || [],
+            alternatives: product.alternatives || [],
+            strongestObjection: product.strongest_objection || "",
+            proofResults: product.proof_results || [],
+            pricingPosition: product.pricing_position || "",
+            founderStory: product.founder_story || ""
         })));
 
-        const insertions = relevant.map(p => {
+        const { plan, tier, usage } = await getUserUsageSnapshot(targetUserId);
+        const remainingSignals = Math.max(plan.signalLimit - usage.signals, 0);
+
+        if (remainingSignals <= 0) {
+            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0, completed_at: new Date().toISOString() }).eq("id", run.id);
+            const limit = buildLimitPayload("signals", tier, usage.signals, plan.signalLimit);
+            return { error: limit.message, code: limit.code, limit };
+        }
+
+        const insertions = relevant.slice(0, remainingSignals).map(p => {
             const v = verifiedMap.get(p.id);
             const s = scoredMap.get(p.id);
             const author = p.author || "unknown";
@@ -488,7 +552,12 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
         }
 
         revalidatePath("/founder/opportunities");
-        return { success: true, addedCount: insertions.length, runId: run?.id };
+        return {
+            success: true,
+            addedCount: insertions.length,
+            runId: run?.id,
+            limit: relevant.length > insertions.length ? buildLimitPayload("signals", tier, usage.signals + insertions.length, plan.signalLimit) : undefined,
+        };
     } catch (e: any) {
         return { error: e.message };
     }
@@ -502,6 +571,12 @@ export async function addManualOpportunityAction(data: { url: string, content: s
 
         const product = await getProductContext(supabase, user);
         if (!product) return { error: "Product setup missing." };
+
+        const { plan, tier, usage } = await getUserUsageSnapshot(user.id);
+        if (usage.signals >= plan.signalLimit) {
+            const limit = buildLimitPayload("signals", tier, usage.signals, plan.signalLimit);
+            return { error: limit.message, code: limit.code, limit };
+        }
 
         let source = 'tweet_url';
         if (data.platform === 'reddit') source = 'reddit_post';
@@ -534,6 +609,12 @@ export async function regenerateSingleDM(opportunityId: string, redditReplyMode?
         const { data: opp } = await supabase.from("opportunities").select("*, products(*)").eq("id", opportunityId).single();
         if (!opp) return { error: "Opportunity not found" };
 
+        const { plan, tier, usage } = await getUserUsageSnapshot(user.id);
+        if (usage.drafts >= plan.draftLimit) {
+            const limit = buildLimitPayload("drafts", tier, usage.drafts, plan.draftLimit);
+            return { error: limit.message, code: limit.code, limit };
+        }
+
         const product = opp.products;
         const author = opp.tweet_author.replace("@", "").replace("u/", "");
         const productUrl = product.website_url || product.product_url;
@@ -543,26 +624,45 @@ export async function regenerateSingleDM(opportunityId: string, redditReplyMode?
             const replies = await generateRedditReplies([{
                 postText: opp.tweet_content, author, subreddit: opp.subreddit || "unknown", postType: "post",
                 productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl,
-                targetAudience: product.target_audience, outreachTone: product.outreach_tone, replyMode: redditReplyMode || 'helpful'
+                targetAudience: product.target_audience, outreachTone: product.outreach_tone, replyMode: redditReplyMode || 'helpful',
+                competitors: product.competitors || [],
+                alternatives: product.alternatives || [],
+                strongestObjection: product.strongest_objection || "",
+                proofResults: product.proof_results || [],
+                pricingPosition: product.pricing_position || "",
+                founderStory: product.founder_story || ""
             }]);
             newDM = replies.get(author) || fallbackRedditReply(author, opp.tweet_content, product.name);
         } else if (opp.source === 'linkedin_post') {
             const replies = await generateLinkedInReplies([{
                 postText: opp.tweet_content, author,
                 productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl,
-                targetAudience: product.target_audience, outreachTone: product.outreach_tone
+                targetAudience: product.target_audience, outreachTone: product.outreach_tone,
+                competitors: product.competitors || [],
+                alternatives: product.alternatives || [],
+                strongestObjection: product.strongest_objection || "",
+                proofResults: product.proof_results || [],
+                pricingPosition: product.pricing_position || "",
+                founderStory: product.founder_story || ""
             }]);
             newDM = replies.get(author) || fallbackLinkedInReply(author, product.name);
         } else {
             const dms = await generatePersonalizedDMs([{
                 tweetText: opp.tweet_content, authorUsername: author, authorName: author,
                 productName: product.name, productDescription: product.description, painSolved: product.pain_solved, productUrl,
-                targetAudience: product.target_audience, outreachTone: product.outreach_tone
+                targetAudience: product.target_audience, outreachTone: product.outreach_tone,
+                competitors: product.competitors || [],
+                alternatives: product.alternatives || [],
+                strongestObjection: product.strongest_objection || "",
+                proofResults: product.proof_results || [],
+                pricingPosition: product.pricing_position || "",
+                founderStory: product.founder_story || ""
             }]);
             newDM = dms.get(author) || fallbackDM(author, opp.tweet_content, product.name);
         }
 
         await supabase.from("opportunities").update({ suggested_dm: newDM }).eq("id", opportunityId);
+        await logDraftUsage(user.id, { opportunityId, source: opp.source || "x" });
         revalidatePath("/founder/opportunities");
         return { success: true, newDM };
     } catch (e: any) {
@@ -597,3 +697,4 @@ export async function updateStatus(opportunityId: string, status: string) {
 export async function archiveOpportunity(id: string) {
     return updateStatus(id, 'archived');
 }
+

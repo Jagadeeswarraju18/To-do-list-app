@@ -75,9 +75,41 @@ const homepageProductSchema = {
 };
 
 export default function LandingPage() {
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is Mardis?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Mardis is an autonomous GTM (Go-To-Market) engine designed for elite founders. It monitors social nodes and the deep web for high-intent signals, allowing you to execute outreach with clinical precision."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How does the AI discover signals?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Our engine uses contextual reasoning to scan millions of data points across social platforms, news cycles, and proprietary data streams. It filters noise to find the exact moment a prospect needs your solution."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is 'Founder Privilege'?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Founder Privilege is a recognition of early adopters. It provides exclusive access to alpha features, priority support, and locked-in pricing as we scale the platform's capabilities."
+                }
+            }
+        ]
+    };
+
     return (
         <div className="relative min-h-screen overflow-x-hidden bg-black selection:bg-white/20 selection:text-white">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageProductSchema) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
             <Navbar />
             <main className="isolate">
                 <Hero />

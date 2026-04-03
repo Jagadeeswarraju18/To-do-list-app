@@ -24,7 +24,6 @@ export function Navbar() {
         { name: "Pricing", href: "#pricing" },
         { name: "Discover", href: "/discover" },
         { name: "FAQ", href: "#faq" },
-        { name: "About", href: "/about" },
     ];
 
     const spring = {

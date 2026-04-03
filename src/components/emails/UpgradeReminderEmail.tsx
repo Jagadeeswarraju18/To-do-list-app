@@ -1,5 +1,6 @@
 import {
     Body,
+    Button,
     Container,
     Head,
     Heading,
@@ -7,7 +8,6 @@ import {
     Preview,
     Section,
     Text,
-    Button,
 } from "@react-email/components";
 import * as React from "react";
 import { MailFooter } from "./MailFooter";
@@ -21,49 +21,46 @@ interface UpgradeReminderEmailProps {
     nextPlanFeatures: string[];
 }
 
-export const UpgradeReminderEmail = ({ 
-    userName, 
-    limitType, 
-    currentPlanName, 
-    nextPlanName, 
-    nextPlanFeatures 
+export const UpgradeReminderEmail = ({
+    userName,
+    limitType,
+    usageCount,
+    currentPlanName,
+    nextPlanName,
+    nextPlanFeatures,
 }: UpgradeReminderEmailProps) => (
     <Html>
         <Head />
-        <Preview>Helpful stats regarding your Mardis account usage</Preview>
+        <Preview>Your current Mardis plan is close to its limit</Preview>
         <Body style={main}>
             <Container style={container}>
-                <Heading style={h1}>Insights for Your Growth</Heading>
+                <Heading style={h1}>You are close to your plan limit</Heading>
+                <Text style={text}>Hi {userName || "there"},</Text>
                 <Text style={text}>
-                    Hi {userName || "there"},
-                </Text>
-                <Text style={text}>
-                    We've noticed you're making great progress with Mardis. To ensure you continue detecting high-intent signals without interruption, we wanted to share some account insights.
+                    You are getting close to the limits on your current Mardis plan. If you need more room, the next plan gives you more capacity and access.
                 </Text>
 
                 <Section style={infoSection}>
-                    <Text style={infoText}>
-                        Current Plan: {currentPlanName}
-                    </Text>
-                    <Text style={infoText}>
-                        Scanning Status: {limitType === 'leads' ? 'High-Volume Detected' : 'Active'}
-                    </Text>
+                    <Text style={infoText}>Current Plan: {currentPlanName}</Text>
+                    <Text style={infoText}>Usage Type: {limitType}</Text>
+                    <Text style={infoText}>Current Usage: {usageCount}</Text>
                 </Section>
 
-                <Text style={text}>
-                    To unlock even more powerful capabilities like these, consider exploring our **{nextPlanName}** features:
+                <Text style={text}>Moving to {nextPlanName} gives you access to:</Text>
+
+                <Section style={featureSection}>
                     {nextPlanFeatures.map((feature, idx) => (
-                        <div key={idx} style={{ marginTop: '6px', color: '#666' }}>
+                        <Text key={idx} style={featureText}>
                             • {feature}
-                        </div>
+                        </Text>
                     ))}
-                </Text>
+                </Section>
 
                 <Button
                     style={button}
-                    href={process.env.NEXT_PUBLIC_APP_URL + "/founder/dashboard"}
+                    href={process.env.NEXT_PUBLIC_APP_URL + "/founder/settings"}
                 >
-                    Expand Your Strategy
+                    View Plans
                 </Button>
 
                 <MailFooter />
@@ -116,6 +113,17 @@ const infoText = {
     letterSpacing: "0.05em",
     margin: "5px 0",
     textTransform: "uppercase" as const,
+};
+
+const featureSection = {
+    marginTop: "8px",
+};
+
+const featureText = {
+    color: "#666666",
+    fontSize: "14px",
+    lineHeight: "22px",
+    margin: "6px 0",
 };
 
 const button = {

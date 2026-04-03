@@ -2,6 +2,8 @@
 
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
+import { getUserUsageSnapshot, logDraftUsage } from "@/lib/usage-limits";
+import { buildLimitPayload } from "@/lib/limit-utils";
 import {
   computeStrategy,
   Platform,
@@ -33,19 +35,19 @@ interface GenerationParams {
   subredditName?: string;
   subredditRules?: string[];
   subredditTone?: string;
+  redditMode?: "safe" | "balanced" | "product_led";
+  commentCount?: number;
+  isRefinement?: boolean;
+  existingContent?: { title?: string; body?: string; text?: string };
 }
 
 function buildRedditContext(subredditName?: string, subredditRules?: string[], subredditTone?: string) {
   const rules = (subredditRules || []).filter(Boolean);
   const joinedRules = rules.length ? rules.join(" | ") : "No explicit rules provided";
-  const strict = rules.some((rule) =>
-    /no self-promo|no promotion|no spam|professional|technical|case studies|source your claims|no low-effort|strict/i.test(rule)
-  );
 
   return {
     rules,
     joinedRules,
-    strict,
     block: `
 SUBREDDIT CONTEXT:
 - Selected subreddit: ${subredditName || "unknown"}
@@ -55,18 +57,123 @@ SUBREDDIT CONTEXT:
 REDDIT SURVIVAL RULES:
 - Write like a normal person who actually belongs in r/${subredditName || "this subreddit"}.
 - Follow the selected subreddit rules automatically, even if that means lowering product mention to zero.
-- If a rule conflicts with promotion, choose the rule and remove the pitch.
-- No "Hey founders", no "Just wanted to share", no "Hope this helps", no polished guru voice.
-- No fake origin story, fake vulnerability, or fake "I've been lurking here" setup.
-- No emojis, no hype words, no landing-page language.
-- Prefer specificity, tradeoffs, and honest detail over persuasion.
-- If the subreddit is strict or technical, be more restrained and more evidence-based.
-- Never sound like you came here to farm traffic.
+- No guru voice, no "Hey founders", no landing-page language.
+- Prefer specificity and honest detail over persuasion.
 `.trim()
   };
 }
 
+const CRITIC_CORE_RULES = `
+CRITIC / HUMANIZATION RULES:
+1. You are a cynical founder who hates AI marketing language.
+2. Make the text sound like an honest human wrote it quickly.
+3. Remove cliches (e.g., "In today's fast-paced world", "Unlock your potential", "Game-changer").
+4. Shorten anything too polished or verbose.
+5. Use natural, slightly rough sentence breaks.
+`.trim();
+
+const WEAK_OUTPUT_REGEX = /unlocking|tapestry|seamlessly|embark|comprehensive|dive deep|game-changer|leverage/i;
+
+function buildRedditModeRules(redditMode: "safe" | "balanced" | "product_led", type: GenerationType) {
+  if (type === "reply") {
+    return `
+REPLY MODE:
+- Write like a real redditor replying in-thread, not publishing a post.
+- No intro setup. Get to the point quickly.
+- No product mention in the comment unless explicitly provided as context and it feels completely earned.
+- Comments should feel useful on their own even if nobody asks a follow-up.
+`.trim();
+  }
+
+  if (redditMode === "safe") {
+    return `
+REDDIT SAFETY MODE: SAFE
+- Default to value-first writing with no direct product mention.
+- Prioritize sounding native over sounding insightful.
+- If a sentence feels like positioning, soften it or remove it.
+`.trim();
+  }
+
+  if (redditMode === "product_led") {
+    return `
+REDDIT SAFETY MODE: PRODUCT-LED
+- Activate the problem sharply, but keep the post discussion-first.
+- You may imply the need for a better system or tool, but do not turn the post into a pitch.
+- Product mention is allowed only if it feels earned and low-pressure.
+`.trim();
+  }
+
+  return `
+REDDIT SAFETY MODE: BALANCED
+- Lead with the problem and make the value obvious.
+- You may hint at the missing system behind the problem, but stay discussion-first.
+- Keep product mention restrained and secondary to the core insight.
+`.trim();
+}
+
+function buildPlatformNativeRules(
+  platform: Platform,
+  type: GenerationType,
+  redditMode: "safe" | "balanced" | "product_led",
+  subredditName?: string,
+  subredditTone?: string
+) {
+  if (platform === "reddit") {
+    return `
+REDDIT NATIVE RULES:
+- Sound like a normal user posting to a community, not a brand publishing content.
+- No listicle voice unless the topic truly needs a short list.
+- No "here are 5 tips", "ultimate guide", "PSA", "hot take", or polished thread-style framing.
+- No fake vulnerability, fake backstory, or fake "I've been seeing this a lot" setup.
+- Avoid neat summary endings. End on a real question, tension, tradeoff, or observation.
+- Keep product mention restrained. If it feels like distribution, remove it.
+- If the subreddit tone is strict, technical, or professional, be more restrained and less performative.
+- Make the title sound like something a real person in r/${subredditName || "this subreddit"} would actually write.
+- Community tone: ${subredditTone || "neutral"}.
+${buildRedditModeRules(redditMode, type)}
+`.trim();
+  }
+
+  if (platform === "twitter") {
+    return `
+TWITTER NATIVE RULES:
+- Lead with one sharp observation, not a mini blog post.
+- Avoid stacked cliches, inspiration-speak, and generic founder wisdom.
+- Keep it quotable and concrete.
+- No fake authority. No "everyone is missing this" unless the point is genuinely specific.
+`.trim();
+  }
+
+  if (platform === "linkedin") {
+    return `
+LINKEDIN NATIVE RULES:
+- Keep it readable and grounded, not corporate or performative.
+- No fake lesson-post structure. No "here's what I learned" unless it feels earned.
+- Avoid motivational fluff and generic leadership language.
+- Use one clear point of view with concrete detail.
+`.trim();
+  }
+
+  return `
+PLATFORM NATIVE RULES:
+- Write like a real person with a specific point, not a content machine.
+- Prefer one sharp angle over broad generic coverage.
+- No slogans, generic hooks, or padded transitions.
+`.trim();
+}
+
 export async function generateContentAction(params: GenerationParams) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user?.id) {
+    const { plan, tier, usage } = await getUserUsageSnapshot(user.id);
+    if (usage.drafts >= plan.draftLimit) {
+      const limit = buildLimitPayload("drafts", tier, usage.drafts, plan.draftLimit);
+      throw new Error(limit.message);
+    }
+  }
+
   const {
     type,
     topic,
@@ -82,10 +189,14 @@ export async function generateContentAction(params: GenerationParams) {
     isProductLed = true,
     subredditName,
     subredditRules,
-    subredditTone
+    subredditTone,
+    redditMode = "balanced",
+    commentCount = 3,
+    isRefinement = false,
+    existingContent
   } = params;
 
-  const platform = type.split("_")[0] as Platform;
+  const platform = (type === "reply" ? "reddit" : type.split("_")[0]) as Platform;
   const strategy = computeStrategy({
     platform,
     signalContext,
@@ -100,120 +211,118 @@ export async function generateContentAction(params: GenerationParams) {
     ? buildRedditContext(subredditName, subredditRules, subredditTone)
     : null;
 
-  let model = "gpt-5-mini";
-  if (type === "linkedin_post" || type === "dm_outreach") {
-    model = "gpt-5.2";
+  // Faster model for primary generation, smarter for refinement
+  let model = isRefinement ? "gpt-5.2" : "gpt-5-mini";
+  if (!isRefinement && (type === "linkedin_post" || type === "dm_outreach")) {
+    model = "gpt-5.2"; 
   }
 
   const commonRules = `
 TRUTH CONSTRAINT:
-- ${strategy.hasPersonalContext ? "Personal Story Mode is enabled. You may use the provided personal context." : "Personal Story Mode is disabled. Do not invent personal history, milestones, timelines, or co-founders."}
-- If personal context is missing, use insight mode, not autobiography.
-- Never fabricate lived experience.
+- Never fabricate lived experience. Use insight mode if personal context is missing.
 
 HUMAN WRITING RULES:
-- Simple English. Short natural sentences. Human over polished.
-- Avoid cliches, fake drama, fake humility, and generic startup wisdom.
-- Avoid uniform rhythm. A little roughness is good.
-- Do not use em dashes. Use periods or commas.
+- Simple English. Short natural sentences. A little roughness is good.
+- Avoid cliches and generic startup wisdom.
+${CRITIC_CORE_RULES}
+- Do not use em dashes.
 - If a sentence sounds like copywriting, rewrite it.
 
 PLATFORM PERSONA:
 - ${strategy.platformTone.systemInstruction}
 - Platform: ${platform.toUpperCase()}
-- Constraints: ${strategy.platformTone.structure}
+- Structure: ${strategy.platformTone.structure}
 - Emojis: ${strategy.vibeRules.emojisAllowed ? "Allowed" : "Strictly banned"}
 - Formality: ${strategy.vibeRules.formality}
 - Jargon tolerance: ${strategy.vibeRules.jargonTolerance}
 - Banned phrases: ${strategy.vibeRules.forbiddenKeywords.join(", ")}, ${strategy.platformTone.forbiddenPatterns.join(", ")}
-${redditContext ? `- ${redditContext.block.replace(/\n/g, "\n- ").replace(/^- - /, "- ")}` : ""}
+${redditContext ? `- ${redditContext.block.replace(/\n/g, "\n- ")}` : ""}
+${buildPlatformNativeRules(platform, type, redditMode, subredditName, subredditTone)}
 
 PRODUCT MENTION RULE:
 - Mention level: ${strategy.productMentionLevel}
 - Product archetype: ${strategy.bridgeArchetype}
-- Only mention the product if it fits naturally.
-- If it sounds like a pitch, remove it.
-${platform === "reddit" ? `- On Reddit, default stance is no product mention unless it feels earned and the rules allow it.
-- Never include links, waitlists, demos, or "DM me".
-- If the subreddit is strict, product mention level becomes none.` : ""}
-`.trim();
+- Only mention product if it fits naturally.
+${platform === "reddit" ? "- Links, demos, waitlists, and DM asks are banned unless explicitly requested." : ""}`
+.trim();
 
   const systemPromptProductLed = `
 You are a founder-positioning writer who makes posts sound like a real person thinking out loud, not a marketer.
-
 ${commonRules}
-
-PRODUCT RELEVANCE BRIDGE:
-- Product: "${productName}" - ${description}
-- Problem it solves: ${painSolved}
-- Target audience: ${targetAudience}
-- The post topic must attract the exact person who has this pain.
-- Do not write a generic post about the topic.
-- Write a post that would make the right buyer think "this is exactly my problem."
-
-OUTPUT FORMAT:
-Return a JSON object:
-{
-  "post_text": "final generated text",
-  "title": "required for reddit, optional otherwise",
-  "body": "required for reddit, optional otherwise",
-  "internal_scoring": {
-    "specificity": 0-2,
-    "opinion_strength": 0-2,
-    "emotional_clarity": 0-2,
-    "cliche_penalty": -2 to 0,
-    "promotion_subtlely": 0-2,
-    "total_score": number
-  },
-  "analysis": {
-    "predicted_engagement_score": number,
-    "reasoning": "brief strategy explanation"
-  }
-}
-
-REDDIT OUTPUT RULES:
-- For reddit, return both "title" and "body".
-- The title must sound like a native subreddit title, not content marketing.
-- The body must follow the subreddit rules automatically.
-- Do not force markdown headings unless the subreddit tone clearly fits it.
-- If the subreddit would hate polished formatting, keep it plain.
+PRODUCT: "${productName}" - ${description}
+PROBLEM: ${painSolved}
+TARGET AUDIENCE: ${targetAudience}
+OUTPUT JSON (Strictly valid JSON): { "post_text": "text", "title": "reddit only", "body": "reddit only" }
 `.trim();
 
   const systemPromptGeneral = `
 You are an expert social ghostwriter for founders and creators.
-
 ${commonRules}
-
-OUTPUT FORMAT:
-Return a JSON object:
-{
-  "post_text": "final generated text",
-  "title": "required for reddit, optional otherwise",
-  "body": "required for reddit, optional otherwise",
-  "internal_scoring": {
-    "specificity": 0-2,
-    "opinion_strength": 0-2,
-    "emotional_clarity": 0-2,
-    "cliche_penalty": -2 to 0,
-    "promotion_subtlely": 0-2,
-    "total_score": number
-  },
-  "analysis": {
-    "predicted_engagement_score": number,
-    "reasoning": "brief strategy explanation"
-  }
-}
-
-REDDIT OUTPUT RULES:
-- For reddit, return both "title" and "body".
-- Respect the selected subreddit rules and tone automatically.
-- No blog voice. No guru voice. No fake community-member voice.
+OUTPUT JSON (Strictly valid JSON): { "post_text": "text", "title": "reddit only", "body": "reddit only" }
 `.trim();
 
   const finalSystemPrompt = isProductLed ? systemPromptProductLed : systemPromptGeneral;
 
-  const finalUserPrompt = isProductLed
-    ? `
+  const getPrompts = () => {
+    if (isRefinement && existingContent) {
+      const existingDraft = platform === "reddit"
+        ? `TITLE:
+${existingContent.title || ""}
+
+BODY:
+${existingContent.body || existingContent.text || ""}`
+        : (existingContent.text || existingContent.body || "");
+
+      return {
+        system: `You are The Critic. Refine the existing ${platform} draft to sound human, cynical, and non-AI.
+${commonRules}
+Keep the core meaning intact, but remove any AI gloss, weak phrasing, and unnecessary polish.
+Return strictly valid JSON matching the platform output shape.`,
+        user: `Refine this ${platform} draft.
+${platform === "reddit" ? "Return both a native title and body." : "Return the improved post text."}
+
+EXISTING DRAFT:
+---
+${existingDraft}
+---`
+      };
+    }
+
+    if (type === "reply") {
+      return {
+        system: `
+You are a Reddit-native comment writer.
+${commonRules}
+OUTPUT JSON (Strictly valid JSON): { "comments": ["comment 1", "comment 2", "comment 3"] }
+`.trim(),
+        user: `
+THREAD OR TOPIC:
+"${topic || signalContext}"
+
+PRODUCT CONTEXT:
+- Product name: ${productName}
+- What it does: ${description}
+- Pain it solves: ${painSolved}
+- Who it is for: ${targetAudience}
+${differentiation ? `- Differentiation: ${differentiation}` : ""}
+${additionalContext ? `- Extra context: ${additionalContext}` : ""}
+- Subreddit tone: ${subredditTone || "neutral"}
+- Subreddit rules: ${redditContext?.joinedRules || "none provided"}
+
+YOUR TASK:
+1. Write ${commentCount} distinct Reddit comments for this thread.
+2. Each comment should sound like a real person replying in-thread.
+3. Keep them useful, specific, and low-pressure.
+4. Do not force the product into the reply.
+5. Vary the angles slightly so the user can choose between them.
+Return only strictly valid JSON.
+`.trim()
+      };
+    }
+
+    return {
+      system: finalSystemPrompt,
+      user: `
 TOPIC OR SIGNAL: "${topic || signalContext}"
 
 PRODUCT CONTEXT:
@@ -228,183 +337,133 @@ ${platform === "reddit" ? `- Selected subreddit: ${subredditName || "unknown"}
 - Subreddit rules: ${redditContext?.joinedRules || "none provided"}` : ""}
 
 YOUR TASK:
-1. Find the sharpest angle of "${topic}" that speaks to someone who suffers from "${painSolved}".
-2. Write a post that makes that person feel seen, without pitching ${productName} unless it naturally fits.
-3. Use angle "${strategy.positioningAngle}" and goal "${strategy.contentGoal}".
-4. Follow all persona, authenticity, and subreddit rules strictly.
-${platform === "reddit" ? `5. Adapt the post specifically to r/${subredditName || "this subreddit"}.
-6. If the subreddit is strict, remove polish and remove any self-serving line.
-7. Return a human Reddit title and a body that sounds native there.` : ""}
-Return only the JSON object.
+1. Use angle "${strategy.positioningAngle}" and goal "${strategy.contentGoal}".
+2. Make it specific, grounded, and native to the platform.
+3. Do not sound like content marketing.
+4. Self-edit before answering so the first draft already sounds human.
+5. Prefer one strong point over covering everything.
+6. If the writing starts sounding polished, clever, or templated, simplify it.
+${platform === "reddit" ? `5. Return a Reddit-native title and body.
+6. Keep the post aligned to the subreddit rules and tone.` : ""}
+Return only strictly valid JSON.
 `.trim()
-    : `
-TOPIC OR SIGNAL: "${topic || signalContext}"
-${platform === "reddit" ? `SELECTED SUBREDDIT: r/${subredditName || "unknown"}
-SUBREDDIT TONE: ${subredditTone || "neutral"}
-SUBREDDIT RULES: ${redditContext?.joinedRules || "none provided"}
-` : ""}YOUR TASK:
-1. Write a highly engaging post strictly about this topic.
-2. Do not force a software angle unless it actually fits.
-3. Make it natural, specific, and grounded.
-4. Use angle "${strategy.positioningAngle}" and goal "${strategy.contentGoal}".
-${platform === "reddit" ? `5. Return a Reddit-native title and body, not one generic blob.
-6. Follow the subreddit rules automatically.` : ""}
-Return only the JSON object.
-`.trim();
+    };
+  };
 
-  async function callAI() {
-    const response = await openai.chat.completions.create({
-      model,
-      messages: [
-        { role: "system", content: finalSystemPrompt },
-        { role: "user", content: finalUserPrompt }
-      ],
-      response_format: { type: "json_object" }
-    });
+  const { system, user: userPrompt } = getPrompts();
 
-    return JSON.parse(response.choices[0].message.content || "{}");
+  async function callAI(retryCount = 0): Promise<any> {
+    try {
+      const activeSystem = retryCount === 0
+        ? system
+        : `${system}
+
+RESCUE MODE:
+- The previous draft was weak, too promotional, empty, or too AI-sounding.
+- Rewrite it to be plainer, more specific, and more native.
+- Do not repeat generic filler.`;
+      const activeUser = retryCount === 0
+        ? userPrompt
+        : `${userPrompt}
+
+${platform === "reddit"
+  ? `RESCUE CHECKLIST:
+- Title must feel native to r/${subredditName || "this subreddit"}.
+- Body must be concrete, restrained, and non-promotional.`
+  : "RESCUE CHECKLIST:\n- Make the post sharper, less generic, and less polished."}`;
+
+      const response = await openai.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: activeSystem },
+          { role: "user", content: activeUser }
+        ],
+        response_format: { type: "json_object" }
+      });
+
+      const res = JSON.parse(response.choices[0].message.content || "{}");
+      
+      // Conservative Fallback Trigger
+      const isEmpty = type === "reply"
+        ? !Array.isArray(res.comments) || res.comments.length === 0 || !String(res.comments[0] || "").trim()
+        : platform === "reddit"
+        ? (!String(res.title || "").trim() || !String(res.body || "").trim())
+        : !String(res.post_text || "").trim();
+      const isTooAI = WEAK_OUTPUT_REGEX.test(JSON.stringify(res));
+
+      if (retryCount === 0 && (isEmpty || isTooAI)) {
+        console.warn("[AI] Weak output. Rescuing...");
+        return callAI(1);
+      }
+
+      return res;
+    } catch (error) {
+      if (retryCount === 0) return callAI(1);
+      throw error;
+    }
   }
 
   try {
-    let result = await callAI();
+    const result = await callAI();
+    const generatedText = result.post_text || result.body || "";
+    const analysis = {
+      predicted_engagement_score: 8,
+      reasoning: `${type === "reply" ? "Reddit comment set" : `${platform} draft`} generated in fast-first mode using angle "${strategy.positioningAngle}" and reddit mode "${redditMode}".`
+    };
 
-    if ((result.internal_scoring?.total_score || 0) < 6) {
-      result = await callAI();
-    }
-
-    const firstPassText = result.post_text || result.body || "";
-
-    const criticSystemPrompt = `
-You are The Critic, a cynical founder who hates AI marketing language.
-
-RULES:
-- Make the text sound like an honest human wrote it quickly.
-- Remove cliches, filler, and corporate wording.
-- Shorten anything too polished or verbose.
-- Keep the core point intact.
-${platform === "reddit" ? `
-- Make it sound native to the selected subreddit, not like a content asset.
-- Strip self-serving lines if the subreddit rules imply anti-promo behavior.
-- Remove performative friendliness and polished summary endings.` : ""}
-
-OUTPUT JSON:
-{
-  "humanized_text": "edited final text",
-  "title": "optional revised reddit title",
-  "body": "optional revised reddit body",
-  "critic_redline": [
-    {"original": "phrase", "reason": "why it sounded fake"}
-  ]
-}
-`.trim();
-
-    const criticResponse = await openai.chat.completions.create({
-      model,
-      messages: [
-        { role: "system", content: criticSystemPrompt },
-        {
-          role: "user",
-          content: `
-PLATFORM: ${platform}
-${platform === "reddit" ? `SUBREDDIT: r/${subredditName || "unknown"}
-SUBREDDIT TONE: ${subredditTone || "neutral"}
-SUBREDDIT RULES: ${redditContext?.joinedRules || "none provided"}
-` : ""}DRAFT:
-
-${firstPassText}
-`.trim()
-        }
-      ],
-      response_format: { type: "json_object" }
-    });
-
-    const criticResult = JSON.parse(criticResponse.choices[0].message.content || "{}");
-    const generatedText = criticResult.humanized_text || firstPassText;
-    const criticRedline = criticResult.critic_redline || [];
-
+    // Async Logging
     (async () => {
       try {
-        const supabase = createClient();
         await supabase.from("content_generation_logs").insert({
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: user?.id,
           platform,
-          pain_type: painSolved,
-          urgency_level: urgency,
-          theme_source: signalContext ? "signal" : "topic",
-          content_mode: strategy.contentMode,
-          positioning_angle: strategy.positioningAngle,
-          product_mention_level: strategy.productMentionLevel,
-          ending_style: strategy.endingStyle,
-          predicted_engagement_score: result.analysis?.predicted_engagement_score || 0,
-          heuristics_score: strategy.heuristicScore,
           generated_content: generatedText,
-          user_action: "generated"
+          user_action: isRefinement ? "refined" : "generated"
         });
-      } catch (logError) {
-        console.error("Logging failed:", logError);
-      }
+      } catch (e) {}
     })();
 
+    if (user?.id) {
+      await logDraftUsage(user.id, { platform, type, refinement: isRefinement });
+    }
+
     if (platform === "twitter") {
-      return {
-        tweets: [generatedText],
-        analysis: {
-          predicted_engagement_score: result.analysis?.predicted_engagement_score || 8,
-          reasoning: result.analysis?.reasoning || "Authentic founder voice."
-        },
-        criticRedline
-      };
+      return { tweets: [generatedText], analysis };
     }
 
     if (platform === "linkedin") {
       const lines = generatedText.split("\n\n");
-      const hook = lines[0] || "";
-      const body = lines.slice(1, -1).join("\n\n") || "";
-      const cta = lines.length > 1 ? lines[lines.length - 1] : "";
-
-      return {
-        hook,
-        body,
-        cta,
+      return { 
         full: generatedText,
-        analysis: {
-          predicted_engagement_score: result.analysis?.predicted_engagement_score || 8,
-          reasoning: result.analysis?.reasoning || "Thought leadership at scale."
-        },
-        criticRedline
+        hook: lines[0] || "",
+        body: lines.slice(1, -1).join("\n\n") || "",
+        cta: lines.length > 1 ? lines[lines.length - 1] : "",
+        analysis
       };
     }
 
     if (platform === "reddit") {
-      const rawTitle = (criticResult.title || result.title || "").trim();
-      const rawBody = (criticResult.body || result.body || "").trim();
-      const lines = generatedText.split("\n");
-      const fallbackTitle = lines[0]?.startsWith("#")
-        ? lines[0].replace(/^#\s*/, "").trim()
-        : lines[0] && lines[0].length < 110
-          ? lines[0].trim()
-          : `Question for r/${subredditName || "reddit"}`;
-      const fallbackBody = lines[0]?.startsWith("#")
-        ? lines.slice(1).join("\n").trim()
-        : generatedText.trim();
-
+      if (type === "reply") {
+        const comments = Array.isArray(result.comments)
+          ? result.comments.map((item: unknown) => String(item || "").trim()).filter(Boolean)
+          : [];
+        return { comments, analysis };
+      }
+      const fallbackBody = String(result.body || result.post_text || "").trim();
+      const fallbackTitle = String(result.title || "").trim() || `Question for r/${subredditName || "reddit"}`;
       return {
-        title: rawTitle || fallbackTitle,
-        body: rawBody || fallbackBody,
+        title: fallbackTitle,
+        body: fallbackBody,
         subreddit_name: subredditName,
-        subreddit_rules_applied: redditContext?.rules || [],
-        subreddit_tone: subredditTone,
-        analysis: {
-          predicted_engagement_score: result.analysis?.predicted_engagement_score || 8,
-          reasoning: result.analysis?.reasoning || "Peer-to-peer value delivery."
-        },
-        criticRedline
+        analysis
       };
     }
 
-    return { content: generatedText, criticRedline };
+    return { content: generatedText, analysis };
+
   } catch (error: any) {
     console.error("Generation Error:", error);
-    throw new Error(`Failed to generate content: ${error.message}`);
+    throw new Error(`Generation failed: ${error.message}`);
   }
 }
+

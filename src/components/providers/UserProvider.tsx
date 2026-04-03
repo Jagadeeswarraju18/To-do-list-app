@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ACTIVE_PRODUCT_CHANGED_EVENT, ACTIVE_PRODUCT_STORAGE_KEY } from "@/lib/active-product";
 
 interface UserContextType {
     user: any | null;
@@ -66,6 +67,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         loadData();
+    }, []);
+
+    useEffect(() => {
+        const handleActiveProductChange = () => {
+            loadData();
+        };
+
+        const handleStorage = (event: StorageEvent) => {
+            if (event.key === ACTIVE_PRODUCT_STORAGE_KEY) {
+                loadData();
+            }
+        };
+
+        window.addEventListener(ACTIVE_PRODUCT_CHANGED_EVENT, handleActiveProductChange);
+        window.addEventListener("storage", handleStorage);
+
+        return () => {
+            window.removeEventListener(ACTIVE_PRODUCT_CHANGED_EVENT, handleActiveProductChange);
+            window.removeEventListener("storage", handleStorage);
+        };
     }, []);
 
     return (

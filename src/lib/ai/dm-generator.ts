@@ -8,6 +8,12 @@ interface DMGeneratorInput {
     productUrl?: string;
     targetAudience?: string;
     outreachTone?: string;
+    competitors?: string[];
+    alternatives?: string[];
+    strongestObjection?: string;
+    proofResults?: string[];
+    pricingPosition?: string;
+    founderStory?: string;
 }
 
 /**
@@ -58,6 +64,12 @@ Target Audience: ${product.targetAudience || 'General Audience'}
 Pain it solves: ${product.painSolved}
 Brand Tone: ${product.outreachTone || 'Casual, human, and empathetic'}
 Link: ${productLink}
+Competitors: ${product.competitors?.length ? product.competitors.join(", ") : "None specified"}
+Current alternatives: ${product.alternatives?.length ? product.alternatives.join(", ") : "None specified"}
+Strongest objection: ${product.strongestObjection || "None specified"}
+Proof points: ${product.proofResults?.length ? product.proofResults.join(" | ") : "None specified"}
+Pricing position: ${product.pricingPosition || "None specified"}
+Founder context: ${product.founderStory || "None specified"}
 
 YOUR JOB:
 For each tweet, write a personalized DM that:
@@ -66,6 +78,8 @@ For each tweet, write a personalized DM that:
 3. Casually mentions your product as something that might help
 4. Includes the product link naturally in the message
 5. Explains briefly how it prevents their exact problem from happening again
+6. If a proof point or founder detail helps credibility, weave in one small concrete detail naturally
+7. If the post hints at an objection, soften it without sounding defensive or salesy
 
 CRITICAL RULES FOR SOUNDING HUMAN:
 - Write like you're texting a friend, not writing a business email
@@ -81,6 +95,7 @@ CRITICAL RULES FOR SOUNDING HUMAN:
 - Keep it under 280 characters if possible, max 400 characters
 - Sound like a 25 year old founder, not a corporate marketer
 - End with something conversational, not a call to action
+- Do not force founder story, proof, or objections into every DM. Use them only when they make the message more credible
 
 BAD EXAMPLE (too robotic):
 "Hi! I noticed your tweet about subscription management challenges. I've built a solution called AppName that helps track subscriptions — check it out at link.com. Would love your feedback!"
@@ -180,6 +195,12 @@ interface RedditReplyInput {
     targetAudience?: string;
     outreachTone?: string;
     replyMode?: 'expert' | 'technical' | 'helpful';
+    competitors?: string[];
+    alternatives?: string[];
+    strongestObjection?: string;
+    proofResults?: string[];
+    pricingPosition?: string;
+    founderStory?: string;
 }
 
 /**
@@ -248,6 +269,12 @@ What it does: ${product.productDescription}
 Target Audience: ${product.targetAudience || 'General Audience'}
 Pain it solves: ${product.painSolved}
 Brand Tone: ${product.outreachTone || 'Helpful Redditor'}
+Competitors: ${product.competitors?.length ? product.competitors.join(", ") : "None specified"}
+Current alternatives: ${product.alternatives?.length ? product.alternatives.join(", ") : "None specified"}
+Strongest objection: ${product.strongestObjection || "None specified"}
+Proof points: ${product.proofResults?.length ? product.proofResults.join(" | ") : "None specified"}
+Pricing position: ${product.pricingPosition || "None specified"}
+Founder context: ${product.founderStory || "None specified"}
 ${personaInstruction}
 
 YOUR JOB:
@@ -258,6 +285,8 @@ Write a helpful, genuine Reddit reply for each post that:
 4. DO NOT INCLUDE ANY LINKS (Reddit's filters are aggressive against first-response links)
 5. Suggestions for 'soft pitches': "I built [Name] for this", "Check out [Name] if you're stuck", or "Search for [Name], it's what I use"
 6. Sounds like a real Redditor, not a marketer
+7. If helpful, use one concrete proof point or founder detail, but only if it feels native to the thread
+8. If the post reflects a likely objection, answer it casually instead of pitching harder
 
 CRITICAL RULES FOR REDDIT TONE:
 - Reddit HATES obvious self-promotion. Be genuinely helpful first.
@@ -272,6 +301,7 @@ CRITICAL RULES FOR REDDIT TONE:
 - Match the energy of the subreddit (casual for casual subs, more detailed for technical subs)
 - End naturally, don't be pushy
 - The reply mode must visibly affect the writing style. Do not return near-identical phrasing across modes.
+- Do not force proof points or founder story into every reply. Use them lightly and only when earned.
 
 BAD EXAMPLE (spammy and has link):
 "Check out my app AppName! It solves exactly this problem. Visit link.com to learn more!"
@@ -366,6 +396,12 @@ interface LinkedInReplyInput {
     productUrl?: string;
     targetAudience?: string;
     outreachTone?: string;
+    competitors?: string[];
+    alternatives?: string[];
+    strongestObjection?: string;
+    proofResults?: string[];
+    pricingPosition?: string;
+    founderStory?: string;
 }
 
 /**
@@ -411,6 +447,15 @@ TONE:
 - Short (2-3 sentences)
 - Professional yet approachable
 - Mention the product as a solution you built for this exact problem
+- Use proof or founder credibility only when it strengthens the comment naturally
+
+CONTEXT:
+- Competitors: ${product.competitors?.length ? product.competitors.join(", ") : "None specified"}
+- Alternatives: ${product.alternatives?.length ? product.alternatives.join(", ") : "None specified"}
+- Strongest objection: ${product.strongestObjection || "None specified"}
+- Proof points: ${product.proofResults?.length ? product.proofResults.join(" | ") : "None specified"}
+- Pricing position: ${product.pricingPosition || "None specified"}
+- Founder context: ${product.founderStory || "None specified"}
 
 BAD: "Buy my tool at link.com"
 GOOD: "Really interesting perspective on {pain}. I actually dealt with this so much that I built {productName} (${productLink}) to automate the {process}. Might be worth a look if you're still struggling with it."`

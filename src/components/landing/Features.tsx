@@ -61,7 +61,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
                 glass-card p-10 md:p-14 rounded-[48px] border bg-[#121212]/40 backdrop-blur-3xl h-full flex flex-col 
                 hover:bg-[#121212]/60 transition-all duration-700 ${feature.accent}
             `}>
-                <div className="absolute inset-0 obsidian-noise opacity-5 pointer-events-none rounded-[48px]" />
+                <div className="absolute inset-0 mardis-noise opacity-5 pointer-events-none rounded-[48px]" />
                 
                 <div style={{ transform: "translateZ(50px)" }} className="relative z-10">
                     <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-500">

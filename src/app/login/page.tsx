@@ -50,7 +50,7 @@ export default function LoginPage() {
             // If no valid user (expired token, no session, etc.), stay on login page
             if (userError || !user) return;
 
-            console.log('[LOGIN] Active valid session for user:', user.id);
+            // console.log('[LOGIN] Active valid session for user:', user.id);
 
             const meta = user.user_metadata || {};
 
@@ -73,7 +73,7 @@ export default function LoginPage() {
                 .eq("user_id", user.id)
                 .limit(1);
 
-            console.log('[LOGIN] Products:', JSON.stringify(products), 'Error:', prodErr?.message);
+            // console.log('[LOGIN] Products:', JSON.stringify(products), 'Error:', prodErr?.message);
 
             const hasProducts = products && products.length > 0;
             const hasCompletedOnboarding = meta.onboarding_complete === true || meta.role === 'founder';
@@ -81,7 +81,7 @@ export default function LoginPage() {
             if (hasProducts || hasCompletedOnboarding) {
                 router.push("/founder/dashboard");
             } else {
-                router.push("/founder/onboarding");
+                router.push("/founder/products?setup=1");
             }
         };
         checkSession();
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
             if (data.user) {
                 const meta = data.user.user_metadata || {};
-                console.log('[LOGIN] User logged in:', data.user.id, 'Role:', role);
+                // console.log('[LOGIN] User logged in:', data.user.id, 'Role:', role);
                 console.log('[LOGIN] User metadata:', JSON.stringify(meta));
 
                 if (role === "founder") {
@@ -113,19 +113,19 @@ export default function LoginPage() {
                         .eq("user_id", data.user.id)
                         .limit(1);
 
-                    console.log('[LOGIN] Products query result:', JSON.stringify(products), 'Error:', prodErr?.message);
+                    // console.log('[LOGIN] Products query result:', JSON.stringify(products), 'Error:', prodErr?.message);
 
                     const hasProducts = products && products.length > 0;
                     const hasCompletedOnboarding = meta.onboarding_complete === true || meta.role === 'founder';
 
-                    console.log('[LOGIN] hasProducts:', hasProducts, 'hasCompletedOnboarding:', hasCompletedOnboarding);
+                    // console.log('[LOGIN] hasProducts:', hasProducts, 'hasCompletedOnboarding:', hasCompletedOnboarding);
 
                     if (hasProducts || hasCompletedOnboarding) {
                         console.log('[LOGIN] Redirecting to /founder/dashboard');
                         router.push("/founder/dashboard");
                     } else {
-                        console.log('[LOGIN] Redirecting to /founder/onboarding');
-                        router.push("/founder/onboarding");
+                        console.log('[LOGIN] Redirecting to /founder/products?setup=1');
+                        router.push("/founder/products?setup=1");
                     }
                 } else {
                     const { data: creatorProfiles } = await supabase
@@ -269,8 +269,8 @@ export default function LoginPage() {
                             transition={{ duration: 1, delay: 0.2 }}
                             className="text-3xl lg:text-5xl font-bold tracking-tight leading-[1.1]"
                         >
-                            Capture market share <br />
-                            <span className="text-zinc-400">with intelligence.</span>
+                            Find buyer intent <br />
+                            <span className="text-zinc-400">before everyone else.</span>
                         </motion.h2>
                         <motion.p 
                             initial={{ opacity: 0 }}
@@ -278,7 +278,7 @@ export default function LoginPage() {
                             transition={{ duration: 1, delay: 0.5 }}
                             className="text-zinc-400 text-sm font-medium leading-relaxed max-w-md"
                         >
-                            The standard for high-growth founder stacks. Monitor demand signals, automate outreach, and dominate your niche.
+                            Track real demand across Reddit, X, and LinkedIn, then respond faster with drafts tailored to each channel.
                         </motion.p>
                     </div>
                 </div>
@@ -294,7 +294,7 @@ export default function LoginPage() {
                         <div className="w-10 h-0.5 rounded-full bg-primary" />
                         <h3 className="text-sm font-bold uppercase tracking-widest text-white">Demand Signals</h3>
                         <p className="text-zinc-400 text-[11px] font-medium leading-relaxed uppercase tracking-widest">
-                            Real-time scanning for high-intent conversations across global networks.
+                            Real-time discovery for high-intent conversations across the channels that matter.
                         </p>
                     </motion.div>
                     <motion.div 
@@ -304,9 +304,9 @@ export default function LoginPage() {
                         className="space-y-4"
                     >
                         <div className="w-10 h-0.5 rounded-full bg-zinc-800" />
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">AI Enrichment</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">AI Drafts</h3>
                         <p className="text-zinc-400 text-[11px] font-medium leading-relaxed uppercase tracking-widest">
-                            Contextualized lead scoring and automated engagement personalized for your brand.
+                            Channel-aware reply suggestions based on your product, audience, and message.
                         </p>
                     </motion.div>
                 </div>
@@ -344,7 +344,7 @@ export default function LoginPage() {
 
                         <form onSubmit={handleLogin} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Identity</label>
+                                <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Email</label>
                                 <div className="relative group">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-white transition-colors" />
                                     <input
@@ -359,7 +359,7 @@ export default function LoginPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Access Key</label>
+                                <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest ml-1">Password</label>
                                 <div className="relative group">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-primary transition-colors" />
                                     <input
@@ -385,7 +385,7 @@ export default function LoginPage() {
                                 disabled={loading}
                                 className="w-full py-4 bg-primary hover:bg-[#423E3E] text-white font-bold rounded-2xl transition-all shadow-[0_0_20px_rgba(54,34,34,0.3)] active:scale-[0.98] text-[10px] uppercase tracking-widest disabled:opacity-50"
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Authorize Access"}
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Sign In"}
                             </button>
                         </form>
 
@@ -421,15 +421,15 @@ export default function LoginPage() {
                                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                                     />
                                 </svg>
-                                Google Identity
+                                Continue with Google
                             </button>
                         </div>
 
                             <div className="text-center mt-6">
                             <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
-                                No access key?{" "}
+                                Don't have an account?{" "}
                                 <Link href="/signup" className="text-white hover:text-zinc-300 transition-colors underline underline-offset-4">
-                                    Initialize Account
+                                    Create account
                                 </Link>
                             </p>
                         </div>
