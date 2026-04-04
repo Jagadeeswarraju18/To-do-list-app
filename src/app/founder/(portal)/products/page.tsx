@@ -591,7 +591,7 @@ function ProductsPageContent() {
                             {/* Header */}
                             <div className="p-8 border-b border-white/10 flex items-center justify-between">
                                 <div className="space-y-1">
-                                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest">
+                                    <div className="flex items-center gap-2 text-xs font-black text-zinc-200 uppercase tracking-widest">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         Product / Details / {formData.id ? 'Edit' : 'Create'}
                                     </div>
@@ -920,7 +920,7 @@ export default function ProductsPage() {
 function Section({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) {
     return (
         <div className="relative group/section">
-            <h2 className="text-[10px] font-black mb-6 flex items-center gap-3 text-zinc-500 uppercase tracking-[0.2em]">
+            <h2 className="text-xs font-black mb-6 flex items-center gap-3 text-zinc-200 uppercase tracking-[0.2em]">
                 <div className="p-2 rounded-lg bg-white/5 border border-white/10 group-hover/section:text-emerald-400 group-hover/section:border-emerald-500/30 transition-all">
                     {icon}
                 </div>
@@ -943,7 +943,7 @@ function Input({
     return (
         <div className={`space-y-2 group/input transition-all duration-500 ${isShimmering ? "opacity-40 pointer-events-none animate-pulse" : ""}`}>
             <div className="flex items-center justify-between px-1">
-                <label className="text-[10px] font-mono font-bold text-zinc-600 uppercase tracking-widest group-focus-within/input:text-emerald-400 transition-colors flex items-center gap-2">
+                <label className="text-xs font-black text-zinc-200 uppercase tracking-widest group-focus-within/input:text-emerald-400 transition-colors flex items-center gap-2">
                     {label} {required && <span className="text-emerald-500 opacity-50">*</span>}
                     {suggestion && suggestion.confidence >= 0.75 && (
                         <span className="text-[8px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1">
@@ -956,13 +956,13 @@ function Input({
                 {textarea ? (
                     <textarea
                         value={value || ""} onChange={e => onChange(e.target.value)}
-                        className="w-full p-4 bg-black border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 rounded-lg transition-all min-h-[120px] resize-none placeholder:text-zinc-800 text-sm leading-relaxed text-white outline-none tracking-tight"
+                        className="w-full p-4 bg-black border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 rounded-lg transition-all min-h-[120px] resize-none placeholder:text-zinc-400 text-sm leading-relaxed text-white outline-none tracking-tight"
                         placeholder={placeholder} required={required}
                     />
                 ) : (
                     <input
                         type="text" value={value || ""} onChange={e => onChange(e.target.value)}
-                        className="w-full p-4 bg-black border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 rounded-lg transition-all text-sm text-white outline-none placeholder:text-zinc-800 tracking-tight"
+                        className="w-full p-4 bg-black border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 rounded-lg transition-all text-sm text-white outline-none placeholder:text-zinc-400 tracking-tight"
                         placeholder={placeholder} required={required}
                     />
                 )}
@@ -994,7 +994,7 @@ function Input({
                     )}
                 </AnimatePresence>
             </div>
-            {hint && <p className="text-[9px] font-mono text-zinc-700 uppercase tracking-tight pl-4">{hint}</p>}
+            {hint && <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-4">{hint}</p>}
         </div>
     );
 }
@@ -1029,7 +1029,7 @@ function StrategicTagEditor({
     return (
         <div className={`space-y-3 transition-all duration-500 ${isShimmering ? "opacity-40 animate-pulse pointer-events-none" : ""}`}>
             <div className="flex items-center justify-between px-1">
-                <label className="text-xs font-semibold text-zinc-400 block">{label}</label>
+                <label className="text-sm font-black text-white block uppercase tracking-widest">{label}</label>
                 {suggestion && suggestion.confidence >= 0.75 && (
                     <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">✨ AI Sync Active</span>
                 )}
@@ -1076,13 +1076,13 @@ function StrategicTagEditor({
                     onChange={e => setInputValue(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && (e.preventDefault(), onAdd())}
                     placeholder={placeholder}
-                    className="bg-transparent text-sm w-full outline-none placeholder:text-zinc-700 text-white"
+                    className="bg-transparent text-sm w-full outline-none placeholder:text-zinc-400 text-white"
                 />
                 <button type="button" onClick={onAdd} className="text-zinc-500 hover:text-white transition-colors">
                     <Plus className="w-4 h-4" />
                 </button>
             </div>
-            {hint && <p className="text-[10px] text-zinc-600 pl-1">{hint}</p>}
+            {hint && <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">{hint}</p>}
         </div>
     );
 }

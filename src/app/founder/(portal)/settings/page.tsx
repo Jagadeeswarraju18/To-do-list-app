@@ -426,10 +426,10 @@ function UserSettingsContent() {
                                                 {plan.description}
                                             </p>
                                             {plan.id === "starter" ? (
-                                                <div className="mt-4 p-3.5 bg-orange-500/5 border border-orange-500/20 rounded-xl relative overflow-hidden group/offer">
-                                                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 translate-x-[-100%] group-hover/offer:translate-x-[100%] transition-transform duration-1000" />
+                                                <div className="mt-4 p-3.5 bg-orange-500/10 border border-orange-500/30 rounded-xl relative overflow-hidden group/offer">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/10 to-orange-500/0 translate-x-[-100%] group-hover/offer:translate-x-[100%] transition-transform duration-1000" />
                                                     <div className="flex justify-between items-center mb-2">
-                                                        <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1.5">
+                                                        <span className="text-[9px] font-black text-orange-400 uppercase tracking-widest flex items-center gap-1.5">
                                                             <Zap className="w-3 h-3" /> Founder Offer
                                                         </span>
                                                         <span className="text-[10px] font-bold text-white tabular-nums">{spotsLeft}/10 Left</span>
@@ -440,7 +440,7 @@ function UserSettingsContent() {
                                                             style={{ width: `${(10 - spotsLeft) * 10}%` }} 
                                                         />
                                                     </div>
-                                                    <p className="text-[9px] font-medium text-orange-400/80 mt-2 uppercase tracking-wide">
+                                                    <p className="text-[9px] font-medium text-orange-400 mt-2 uppercase tracking-wide">
                                                         Locks in $15/mo lifetime.
                                                     </p>
                                                 </div>
@@ -516,7 +516,7 @@ function UserSettingsContent() {
                             {/* Header */}
                             <div className="p-8 border-b border-white/10 flex items-center justify-between">
                                 <div className="space-y-1">
-                                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest">
+                                    <div className="flex items-center gap-2 text-xs font-black text-zinc-200 uppercase tracking-widest">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         Account / Profile / Edit
                                     </div>
@@ -705,7 +705,7 @@ function Badge({ icon, text, color = "default" }: any) {
 function Section({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) {
     return (
         <div className="relative group/section">
-            <h2 className="text-xs font-black mb-6 flex items-center gap-3 text-zinc-500 uppercase tracking-[0.2em]">
+            <h2 className="text-sm font-black mb-6 flex items-center gap-3 text-zinc-200 uppercase tracking-[0.2em]">
                 <div className="p-2 rounded-lg bg-white/5 border border-white/10 group-hover/section:text-emerald-400 group-hover/section:border-emerald-500/30 transition-all">
                     {icon}
                 </div>
@@ -724,7 +724,7 @@ function Input({ label, value, onChange, placeholder, required, icon, className 
     return (
         <div className="space-y-2 group/input">
             <div className="flex items-center justify-between px-1">
-                <label className="text-[11px] font-mono font-black text-zinc-500 uppercase tracking-widest group-focus-within/input:text-emerald-400 transition-colors">
+                <label className="text-xs font-black text-zinc-200 uppercase tracking-widest group-focus-within/input:text-emerald-400 transition-colors">
                     {label} {required && <span className="text-emerald-500 opacity-50">*</span>}
                 </label>
             </div>
@@ -738,11 +738,11 @@ function Input({ label, value, onChange, placeholder, required, icon, className 
                     type={type}
                     value={value || ""}
                     onChange={e => onChange(e.target.value)}
-                    className={`w-full p-4 ${icon ? "pl-12" : "px-4"} bg-black border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 rounded-lg transition-all text-sm text-white outline-none placeholder:text-zinc-800 tracking-tight ${className}`}
+                    className={`w-full p-4 ${icon ? "pl-12" : "px-4"} bg-black border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 rounded-lg transition-all text-sm text-white outline-none placeholder:text-zinc-400 tracking-tight ${className}`}
                     placeholder={placeholder} required={required}
                 />
             </div>
-            {hint && <p className="text-[9px] font-mono text-zinc-700 uppercase tracking-tight pl-4">{hint}</p>}
+            {hint && <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight pl-4">{hint}</p>}
         </div>
     );
 }
