@@ -56,28 +56,28 @@ export function Sidebar() {
     };
 
     const navItems = isCreatorView ? [
-        { href: "/creator/dashboard", icon: <LayoutDashboard />, label: "Dashboard", active: pathname === "/creator/dashboard" },
-        { href: "/creator/platforms", icon: <Share2 />, label: "Platforms", active: pathname === "/creator/platforms" },
-        { href: "/creator/analytics", icon: <PieChart />, label: "Analytics", active: pathname === "/creator/analytics" },
-        { href: "/creator/media-kit", icon: <FolderHeart />, label: "Media Kit", active: pathname === "/creator/media-kit" },
-        { href: "/creator/profile", icon: <UserCircle />, label: "Profile", active: pathname === "/creator/profile" },
+        { href: "/creator/dashboard", icon: <LayoutDashboard />, label: "Dashboard", active: pathname === "/creator/dashboard", id: "nav-dashboard" },
+        { href: "/creator/platforms", icon: <Share2 />, label: "Platforms", active: pathname === "/creator/platforms", id: "nav-platforms" },
+        { href: "/creator/analytics", icon: <PieChart />, label: "Analytics", active: pathname === "/creator/analytics", id: "nav-analytics" },
+        { href: "/creator/media-kit", icon: <FolderHeart />, label: "Media Kit", active: pathname === "/creator/media-kit", id: "nav-mediakit" },
+        { href: "/creator/profile", icon: <UserCircle />, label: "Profile", active: pathname === "/creator/profile", id: "nav-profile" },
     ] : [
-        { href: "/founder/dashboard", icon: <LayoutDashboard />, label: "Dashboard", active: pathname === "/founder/dashboard" },
-        { href: "/founder/opportunities", icon: <ListFilter />, label: "Opportunities", active: pathname === "/founder/opportunities" },
-        { href: "/founder/platforms", icon: <Share2 />, label: "Strategy", active: pathname === "/founder/platforms" },
-        { href: "/founder/battlefield", icon: <Swords />, label: "Battlefield", active: pathname === "/founder/battlefield" },
-        { href: "/founder/creators", icon: <Users />, label: "Creators", active: pathname === "/founder/creators" },
+        { href: "/founder/dashboard", icon: <LayoutDashboard />, label: "Dashboard", active: pathname === "/founder/dashboard", id: "nav-dashboard" },
+        { href: "/founder/opportunities", icon: <ListFilter />, label: "Opportunities", active: pathname === "/founder/opportunities", id: "nav-opportunities" },
+        { href: "/founder/platforms", icon: <Share2 />, label: "Strategy", active: pathname === "/founder/platforms", id: "nav-strategy" },
+        { href: "/founder/battlefield", icon: <Swords />, label: "Battlefield", active: pathname === "/founder/battlefield", id: "nav-battlefield" },
+        { href: "/founder/creators", icon: <Users />, label: "Creators", active: pathname === "/founder/creators", id: "nav-creators" },
     ];
 
     const systemItems = isCreatorView ? [] : [
-        { href: "/founder/products", icon: <BrandLogo size="xs" className="scale-125" />, label: "Products", active: pathname === "/founder/products" },
-        { href: "/founder/settings", icon: <Settings />, label: "Settings", active: pathname === "/founder/settings" },
+        { href: "/founder/products", icon: <BrandLogo size="xs" className="scale-125" />, label: "Products", active: pathname === "/founder/products", id: "nav-products" },
+        { href: "/founder/settings", icon: <Settings />, label: "Settings", active: pathname === "/founder/settings", id: "nav-settings" },
     ];
 
     const sidebarContent = (
         <div className="flex flex-col h-full gap-2.5 p-3 no-scrollbar overflow-y-auto">
             {/* Module 1: Brand Pod */}
-            <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-5 shadow-2xl flex items-center justify-between group/brand transition-all hover:bg-black/80">
+            <div id="nav-brand" className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-5 shadow-2xl flex items-center justify-between group/brand transition-all hover:bg-black/80">
                 <div className="flex items-center gap-4">
                     <div className="relative">
                         {isCreatorView ? (
@@ -190,10 +190,11 @@ export function Sidebar() {
     );
 }
 
-function NavItem({ href, icon, label, active = false }: { href: string; icon: React.ReactNode; label: string; active?: boolean }) {
+function NavItem({ href, icon, label, active = false, id }: { href: string; icon: React.ReactNode; label: string; active?: boolean; id?: string }) {
     return (
         <Link
             href={href}
+            id={id}
             className={`relative flex items-center gap-4 px-5 py-3 rounded-[22px] text-[11px] font-bold tracking-widest uppercase transition-all group ${active
                 ? "text-white"
                 : "text-zinc-400 hover:text-white hover:bg-white/[0.03]"

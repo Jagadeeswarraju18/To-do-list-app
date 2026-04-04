@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { UserProvider } from "@/components/providers/UserProvider";
+import { WelcomeTour } from "@/components/dashboard/WelcomeTour";
 
 export default function DashboardLayout({
     children,
@@ -12,6 +13,7 @@ export default function DashboardLayout({
 
     return (
         <UserProvider>
+            <WelcomeTour />
             <div className="min-h-screen bg-transparent flex relative overflow-hidden">
 
                 <Sidebar />

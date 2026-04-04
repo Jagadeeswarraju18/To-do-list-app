@@ -4,5 +4,9 @@
       <rect x="0" y="0" width="512" height="512" rx="115" ry="115"/>
     </clipPath>
   </defs>
-  <image href="/mardis.png" width="512" height="512" clip-path="url(#squircle)"/>
+  <!-- Solid black background to prevent subpixel transparent bleeding -->
+  <rect width="512" height="512" fill="#000000" clip-path="url(#squircle)"/>
+  
+  <!-- Sclaed up to 112% to hide the white border artifacts natively present in mardis.png (matches BrandLogo scaling) -->
+  <image href="/mardis.png" x="-31" y="-31" width="574" height="574" clip-path="url(#squircle)"/>
 </svg>

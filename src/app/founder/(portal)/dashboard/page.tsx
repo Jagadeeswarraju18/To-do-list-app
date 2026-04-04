@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { MessageSquare, ArrowRight, Zap, ShieldCheck, Target, Sparkles, Brain, Search, BarChart3 } from "lucide-react";
+import { MessageSquare, ArrowRight, Zap, ShieldCheck, Target, Sparkles, Brain, Search, BarChart3, HelpCircle } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -154,11 +154,20 @@ export default function DashboardPage() {
                             </p>
                         </div>
                     </div>
-                    <Link href={product ? "/founder/products" : "/founder/products?setup=1"}>
-                        <button className="group relative px-6 py-3 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-xl transition-all shadow-xl shadow-primary/10 active:scale-95 flex items-center gap-2 text-xs">
-                            {product ? "Edit Product" : "Add Product"} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => window.dispatchEvent(new CustomEvent("start-mardis-tour"))}
+                            className="px-4 py-3 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/5 rounded-xl transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest"
+                        >
+                            <HelpCircle className="w-3.5 h-3.5" />
+                            Tour
                         </button>
-                    </Link>
+                        <Link href={product ? "/founder/products" : "/founder/products?setup=1"}>
+                            <button className="group relative px-6 py-3 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-xl transition-all shadow-xl shadow-primary/10 active:scale-95 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+                                {product ? "Edit Product" : "Add Product"} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </Link>
+                    </div>
                 </div>
             </div>
 
@@ -197,12 +206,21 @@ export default function DashboardPage() {
                             </p>
                         </div>
 
-                        <Link href="/founder/products?setup=1">
-                            <button className="relative group px-10 py-5 bg-primary hover:bg-[#423F3E] text-white font-black rounded-2xl transition-all shadow-2xl shadow-primary/20 active:scale-95 flex items-center gap-4 text-[11px] uppercase tracking-[0.2em]">
-                                Add Website
-                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <Link href="/founder/products?setup=1">
+                                <button className="relative group px-10 py-5 bg-primary hover:bg-[#423F3E] text-white font-black rounded-2xl transition-all shadow-2xl shadow-primary/20 active:scale-95 flex items-center gap-4 text-[11px] uppercase tracking-[0.2em]">
+                                    Add Website
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </Link>
+                            <button 
+                                onClick={() => window.dispatchEvent(new CustomEvent("start-mardis-tour"))}
+                                className="px-8 py-5 bg-white/5 border border-white/5 hover:bg-white/10 text-zinc-400 hover:text-white rounded-2xl transition-all text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3"
+                            >
+                                <HelpCircle className="w-4 h-4" />
+                                Show Tour
                             </button>
-                        </Link>
+                        </div>
                 </motion.div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
