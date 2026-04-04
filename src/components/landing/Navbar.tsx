@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Radar, Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -49,7 +50,7 @@ export function Navbar() {
                     <Link href="/" className="flex items-center gap-2.5 group">
                         <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/10 overflow-hidden shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
                             <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <Radar className="h-5 w-5 text-white relative z-10" />
+                            <BrandLogo size="sm" className="scale-125" />
                         </div>
                         <span className="text-lg brand-title uppercase transition-all duration-300">
                              Mardis

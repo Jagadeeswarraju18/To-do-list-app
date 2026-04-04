@@ -1,48 +1,38 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface BrandLogoProps {
   className?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'fluid';
 }
 
 export const BrandLogo: React.FC<BrandLogoProps> = ({ className = '', size = 'md' }) => {
   const sizes = {
-    sm: 'w-6 h-6',
-    md: 'w-10 h-10',
-    lg: 'w-12 h-12',
-    xl: 'w-16 h-16'
+    xs: 'w-4 h-4',
+    sm: 'w-8 h-8',
+    md: 'w-16 h-16',
+    lg: 'w-24 h-24',
+    xl: 'w-32 h-32',
+    xxl: 'w-48 h-48',
+    fluid: 'w-full h-full'
   };
 
   return (
-    <div className={`relative flex items-center justify-center ${sizes[size]} ${className}`}>
-      {/* Elegant minimalist M design */}
-      <svg
-        viewBox="0 0 100 100"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full drop-shadow-[0_0_8px_rgba(54,34,34,0.3)]"
-      >
-        {/* Abstract Architectural M */}
-        <path
-          d="M20 80V20L50 50L80 20V80"
-          stroke="currentColor"
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-white opacity-90"
-        />
-        {/* Subtle Accent Layer */}
-        <path
-          d="M20 80V40L50 70L80 40V80"
-          stroke="rgba(255,255,255,0.2)"
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+    <div className={`relative flex items-center justify-center overflow-hidden rounded-[22.5%] ${sizes[size]} ${className}`}>
+      {/* Premium Metallic Glow */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent blur-2xl opacity-30 pointer-events-none" />
       
-      {/* Inner Glow */}
-      <div className="absolute inset-2 bg-primary/20 blur-xl rounded-full opacity-50" />
+      <Image
+        src="/mardis.png"
+        alt="Mardis Logo"
+        width={500}
+        height={500}
+        priority
+        className="w-full h-full object-cover scale-[1.12] relative z-10 mix-blend-screen"
+      />
+      
+      {/* Subtle Bottom Reflection */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent blur-[1px]" />
     </div>
   );
 };

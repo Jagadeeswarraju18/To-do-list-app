@@ -3,7 +3,8 @@
 import { Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { Radar, ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ParticleSwirl } from "@/components/ui/ParticleSwirl";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -59,8 +60,8 @@ function DiscoverLoginContent() {
                     </Link>
                     
                     <div className="flex justify-center mb-8">
-                        <div className="w-16 h-16 rounded-[28px] border border-white/5 bg-white/[0.02] flex items-center justify-center backdrop-blur-md">
-                            <Radar className="w-7 h-7 text-white/50" />
+                        <div className="w-16 h-16 rounded-[28px] border border-white/5 bg-white/[0.02] flex items-center justify-center backdrop-blur-md overflow-hidden">
+                            <BrandLogo size="sm" className="opacity-50" />
                         </div>
                     </div>
                     

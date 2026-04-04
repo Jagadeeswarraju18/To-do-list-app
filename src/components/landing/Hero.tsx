@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue } from "framer-motion";
-import { Cpu, Check, Linkedin, Sparkles, Target, Compass, Radar } from "lucide-react";
+import { Cpu, Check, Linkedin, Sparkles, Target, Compass } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import Link from "next/link";
 import { useState, useEffect, type MouseEvent } from "react";
 import { XLogo } from "@/components/ui/XLogo";
@@ -110,7 +111,7 @@ export function Hero() {
                     <div className="absolute inset-0 flex flex-col overflow-hidden text-left">
                         <div className="flex items-center justify-between border-b border-white/5 bg-white/[0.02] px-6 sm:px-10 py-3">
                             <div className="flex items-center gap-6">
-                                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-white">Community Radar</h3>
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-white">Community Intelligence</h3>
                                 <div className="hidden sm:flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
                                     <div className="h-1.5 w-1.5 rounded-full bg-white opacity-40" />
                                     Live Ingest
@@ -255,7 +256,7 @@ export function Hero() {
 
                                         <div className="absolute inset-14 flex items-center justify-center rounded-full border border-white/30 bg-black/60 shadow-[0_0_100px_rgba(255,255,255,0.03)] backdrop-blur-3xl">
                                             <div className="absolute inset-2 rounded-full border border-white/5 bg-white/[0.01]" />
-                                            <Compass className="h-6 w-6 text-white opacity-80" />
+                                            <BrandLogo size="sm" />
                                         </div>
 
                                         {[0, 120, 240].map((_, i) => (

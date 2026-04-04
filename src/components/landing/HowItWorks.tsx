@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Radar, Target, Send } from "lucide-react";
+import { Target, Send } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useRef } from "react";
 
 const steps = [
@@ -9,7 +10,7 @@ const steps = [
         title: "We find buyers for you",
         subtitle: "STEP 01",
         desc: "Mardis watches Reddit, X, and LinkedIn around the clock. When someone posts about a problem your product solves, we catch it.",
-        icon: Radar
+        icon: null as any
     },
     {
         title: "We show you the best ones",
@@ -63,8 +64,12 @@ export function HowItWorks() {
                             </div>
 
                             {/* Icon Hub */}
-                            <div className="w-14 h-14 rounded-2xl bg-[#0a0a0a] border border-white/5 flex items-center justify-center mb-10 group-hover:border-white/10 group-hover:bg-white/5 transition-all duration-500 shadow-xl">
-                                <step.icon className="w-6 h-6 text-white/30 group-hover:text-white/70 transition-colors duration-500" />
+                            <div className="w-14 h-14 rounded-2xl bg-[#0a0a0a] border border-white/5 flex items-center justify-center mb-10 group-hover:border-white/10 group-hover:bg-white/5 transition-all duration-500 shadow-xl overflow-hidden">
+                                {step.title.includes(" buyers ") ? (
+                                    <BrandLogo size="sm" className="opacity-40 group-hover:opacity-100 transition-opacity" />
+                                ) : (
+                                    <step.icon className="w-6 h-6 text-white/30 group-hover:text-white/70 transition-colors duration-500" />
+                                )}
                             </div>
                             
                             <h3 className="heading-serif text-3xl md:text-4xl text-white mb-6 tracking-tight">

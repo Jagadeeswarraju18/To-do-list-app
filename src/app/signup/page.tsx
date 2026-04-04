@@ -4,7 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Briefcase, Palette, Mail, Lock, Loader2, Radar, Eye, EyeOff, User } from "lucide-react";
+import { Briefcase, Palette, Mail, Lock, Loader2, Eye, EyeOff, User } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import Link from "next/link";
 
 type Role = "founder" | "creator";
@@ -110,7 +111,7 @@ export default function SignupPage() {
                     {/* Atmospheric Glow */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] opacity-30" />
 
-                    {/* Refined Radar Ripples */}
+                    {/* Refined Branding Ripples */}
                     {[...Array(3)].map((_, i) => (
                         <motion.div 
                             key={`ripple-${i}`}
@@ -180,7 +181,7 @@ export default function SignupPage() {
                     >
                         <Link href="/" className="flex items-center gap-3 mb-10">
                             <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-2xl">
-                                <Radar className="h-5 w-5 text-white" />
+                                <BrandLogo size="sm" className="scale-110" />
                             </div>
                             <span className="text-xl brand-title uppercase">
                                 Mardis

@@ -13,9 +13,16 @@ import {
     getPriceForBilling,
     PRICING_PLANS,
 } from "@/lib/pricing";
+import { getStarterOfferSpotsLeft } from "@/app/actions/get-founder-offer";
+import { useEffect } from "react";
 
 export function Pricing() {
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+    const [spotsLeft, setSpotsLeft] = useState<number>(3); // loading state default
+
+    useEffect(() => {
+        getStarterOfferSpotsLeft().then(setSpotsLeft);
+    }, []);
 
     const handleCheckout = async (planId: string) => {
         setLoadingPlan(planId);
@@ -125,14 +132,30 @@ export function Pricing() {
                                         </p>
                                     )}
 
-                                    <p className={`text-xs font-bold uppercase tracking-tight ${plan.popular ? "text-zinc-500" : "text-zinc-600"}`}>
-                                        {plan.description}
-                                    </p>
-                                    {note && (
+                                    {plan.id === "starter" ? (
+                                        <div className="mt-4 p-3.5 bg-orange-500/5 border border-orange-500/20 rounded-xl relative overflow-hidden group/offer">
+                                            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 translate-x-[-100%] group-hover/offer:translate-x-[100%] transition-transform duration-1000" />
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1.5">
+                                                    <Zap className="w-3 h-3" /> Founder Offer
+                                                </span>
+                                                <span className="text-[10px] font-bold text-white tabular-nums">{spotsLeft}/10 Left</span>
+                                            </div>
+                                            <div className="w-full h-1.5 bg-black rounded-full overflow-hidden border border-white/5 shadow-inner">
+                                                <div 
+                                                    className="h-full bg-gradient-to-r from-orange-600 to-orange-400 rounded-full transition-all duration-1000 ease-out" 
+                                                    style={{ width: `${(10 - spotsLeft) * 10}%` }} 
+                                                />
+                                            </div>
+                                            <p className="text-[9px] font-medium text-orange-400/80 mt-2 uppercase tracking-wide">
+                                                Locks in $15/mo lifetime.
+                                            </p>
+                                        </div>
+                                    ) : note ? (
                                         <p className="mt-3 text-[11px] text-zinc-500 leading-relaxed">
                                             {note}
                                         </p>
-                                    )}
+                                    ) : null}
                                 </div>
 
                                 <div className="space-y-4 mb-10 flex-grow">

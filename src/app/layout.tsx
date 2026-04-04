@@ -10,9 +10,9 @@ export const metadata: Metadata = {
     description: "Mardis is demand capture software that finds high-intent conversations across Reddit, X, and LinkedIn, ranks them, and helps teams respond with rule-aware drafts.",
     metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.mardishub.com"),
     icons: {
-        icon: "/icon.svg",
-        shortcut: "/icon.svg",
-        apple: "/icon.svg",
+        icon: "/favicon.svg",
+        shortcut: "/favicon.svg",
+        apple: "/mardis.png",
     },
     keywords: ["demand capture software", "reddit marketing", "intent detection", "Mardis", "LinkedIn outreach", "X marketing"],
     openGraph: {

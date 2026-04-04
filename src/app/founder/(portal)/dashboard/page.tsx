@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Radar, MessageSquare, ArrowRight, Zap, ShieldCheck, Target, Sparkles, Brain, Search, BarChart3 } from "lucide-react";
+import { MessageSquare, ArrowRight, Zap, ShieldCheck, Target, Sparkles, Brain, Search, BarChart3 } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/components/providers/UserProvider";
@@ -124,7 +125,7 @@ export default function DashboardPage() {
                         <div className="relative">
                             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
                             <div className="relative w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-[0_0_25px_rgba(54,34,34,0.3)]">
-                                <Radar className="w-6 h-6 shadow-[0_0_5px_rgba(0,0,0,0.1)]" />
+                                <BrandLogo size="sm" className="scale-125" />
                             </div>
                         </div>
                         <div>
@@ -165,7 +166,7 @@ export default function DashboardPage() {
             {(userLoading || loading) ? (
                 <div className="py-32 flex flex-col items-center justify-center text-zinc-500 gap-6">
                     <div className="relative">
-                        <Radar className="w-12 h-12 animate-pulse text-white/20" />
+                        <BrandLogo size="lg" className="animate-pulse opacity-40" />
                         <div className="absolute inset-0 blur-xl bg-white/5 rounded-full" />
                     </div>
                     <p className="font-bold tracking-widest uppercase text-[10px] animate-pulse">Syncing Tactical Intel...</p>
@@ -181,7 +182,7 @@ export default function DashboardPage() {
                     <div className="relative">
                         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse" />
                         <div className="relative w-24 h-24 rounded-3xl bg-zinc-900 border border-white/10 flex items-center justify-center shadow-2xl">
-                            <Radar className="w-10 h-10 text-zinc-700" />
+                            <BrandLogo size="lg" className="opacity-80" />
                         </div>
                     </div>
 
@@ -370,7 +371,7 @@ export default function DashboardPage() {
                                     </h3>
                                 </div>
                                 <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:bg-white/10 transition-all">
-                                    <Radar className="w-5 h-5 text-white" />
+                                    <BrandLogo size="sm" className="opacity-80" />
                                 </div>
                             </div>
 

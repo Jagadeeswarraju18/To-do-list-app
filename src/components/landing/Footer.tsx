@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Radar, Twitter, Linkedin, Github, Shield, Lock } from "lucide-react";
+import { Twitter, Linkedin, Github, Shield, Lock } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import Link from "next/link";
 
 export function Footer() {
@@ -20,9 +21,7 @@ export function Footer() {
                     {/* Column 1: Brand & Badges */}
                     <div className="space-y-12">
                         <Link href="/" className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/5">
-                                <Radar className="h-4 w-4 text-white" />
-                            </div>
+                            <BrandLogo size="md" className="-ml-2" />
                             <span className="text-lg brand-title uppercase">
                                 Mardis
                             </span>
@@ -40,7 +39,7 @@ export function Footer() {
                                     <Shield className="w-4 h-4 text-white" />
                                 </div>
                                 <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity">
-                                    <Radar className="w-4 h-4 text-white" />
+                                    <BrandLogo size="sm" className="scale-75 opacity-50" />
                                 </div>
                             </div>
                         </div>

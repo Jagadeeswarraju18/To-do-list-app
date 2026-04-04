@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2, User, Mail, Shield, Linkedin, Instagram, Link as LinkIcon, Lock, PenSquare, X, Globe, Calendar, Camera, Plus, Trash2, CreditCard, Check } from "lucide-react";
+import { Loader2, User, Mail, Shield, Linkedin, Instagram, Link as LinkIcon, Lock, PenSquare, X, Globe, Calendar, Camera, Plus, Trash2, CreditCard, Check, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { XLogo } from "@/components/ui/XLogo";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,6 +20,7 @@ import {
     PRICING_PLANS,
 } from "@/lib/pricing";
 import { buildCheckoutHeaders } from "@/lib/billing/client-checkout";
+import { getStarterOfferSpotsLeft } from "@/app/actions/get-founder-offer";
 
 type ProfileData = {
     full_name: string;
@@ -63,6 +64,7 @@ function UserSettingsContent() {
     });
 
     const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+    const [spotsLeft, setSpotsLeft] = useState<number>(3); // Loading default
     const [newSocial, setNewSocial] = useState({ platform: "", url: "" });
     const [isAddingSocial, setIsAddingSocial] = useState(false);
 
@@ -75,6 +77,7 @@ function UserSettingsContent() {
         if (user) {
             fetchProfile();
             fetchXIntegration();
+            getStarterOfferSpotsLeft().then(setSpotsLeft);
         }
 
         const successMsg = searchParams.get('success');
@@ -422,11 +425,30 @@ function UserSettingsContent() {
                                             <p className="text-zinc-400 text-xs font-bold uppercase tracking-tight">
                                                 {plan.description}
                                             </p>
-                                            {note && (
+                                            {plan.id === "starter" ? (
+                                                <div className="mt-4 p-3.5 bg-orange-500/5 border border-orange-500/20 rounded-xl relative overflow-hidden group/offer">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 translate-x-[-100%] group-hover/offer:translate-x-[100%] transition-transform duration-1000" />
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1.5">
+                                                            <Zap className="w-3 h-3" /> Founder Offer
+                                                        </span>
+                                                        <span className="text-[10px] font-bold text-white tabular-nums">{spotsLeft}/10 Left</span>
+                                                    </div>
+                                                    <div className="w-full h-1.5 bg-black rounded-full overflow-hidden border border-white/5 shadow-inner">
+                                                        <div 
+                                                            className="h-full bg-gradient-to-r from-orange-600 to-orange-400 rounded-full transition-all duration-1000 ease-out" 
+                                                            style={{ width: `${(10 - spotsLeft) * 10}%` }} 
+                                                        />
+                                                    </div>
+                                                    <p className="text-[9px] font-medium text-orange-400/80 mt-2 uppercase tracking-wide">
+                                                        Locks in $15/mo lifetime.
+                                                    </p>
+                                                </div>
+                                            ) : note ? (
                                                 <p className="mt-3 text-[11px] text-zinc-400 leading-relaxed font-medium">
                                                     {note}
                                                 </p>
-                                            )}
+                                            ) : null}
                                         </div>
 
                                         <ul className="space-y-4 mb-10 flex-grow">

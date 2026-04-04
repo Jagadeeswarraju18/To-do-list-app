@@ -48,7 +48,7 @@ function ProductSchema() {
                         "@type": "Brand",
                         name: "Mardis Hub"
                     },
-                    image: "https://www.mardishub.com/icon.svg",
+                    image: "https://www.mardishub.com/logo.jpg",
                     url: productUrl,
                     additionalProperty: [
                         {
@@ -86,7 +86,7 @@ const channels = [
     {
         name: "Reddit",
         role: "Deepest workflow",
-        detail: "Community radar, subreddit rules, safer replies, and live mission cards."
+        detail: "Community signals, subreddit rules, safer replies, and live mission cards."
     },
     {
         name: "X",

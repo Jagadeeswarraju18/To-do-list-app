@@ -69,7 +69,7 @@ export async function generateAIPitch(creatorData: { display_name: string, bio?:
         }).join(", ");
 
         const prompt = `
-        You are a top-tier creator. Write a short, professional "Founder-First" bio for your profile on DemandRadar.
+        You are a top-tier creator. Write a short, professional "Founder-First" bio for your profile on Mardis.
         
         MY NAME: ${creatorData.display_name}
         MY NICHE: ${creatorData.niche}

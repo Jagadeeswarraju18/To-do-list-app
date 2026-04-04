@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
-    Users, ArrowUpRight, Sparkles, Radar, Layers, Search, Activity,
+    Users, ArrowUpRight, Sparkles, Layers, Search, Activity,
     LayoutGrid, Brain, Database, Code2, Palette, Filter, ChevronRight
 } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { motion, AnimatePresence } from "framer-motion";
 import { SignalButton } from "@/components/ui/SignalButton";
 
@@ -54,8 +55,8 @@ export function DiscoverClientPage({ products: initialProducts }: { products: an
                 {/* Navbar - Mardis Style */}
                 <div className="flex items-center justify-between mb-10">
                     <Link href="/" className="group flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-xl group-hover:border-white/20 transition-all duration-500">
-                            <Radar className="w-6 h-6 text-white opacity-40" />
+                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-xl group-hover:border-white/20 transition-all duration-500 overflow-hidden">
+                            <BrandLogo size="sm" className="opacity-40" />
                         </div>
                         <div className="flex flex-col">
                             <span className="text-xl font-bold tracking-tight text-white uppercase leading-none">Discover</span>
@@ -149,7 +150,7 @@ export function DiscoverClientPage({ products: initialProducts }: { products: an
                                         </div>
 
                                         <p className="text-zinc-400 text-[13px] font-medium leading-relaxed mb-8 line-clamp-2 relative z-10 group-hover:text-white transition-colors duration-500">
-                                            {product.description || product.pain_solved || "Exclusive insights from the DemandRadar builder network."}
+                                            {product.description || product.pain_solved || "Exclusive insights from the Mardis builder network."}
                                         </p>
 
                                         <div className="mt-auto flex items-center justify-between relative z-10 pt-5 border-t border-white/10">
@@ -262,7 +263,7 @@ export function DiscoverClientPage({ products: initialProducts }: { products: an
                                                      by <span className="text-zinc-500 font-semibold tracking-tight">@{profile?.full_name?.split(' ')[0] || "maker"}</span>
                                                  </p>
                                                 <p className="text-zinc-600 text-[11px] leading-relaxed line-clamp-2 font-medium tracking-tight">
-                                                    {product.description || product.pain_solved || "Innovative solutions from the DemandRadar builder network."}
+                                                    {product.description || product.pain_solved || "Innovative solutions from the Mardis builder network."}
                                                 </p>
                                             </div>
 

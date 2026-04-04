@@ -1,7 +1,8 @@
 import { getPublicProductDetails } from "@/app/actions/public-actions";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users, Target, ArrowLeft, ArrowUpRight, CheckCircle2, Radar, Twitter, Linkedin, Heart } from "lucide-react";
+import { Users, Target, ArrowLeft, ArrowUpRight, CheckCircle2, Twitter, Linkedin, Heart } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { SignalButton } from "@/components/ui/SignalButton";
 import { Metadata } from "next";
 
@@ -86,8 +87,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             {/* Header */}
             <header className="w-full max-w-5xl mx-auto px-6 py-8 flex items-center justify-between relative z-50">
                 <Link href="/" className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                        <Radar className="w-5 h-5 text-white opacity-40" />
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+                        <BrandLogo size="xs" className="opacity-40 scale-125" />
                     </div>
                     <span className="text-xl brand-title uppercase leading-none">Mardis</span>
                 </Link>

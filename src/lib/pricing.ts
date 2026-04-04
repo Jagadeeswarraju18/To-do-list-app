@@ -50,7 +50,7 @@ export const PRICING_PLANS: PlanDefinition[] = [
         id: "starter",
         name: "Starter",
         shortName: "Starter",
-        description: "For serious solo builders.",
+        description: "Essential launch kit.",
         features: ["3 Products", "100 Signals / month", "150 AI Drafts / month", "60 Scans / month", "30-Day History"],
         cta: "Choose Starter",
         productLimit: 3,
@@ -62,7 +62,6 @@ export const PRICING_PLANS: PlanDefinition[] = [
         supportLabel: "Email support",
         monthlyPrice: 15,
         yearlyPrice: 15,
-        monthlyNote: "First 10 members: $15 ($19 regular)",
     },
     {
         id: "pro",

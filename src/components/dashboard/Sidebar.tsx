@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-    LogOut, Radar, LayoutDashboard, Search, ListFilter,
+    LogOut, LayoutDashboard, Search, ListFilter,
     Settings, Users, Handshake, Share2, PieChart,
     FolderHeart, UserCircle, Menu, X, Swords
 } from "lucide-react";
@@ -63,14 +63,14 @@ export function Sidebar() {
         { href: "/creator/profile", icon: <UserCircle />, label: "Profile", active: pathname === "/creator/profile" },
     ] : [
         { href: "/founder/dashboard", icon: <LayoutDashboard />, label: "Dashboard", active: pathname === "/founder/dashboard" },
-        { href: "/founder/battlefield", icon: <Swords />, label: "Battlefield", active: pathname === "/founder/battlefield" },
         { href: "/founder/opportunities", icon: <ListFilter />, label: "Opportunities", active: pathname === "/founder/opportunities" },
         { href: "/founder/platforms", icon: <Share2 />, label: "Strategy", active: pathname === "/founder/platforms" },
+        { href: "/founder/battlefield", icon: <Swords />, label: "Battlefield", active: pathname === "/founder/battlefield" },
         { href: "/founder/creators", icon: <Users />, label: "Creators", active: pathname === "/founder/creators" },
     ];
 
     const systemItems = isCreatorView ? [] : [
-        { href: "/founder/products", icon: <Radar />, label: "Products", active: pathname === "/founder/products" },
+        { href: "/founder/products", icon: <BrandLogo size="xs" className="scale-125" />, label: "Products", active: pathname === "/founder/products" },
         { href: "/founder/settings", icon: <Settings />, label: "Settings", active: pathname === "/founder/settings" },
     ];
 

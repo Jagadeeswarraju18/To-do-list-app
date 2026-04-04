@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import {
     Loader2, Swords, RefreshCw, MessageCircle, AlertCircle,
-    Zap, Sparkles, ListFilter, Radar, Settings, ShieldAlert, BarChart3
+    Zap, Sparkles, ListFilter, Settings, ShieldAlert, BarChart3
 } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useUser } from "@/components/providers/UserProvider";
 import { toast } from "sonner";
 import { updateStatus, discoverOpportunitiesAction } from "@/app/actions/discover-opportunities";
@@ -179,13 +180,13 @@ export default function BattlefieldPage() {
             {/* Header Area */}
             <div className="relative group/header">
                 <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-transparent rounded-[40px] blur-2xl opacity-50 transition duration-1000" />
-                <div className="relative glass-panel p-6 md:p-8 overflow-hidden border-white/5">
+                <div className="relative glass-panel p-5 md:p-6 overflow-hidden border-white/5">
                     <div className="absolute -top-24 -right-24 opacity-5 pointer-events-none transition-transform duration-1000">
                         <Swords className="w-96 h-96 text-white" />
                     </div>
 
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-                        <div className="space-y-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                        <div className="space-y-3">
                             <div className="flex items-center gap-4">
                                 <div className="bg-white/10 text-white p-2.5 rounded-xl border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                                     <Swords className="w-6 h-6" />
@@ -344,11 +345,11 @@ export default function BattlefieldPage() {
                                 <div className="relative">
                                     <div className="absolute -inset-8 bg-white/5 blur-3xl rounded-full animate-pulse" />
                                     <div className="p-10 bg-zinc-900 rounded-full border border-white/10 relative z-10">
-                                        <Radar className="w-16 h-16 text-white" />
+                                        <BrandLogo size="lg" />
                                     </div>
                                 </div>
                                 <div className="space-y-4 max-w-lg mx-auto">
-                                    <h2 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter">Strategic Radar Offline</h2>
+                                    <h2 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter">Strategic Systems Offline</h2>
                                     <p className="text-zinc-400 text-lg leading-relaxed font-medium">
                                         We cannot intercept competitor-switching signals without identifying your rivals. Add them in <span className="text-white font-bold underline">Product Settings</span>.
                                     </p>

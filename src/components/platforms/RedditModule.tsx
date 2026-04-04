@@ -19,7 +19,6 @@ import {
     Star,
     Target,
     Zap,
-    Radar,
     Terminal,
     Command,
     Activity,
@@ -28,6 +27,7 @@ import {
     Cpu,
     Filter
 } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateContentAction } from "@/app/actions/generate-content";
 import { regenerateSingleDM } from "@/app/actions/discover-opportunities";
@@ -716,96 +716,98 @@ export default function RedditModule({ product }: { product: any }) {
     }
 
     return (
-        <div className="w-full space-y-12">
+        <div className="w-full space-y-8">
             {/* Tactical Command Console & Controls Container */}
-            <div className="flex flex-col xl:flex-row gap-12">
+            <div className="flex flex-col xl:flex-row gap-8">
                 {/* Left Side: Main Console */}
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex-1 space-y-8"
+                    className="flex-1 space-y-6"
                 >
-                    <div className="glass-card p-10 border-white/10 relative overflow-hidden rounded-[40px] shadow-2xl group">
-                        <div className="absolute inset-0 cyber-grid opacity-30 pointer-events-none" />
-                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px]" />
-                        
-                        <div className="relative z-10 grid gap-10 lg:grid-cols-[1.5fr_1fr]">
-                            <div className="space-y-6">
-                                <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-[#FF8A5B] shadow-lg">
-                                    <Terminal className="h-3.5 w-3.5" />
-                                    Reddit Deployment Protocol
-                                </div>
-                                <h2 className="mt-8 text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
-                                    Community <span className="text-orange-500">Signal</span> Lab
-                                </h2>
-                                <p className="mt-6 text-base text-zinc-400 font-medium leading-relaxed max-w-xl italic">
-                                    Run surgical missions across niche communities. Target high-intent threads, sound like a peer, and capture demand without noise.
-                                </p>
-                                
-                                <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                                    <div className="relative flex-1">
-                                        <input
-                                            value={niche}
-                                            onChange={(e) => setNiche(e.target.value)}
-                                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                                            className="w-full h-14 rounded-2xl border border-white/10 bg-white/5 px-6 pl-12 text-sm text-white placeholder:text-zinc-600 focus:border-orange-500/50 outline-none transition-all shadow-inner"
-                                            placeholder="Enter niche or community signal..."
-                                        />
-                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                    <div className="glass-panel p-5 md:p-6 border-white/5 relative overflow-hidden">
+                        <div className="relative z-10 space-y-5">
+                            {/* Header row */}
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                                            <Terminal className="h-3.5 w-3.5 text-[#FF8A5B]" />
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">Reddit Deployment Protocol</span>
                                     </div>
-                                    <button
-                                        onClick={handleSearch}
-                                        disabled={!niche.trim() || generating}
-                                        className="premium-button h-14 px-10 shadow-orange-500/20"
-                                    >
-                                        {generating ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Radar className="h-4 w-4" />}
-                                        {generating ? "SCANNING..." : "SCAN"}
-                                    </button>
+                                    <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+                                        Community Signal Lab
+                                    </h2>
+                                    <p className="text-sm text-zinc-500 font-medium leading-relaxed max-w-lg">
+                                        Run surgical missions across niche communities. Target high-intent threads, sound like a peer, and capture demand without noise.
+                                    </p>
                                 </div>
 
-                                <div className="mt-6 flex items-center gap-6">
-                                    <button 
-                                        onClick={() => { setView("saved"); void loadSavedDrafts(); }} 
-                                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
-                                    >
-                                        <Layers className="h-3.5 w-3.5" />
-                                        <span className="text-white">{savedDrafts.length}</span> Drafts in Vault
-                                    </button>
-                                    <div className="h-4 w-px bg-white/10" />
-                                    <button 
-                                        onClick={() => { setView("saved"); void loadSavedDrafts(); }} 
-                                        className="flex items-center gap-2 text-[10px) font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
-                                    >
-                                        <Star className="h-3.5 w-3.5" />
-                                        <span className="text-white">{savedSubs.length}</span> Tracked Subs
-                                    </button>
+                                {/* Inline stats */}
+                                <div className="hidden md:flex items-center gap-3 shrink-0">
+                                    {[
+                                        { label: "Signals", value: redditOpportunities.length, color: "text-orange-400" },
+                                        { label: "Subs", value: subreddits.length, color: "text-emerald-400" },
+                                    ].map((stat, i) => (
+                                        <div key={i} className="px-4 py-2.5 rounded-xl border border-white/5 bg-white/[0.03] text-center">
+                                            <p className={`text-lg font-bold ${stat.color} tabular-nums leading-none`}>{stat.value}</p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 mt-0.5">{stat.label}</p>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                {[
-                                    { label: "Signals Found", value: redditOpportunities.length, icon: Activity, color: "text-orange-500" },
-                                    { label: "Sub Frequencies", value: subreddits.length, icon: Globe, color: "text-emerald-400" },
-                                    { label: "AI Fidelity", value: "Level 4", icon: Cpu, color: "text-purple-400" },
-                                    { label: "Protocol", value: redditMode === "safe" ? "Stealth" : "Direct", icon: ShieldCheck, color: "text-indigo-400" }
-                                ].map((stat, i) => (
-                                    <div key={i} className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-md group-hover:bg-white/[0.05] transition-all hover:border-white/10">
-                                        <stat.icon className={`h-5 w-5 ${stat.color} mb-4`} />
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{stat.label}</p>
-                                        <p className="mt-1 text-2xl font-black text-white tabular-nums">{stat.value}</p>
-                                    </div>
-                                ))}
+                            {/* Search input */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="relative flex-1">
+                                    <input
+                                        value={niche}
+                                        onChange={(e) => setNiche(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                        className="w-full h-11 rounded-xl border border-white/10 bg-white/5 px-5 pl-10 text-sm text-white placeholder:text-zinc-600 focus:border-orange-500/40 outline-none transition-all"
+                                        placeholder="Enter niche or community signal..."
+                                    />
+                                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-600" />
+                                </div>
+                                <button
+                                    onClick={handleSearch}
+                                    disabled={!niche.trim() || generating}
+                                    className="premium-button h-11 px-6 shadow-orange-500/20 shrink-0"
+                                >
+                                    {generating ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <BrandLogo size="sm" className="scale-125" />}
+                                    {generating ? "Scanning..." : "Scan"}
+                                </button>
+                            </div>
+
+                            {/* Footer meta */}
+                            <div className="flex items-center gap-5 pt-1 border-t border-white/5">
+                                <button 
+                                    onClick={() => { setView("saved"); void loadSavedDrafts(); }} 
+                                    className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
+                                >
+                                    <Layers className="h-3 w-3" />
+                                    <span className="text-white">{savedDrafts.length}</span> Drafts in Vault
+                                </button>
+                                <div className="h-3 w-px bg-white/10" />
+                                <button 
+                                    onClick={() => { setView("saved"); void loadSavedDrafts(); }} 
+                                    className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
+                                >
+                                    <Star className="h-3 w-3" />
+                                    <span className="text-white">{savedSubs.length}</span> Tracked Subs
+                                </button>
                             </div>
                         </div>
                     </div>
                 </motion.div>
 
-                {/* Right Side: Sleek Controls */}
-                <div className="flex w-full flex-col gap-8 xl:w-80 xl:flex-shrink-0">
-                    {/* Tactical Switch: Output Target */}
+                {/* Right Side: Compact Controls */}
+                <div className="flex w-full flex-col gap-5 xl:w-64 xl:flex-shrink-0">
+                    {/* Protocol Target */}
                     <div>
-                        <label className="mb-3 block text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">Protocol Target</label>
-                        <div className="flex p-1.5 bg-black/60 rounded-2xl border border-white/5 shadow-inner backdrop-blur-xl">
+                        <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-zinc-600">Protocol Target</label>
+                        <div className="flex p-1 bg-black/60 rounded-xl border border-white/5 shadow-inner backdrop-blur-xl">
                             {(["post", "comments"] as const).map((target) => (
                                 <button
                                     key={target}
@@ -815,7 +817,7 @@ export default function RedditModule({ product }: { product: any }) {
                                         setGeneratedComments([]);
                                         setGenerationError(null);
                                     }}
-                                    className={`flex-1 rounded-xl py-3 text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${generationTarget === target ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.15)]" : "text-zinc-500 hover:text-white"}`}
+                                    className={`flex-1 rounded-lg py-2 text-[10px] font-black uppercase tracking-widest transition-all duration-200 ${generationTarget === target ? "bg-white text-black shadow-sm" : "text-zinc-500 hover:text-white"}`}
                                 >
                                     {target === "post" ? "Draft" : "Karma Builder"}
                                 </button>
@@ -823,53 +825,54 @@ export default function RedditModule({ product }: { product: any }) {
                         </div>
                     </div>
 
-                    {/* Mission Parameters */}
-                    <div className="grid gap-6">
-                        <div>
-                            <label className="mb-3 block text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">Tactical Aggression</label>
-                            <div className="grid grid-cols-1 gap-2">
-                                {([
-                                    { key: "safe", label: "Stealth (Safe)", desc: "Maximum native feel" },
-                                    { key: "balanced", label: "Balanced", desc: "Value + Soft Pivot" },
-                                    { key: "product_led", label: "Direct (Product)", desc: "High Intent Capture" }
-                                ] as const).map((mode) => (
-                                    <button
-                                        key={mode.key}
-                                        onClick={() => setRedditMode(mode.key)}
-                                        className={`group flex flex-col items-start p-4 rounded-2xl border transition-all duration-300 ${redditMode === mode.key ? "border-orange-500/30 bg-orange-500/10 orange-glow" : "border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10"}`}
-                                    >
-                                        <span className={`text-[10px] font-black uppercase tracking-widest ${redditMode === mode.key ? "text-orange-500" : "text-zinc-400 group-hover:text-white"}`}>{mode.label}</span>
-                                        <span className="text-[9px] text-zinc-600 mt-1 font-medium italic">{mode.desc}</span>
-                                    </button>
-                                ))}
-                            </div>
+                    {/* Tactical Aggression */}
+                    <div>
+                        <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-zinc-600">Tactical Aggression</label>
+                        <div className="grid grid-cols-1 gap-1.5">
+                            {([
+                                { key: "safe", label: "Stealth (Safe)", desc: "Maximum native feel" },
+                                { key: "balanced", label: "Balanced", desc: "Value + Soft Pivot" },
+                                { key: "product_led", label: "Direct (Product)", desc: "High Intent Capture" }
+                            ] as const).map((mode) => (
+                                <button
+                                    key={mode.key}
+                                    onClick={() => setRedditMode(mode.key)}
+                                    className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all duration-200 ${redditMode === mode.key ? "border-orange-500/30 bg-orange-500/10" : "border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10"}`}
+                                >
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ${redditMode === mode.key ? "text-orange-400" : "text-zinc-400 group-hover:text-white"}`}>{mode.label}</span>
+                                    <span className="text-[9px] text-zinc-600 font-medium">{mode.desc}</span>
+                                </button>
+                            ))}
                         </div>
-                        <div className="pt-2">
-                            <label className="mb-3 block text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">Mission Angle</label>
-                            <div className="flex gap-2 p-1.5 bg-black/60 rounded-2xl border border-white/5">
-                                {[
-                                    { id: false, label: "Value-First" },
-                                    { id: true, label: "Product-Led" }
-                                ].map(angle => (
-                                    <button
-                                        key={angle.label}
-                                        onClick={() => setIsProductLed(angle.id)}
-                                        className={`flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isProductLed === angle.id ? "bg-white/10 text-white border border-white/10" : "text-zinc-600 hover:text-white"}`}
-                                    >
-                                        {angle.label}
-                                    </button>
-                                ))}
-                            </div>
+                    </div>
+
+                    {/* Mission Angle */}
+                    <div>
+                        <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-zinc-600">Mission Angle</label>
+                        <div className="flex gap-1.5 p-1 bg-black/60 rounded-xl border border-white/5">
+                            {[
+                                { id: false, label: "Value-First" },
+                                { id: true, label: "Product-Led" }
+                            ].map(angle => (
+                                <button
+                                    key={angle.label}
+                                    onClick={() => setIsProductLed(angle.id)}
+                                    className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${isProductLed === angle.id ? "bg-white/10 text-white border border-white/10" : "text-zinc-600 hover:text-white"}`}
+                                >
+                                    {angle.label}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>
             </div>
 
+
             {subreddits.length > 0 && (
                 <div className="space-y-6">
                     <div className="flex items-center justify-between border-b border-white/5 pb-4">
                         <div className="flex items-center gap-3">
-                            <Radar className="h-5 w-5 text-orange-500 animate-pulse" />
+                            <BrandLogo size="sm" className="opacity-80 animate-pulse" />
                             <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500">Active Frequencies</h3>
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#FF8A5B] bg-[#FF4500]/10 px-3 py-1 rounded-full border border-[#FF4500]/20">
@@ -1124,7 +1127,7 @@ export default function RedditModule({ product }: { product: any }) {
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-white/5 pb-8">
                         <div>
                             <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-[#FF8A5B] shadow-lg">
-                                <Radar className="h-3.5 w-3.5 animate-pulse" />
+                                <BrandLogo size="sm" className="opacity-80 animate-pulse" />
                                 Tactical Missions Available
                             </div>
                             <h3 className="mt-6 text-3xl font-black italic uppercase tracking-tighter text-white">
