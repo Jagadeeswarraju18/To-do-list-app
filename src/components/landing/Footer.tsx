@@ -8,8 +8,8 @@ export function Footer() {
     return (
         <footer className="pt-40 pb-20 px-6 relative z-10 bg-black overflow-hidden">
             {/* Massive Obsidian-style Watermark */}
-            <div className="absolute bottom-[-15%] left-0 w-full flex justify-center pointer-events-none select-none overflow-hidden z-0">
-                <span className="text-[35vw] font-black text-white/[0.02] tracking-tighter uppercase leading-none">
+            <div className="absolute bottom-[-5%] left-0 w-full flex justify-center pointer-events-none select-none overflow-hidden z-0">
+                <span className="text-[25vw] font-black text-white/[0.02] tracking-tighter uppercase leading-none">
                     Mardis
                 </span>
             </div>
@@ -90,7 +90,16 @@ export function Footer() {
 
                 {/* Bottom Row */}
                 <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-[11px] font-medium text-gray-600 tracking-tight">
-                    <span>&copy; 2026 MardisHub. All rights reserved.</span>
+                    <div className="flex items-center gap-6">
+                        <span>&copy; 2026 MardisHub. All rights reserved.</span>
+                        <Link href="https://x.com/Mardishub" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors flex items-center gap-1.5 uppercase tracking-wider font-bold">
+                            <Twitter className="w-2.5 h-2.5" />
+                            X Profile
+                        </Link>
+                    </div>
+                    <Link href="https://x.com/Jagadeeswarrrr" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest font-black opacity-80">
+                        built by @Jagadeeswarrrr
+                    </Link>
                 </div>
             </div>
         </footer>

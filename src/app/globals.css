@@ -137,11 +137,18 @@
 
 .heading-serif {
     font-family: 'Cormorant Garamond', serif !important;
-    font-size: 72px;
+    font-size: 40px;
     font-weight: 300 !important;
     line-height: 1 !important;
-    letter-spacing: -2px;
+    letter-spacing: -1px;
     -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 768px) {
+    .heading-serif {
+        font-size: 72px;
+        letter-spacing: -2px;
+    }
 }
 
 .brand-title {

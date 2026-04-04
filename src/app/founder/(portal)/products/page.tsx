@@ -282,6 +282,11 @@ function ProductsPageContent() {
                     'competitors', 'alternatives', 'strongest_objection', 'proof_results'
                 ];
 
+                // Apply logo from extraction result if not already set
+                if ((res as any).logo_url && !formData.logo_url) {
+                    updates['logo_url'] = (res as any).logo_url;
+                }
+
                 fields.forEach(field => {
                     const data = (res as any)[field];
                     if (data && data.value) {
@@ -614,7 +619,7 @@ function ProductsPageContent() {
                                                     value={formData.website_url}
                                                     onChange={(v: string) => updateField("website_url", v)}
                                                     placeholder="https://yourproduct.com"
-                                                    hint="Start with your website. We'll analyze it and fill in the basics."
+                                                    hint="Paste your URL and hit Auto Fill — we'll populate all fields for you."
                                                 />
                                                 {formData.website_url?.length > 5 && (
                                                     <button
@@ -623,8 +628,8 @@ function ProductsPageContent() {
                                                         disabled={isExtracting || cooldown}
                                                         className="absolute right-2 top-8 text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md hover:bg-emerald-500 hover:text-black transition-all disabled:opacity-50 flex items-center gap-1"
                                                     >
-                                                        {isExtracting ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5" />}
-                                                        {isExtracting ? "Analyzing" : "Analyze"}
+                                                        {isExtracting ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Wand2 className="w-2.5 h-2.5" />}
+                                                        {isExtracting ? "Filling..." : "Auto Fill"}
                                                     </button>
                                                 )}
                                             </div>

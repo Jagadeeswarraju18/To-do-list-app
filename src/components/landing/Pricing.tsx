@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, ArrowRight, Sparkles, Loader2, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -43,7 +44,13 @@ export function Pricing() {
     return (
         <section id="pricing" className="py-32 px-6 relative z-10 overflow-hidden bg-[#0A0A0A] scroll-mt-32">
             <div className="max-w-[1440px] mx-auto">
-                <div className="text-center mb-32 relative">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="text-center mb-32 relative"
+                >
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/5 bg-white/[0.02] text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mb-10 backdrop-blur-md">
                         <Zap className="w-3.5 h-3.5 text-primary" />
                         Pricing
@@ -56,9 +63,18 @@ export function Pricing() {
                     <p className="text-zinc-500 max-w-xl mx-auto text-lg leading-relaxed font-medium">
                         All paid plans are shown at the annual rate. Starter includes a founder offer for the first 10 members.
                     </p>
-                </div>
+                </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2">
+                <motion.div 
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    variants={{
+                        visible: { transition: { staggerChildren: 0.1 } },
+                        hidden: {}
+                    }}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2"
+                >
                     {PRICING_PLANS.map((plan) => {
                         const price = getPriceForBilling(plan.id, "yearly");
                         const compareAt = getCompareAtForBilling(plan.id, "yearly");
@@ -66,7 +82,11 @@ export function Pricing() {
                         const note = getPlanNote(plan.id, "yearly");
 
                         return (
-                            <div
+                            <motion.div
+                                variants={{
+                                    hidden: { opacity: 0, y: 30 },
+                                    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+                                }}
                                 key={plan.id}
                                 className={`relative p-8 rounded-[32px] border transition-all duration-700 group flex flex-col bg-[#0A0A0A] ${plan.popular ? "border-white/20 shadow-2xl shadow-white/[0.05] hover:border-white/40" : "border-white/10 hover:border-white/20 hover:shadow-2xl hover:shadow-white/[0.02]"}`}
                             >
@@ -147,10 +167,10 @@ export function Pricing() {
                                         )}
                                     </button>
                                 </div>
-                            </div>
+                            </motion.div>
                         );
                     })}
-                </div>
+                </motion.div>
 
                 <div className="mt-32 text-center">
                     <p className="text-zinc-700 text-xs font-medium">

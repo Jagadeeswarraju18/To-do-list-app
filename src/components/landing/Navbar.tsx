@@ -33,11 +33,11 @@ export function Navbar() {
     };
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-[100] flex justify-center pt-6 px-4 pointer-events-none">
+        <div className="fixed top-0 left-0 right-0 z-[100] flex justify-center pt-4 sm:pt-6 px-4 pointer-events-none">
             <header
                 className={`
                     w-full max-w-7xl mx-auto flex items-center justify-between pointer-events-auto
-                    px-6 py-3 rounded-full border transition-all duration-700
+                    px-4 sm:px-6 py-3 rounded-full border transition-all duration-700
                     ${isScrolled 
                         ? "bg-black/80 backdrop-blur-2xl border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.8)]" 
                         : "bg-black/20 backdrop-blur-md border-white/10"
@@ -113,28 +113,28 @@ export function Navbar() {
                                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                 className="md:hidden absolute top-full left-0 right-0 mt-4 px-4"
                             >
-                                <div className="glass-panel p-6 space-y-4 shadow-2xl">
-                                    <div className="grid gap-2">
+                                <div className="glass-panel p-4 space-y-3 shadow-2xl">
+                                    <div className="grid gap-1.5">
                                         {navLinks.map((link) => (
                                             <Link
                                                 key={link.name}
                                                 href={link.href}
-                                                className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] text-lg font-medium text-gray-300 hover:text-white hover:bg-white/[0.08] transition-all"
+                                                className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/[0.08] transition-all"
                                                 onClick={() => setMobileNav(false)}
                                             >
                                                 {link.name}
-                                                <ArrowRight className="w-4 h-4 opacity-50" />
+                                                <ArrowRight className="w-3.5 h-3.5 opacity-30" />
                                             </Link>
                                         ))}
                                     </div>
-                                    <div className="pt-4 space-y-3">
+                                    <div className="pt-2 space-y-2">
                                         <Link href="/login" onClick={() => setMobileNav(false)}>
-                                            <button className="w-full py-4 text-[15px] font-bold text-gray-400 hover:text-white transition-colors">
+                                            <button className="w-full py-2.5 text-[13px] font-bold text-gray-500 hover:text-white transition-colors">
                                                 Log in
                                             </button>
                                         </Link>
                                         <Link href="/signup" onClick={() => setMobileNav(false)}>
-                                            <button className="premium-button w-full py-4 text-[15px]">
+                                            <button className="premium-button w-full py-3 text-[13px]">
                                                 Get Started
                                             </button>
                                         </Link>

@@ -99,7 +99,9 @@ export function AnalyticsCharts({ data }: { data: AnalyticsData }) {
                             initial={{ pathLength: 0, opacity: 0 }}
                             animate={{ pathLength: 1, opacity: 1 }}
                             transition={{ duration: 2.5, ease: "easeInOut" }}
-                            d="M0,35 C10,35 20,30 30,25 C40,20 50,15 60,18 C70,21 80,10 100,2"
+                            d={data.scanned > 0 
+                                ? "M0,35 C10,35 20,30 30,25 C40,20 50,15 60,18 C70,21 80,10 100,2" 
+                                : "M0,38 L100,38"}
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="2.5"
@@ -109,7 +111,9 @@ export function AnalyticsCharts({ data }: { data: AnalyticsData }) {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 0.15 }}
                             transition={{ delay: 1, duration: 1 }}
-                            d="M0,35 C10,35 20,30 30,25 C40,20 50,15 60,18 C70,21 80,10 100,2 L100,40 L0,40 Z"
+                            d={data.scanned > 0 
+                                ? "M0,35 C10,35 20,30 30,25 C40,20 50,15 60,18 C70,21 80,10 100,2 L100,40 L0,40 Z" 
+                                : "M0,38 L100,38 L100,40 L0,40 Z"}
                             fill="currentColor"
                             className="text-white/[0.05]"
                         />

@@ -20,6 +20,7 @@ export interface ExtractionResult {
     alternatives: ExtractionField<string[]>;
     strongest_objection: ExtractionField;
     proof_results: ExtractionField<string[]>;
+    logo_url?: string;
     error?: string;
 }
 
@@ -44,6 +45,20 @@ export async function extractProductDetailsAction(url: string): Promise<Extracti
         }
 
         const rawMarkdown = await scraperRes.text();
+        
+        // Extract OG image or favicon for logo
+        let logoUrl: string | undefined;
+        const ogMatch = rawMarkdown.match(/!\[.*?\]\((https?:\/\/[^)]+(?:og|logo|icon|brand)[^)]*\.(?:png|jpg|svg|webp|ico))\)/i) 
+                     || rawMarkdown.match(/Image URL\s*:\s*(https?:\/\/[^\s]+)/i);
+        if (ogMatch?.[1]) {
+            logoUrl = ogMatch[1];
+        } else {
+            // Fallback: use /favicon.ico from domain
+            try {
+                const domain = new URL(targetUrl);
+                logoUrl = `${domain.origin}/favicon.ico`;
+            } catch (_) {}
+        }
         
         // Basic "junk filter" - if it's too short or clearly an error page
         if (rawMarkdown.length < 200) {
@@ -113,7 +128,7 @@ export async function extractProductDetailsAction(url: string): Promise<Extracti
         }
 
         const result = JSON.parse(cleaned);
-        return result as ExtractionResult;
+        return { ...result, logo_url: logoUrl } as ExtractionResult;
 
     } catch (err: any) {
         console.error("[Scout Error]:", err.message);

@@ -13,7 +13,7 @@ export default function DashboardPage() {
     const { user, product, loading: userLoading } = useUser();
     const [stats, setStats] = useState({
         strategyVelocity: 0,
-        brandResonance: 85, // Mocked for now
+        brandResonance: 0,
         personaHealth: 0,
         activeBridges: 0,
         highIntentGrowth: 0,
@@ -99,9 +99,9 @@ export default function DashboardPage() {
                     totalOpportunities: opportunitiesCount || 0,
                 });
                 setAnalytics({
-                    scanned: totalScanned || 2431, // Fallback for aesthetic
-                    verified: totalVerified || 142,
-                    contacted: totalContacted || 12
+                    scanned: totalScanned || 0, // No fallback
+                    verified: totalVerified || 0,
+                    contacted: totalContacted || 0
                 });
                 setRecentSignals(signals || []);
             } catch (err) {
@@ -162,7 +162,15 @@ export default function DashboardPage() {
             </div>
 
             {/* Metrics / Empty State */}
-            {!userLoading && !loading && !product ? (
+            {(userLoading || loading) ? (
+                <div className="py-32 flex flex-col items-center justify-center text-zinc-500 gap-6">
+                    <div className="relative">
+                        <Radar className="w-12 h-12 animate-pulse text-white/20" />
+                        <div className="absolute inset-0 blur-xl bg-white/5 rounded-full" />
+                    </div>
+                    <p className="font-bold tracking-widest uppercase text-[10px] animate-pulse">Syncing Tactical Intel...</p>
+                </div>
+            ) : !product ? (
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

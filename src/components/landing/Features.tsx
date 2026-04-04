@@ -1,159 +1,120 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Zap, Target, BarChart3, Globe, Shield, MessageSquare, Sparkles, Plus, Layers, Bot, Radio } from "lucide-react";
-import { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { Search, Layers, Bot, Bell, Shield, Sparkles, ArrowRight } from "lucide-react";
 
 const features = [
     {
-        title: "Mission Command",
-        desc: "Execute high-precision tactical plays across Reddit, X, and LinkedIn from a single unified workspace.",
-        icon: Bot,
-        stats: "3 Channels",
-        accent: "border-primary/50 shadow-primary/20"
+        number: "01",
+        title: "Find Warm Leads",
+        desc: "We scan Reddit, X, and LinkedIn for people who need exactly what you sell — right now.",
+        icon: Search,
     },
     {
-        title: "Reddit Command Center",
-        desc: "Rule-aware, community-native engine that crafts safe, high-engagement content for strict subreddits.",
-        icon: Radio,
-        stats: "Rule-Aware",
-        accent: "border-zinc-500/50 shadow-white/5"
-    },
-    {
-        title: "Authentic Personas",
-        desc: "Pivot between Expert, Technical, and Helpful angles to match the community's specific frequency.",
+        number: "02",
+        title: "No Spam. No Bots.",
+        desc: "Every reply we draft sounds human and fits the conversation naturally.",
         icon: Layers,
-        stats: "3 Angles",
-        accent: "border-primary/50 shadow-primary/20"
-    }
+    },
+    {
+        number: "03",
+        title: "Works While You Sleep",
+        desc: "Mardis runs 24/7. New leads land in your inbox. You just show up and reply.",
+        icon: Bot,
+    },
+    {
+        number: "04",
+        title: "Instant Alerts",
+        desc: "The moment a new lead appears, you know. First to reply usually wins the deal.",
+        icon: Bell,
+    },
+    {
+        number: "05",
+        title: "Safe for Every Platform",
+        desc: "We follow community rules on every platform. No bans, no shadowbans, ever.",
+        icon: Shield,
+    },
 ];
-
-function FeatureCard({ feature, index }: { feature: typeof features[0], index: number }) {
-    const cardRef = useRef<HTMLDivElement>(null);
-    const x = useMotionValue(0);
-    const y = useMotionValue(0);
-
-    const mouseXSpring = useSpring(x);
-    const mouseYSpring = useSpring(y);
-
-    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
-    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!cardRef.current) return;
-        const rect = cardRef.current.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        x.set(mouseX / rect.width - 0.5);
-        y.set(mouseY / rect.height - 0.5);
-    };
-
-    const handleMouseLeave = () => {
-        x.set(0);
-        y.set(0);
-    };
-
-    return (
-        <div
-            className="group relative"
-        >
-            <div className={`
-                glass-card p-10 md:p-14 rounded-[48px] border bg-[#121212]/40 backdrop-blur-3xl h-full flex flex-col 
-                hover:bg-[#121212]/60 transition-all duration-700 ${feature.accent}
-            `}>
-                <div className="absolute inset-0 mardis-noise opacity-5 pointer-events-none rounded-[48px]" />
-                
-                <div style={{ transform: "translateZ(50px)" }} className="relative z-10">
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-500">
-                        <feature.icon className="w-7 h-7 text-white premium-icon" />
-                    </div>
-                    
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="px-2 py-0.5 rounded-full bg-primary/20 border border-primary/30 text-[9px] font-black text-primary uppercase tracking-widest">
-                            Live
-                        </div>
-                        <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">
-                            {feature.stats}
-                        </span>
-                    </div>
-                    
-                    <h3 className="heading-serif text-5xl text-white mb-6 group-hover:tracking-tight transition-all leading-tight italic">
-                        {feature.title}
-                    </h3>
-                    
-                    <p className="text-zinc-500 text-sm font-medium leading-relaxed group-hover:text-zinc-400 transition-colors">
-                        {feature.desc}
-                    </p>
-                </div>
-            </div>
-        </div>
-    );
-}
 
 export function Features() {
     return (
-        <section id="features" className="py-32 px-6 relative z-10 overflow-hidden scroll-mt-32">
-            <div className="max-w-[1440px] mx-auto">
-                <div className="text-center mb-40">
-                    <div
-                        className="max-w-4xl mx-auto"
-                    >
-                        <h2 className="heading-serif text-7xl md:text-9xl text-white mb-10 tracking-tighter leading-none italic text-pretty">
-                            Tactical <br />
-                            <span className="opacity-50 not-italic text-[0.8em]">Operating System.</span>
+        <section id="features" className="py-16 px-6 relative z-10 scroll-mt-32 bg-background">
+            <div className="max-w-5xl mx-auto">
+
+                {/* Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
+                >
+                    <div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-4">
+                            <Sparkles className="w-3 h-3" />
+                            What Mardis Does
+                        </div>
+                        <h2 className="heading-serif text-3xl md:text-6xl text-white tracking-tighter leading-none italic">
+                            Stop scrolling.<br />
+                            <span className="opacity-30 not-italic">Start closing.</span>
                         </h2>
-                        <p className="text-zinc-500 text-xl font-medium mx-auto max-w-2xl leading-relaxed text-pretty">
-                            We don't just find leads. We give you the playbook to enter conversations, build authority, and capture demand without the generic AI noise.
-                        </p>
                     </div>
-                </div>
+                    <p className="text-sm text-zinc-500 max-w-xs leading-relaxed sm:text-right">
+                        Five things Mardis does while you focus on building your product.
+                    </p>
+                </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-                    {features.map((feature, index) => (
-                        <FeatureCard key={feature.title} feature={feature} index={index} />
+                {/* Feature rows */}
+                <motion.div 
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    variants={{
+                        visible: { transition: { staggerChildren: 0.08 } },
+                        hidden: {}
+                    }}
+                    className="divide-y divide-white/5 border-y border-white/5"
+                >
+                    {features.map((f, i) => (
+                        <motion.div
+                            key={f.title}
+                            variants={{
+                                hidden: { opacity: 0, y: 20 },
+                                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+                            }}
+                            className="group flex flex-row items-start sm:items-center gap-4 sm:gap-6 py-6 sm:py-5 hover:bg-white/[0.015] px-4 -mx-4 rounded-xl transition-colors duration-200 cursor-default"
+                        >
+                            {/* Number */}
+                            <span className="w-8 shrink-0 text-[10px] sm:text-[11px] font-black text-white/15 tabular-nums group-hover:text-white/30 transition-colors mt-1 sm:mt-0">
+                                {f.number}
+                            </span>
+
+                            {/* Icon */}
+                            <div className="w-8 h-8 shrink-0 rounded-lg border border-white/5 bg-white/[0.03] flex items-center justify-center group-hover:bg-white/[0.06] group-hover:border-white/10 transition-all duration-200 mt-0.5 sm:mt-0">
+                                <f.icon className="w-3.5 h-3.5 text-white/30 group-hover:text-white/60 transition-colors" />
+                            </div>
+
+                            {/* Title & Mobile Description */}
+                            <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 overflow-hidden">
+                                <h3 className="w-full sm:w-48 shrink-0 font-semibold text-sm text-white/70 group-hover:text-white transition-colors tracking-tight">
+                                    {f.title}
+                                </h3>
+
+                                {/* Separator (Desktop Only) */}
+                                <div className="hidden sm:block h-[1px] flex-1 bg-white/5 group-hover:bg-white/10 transition-colors" />
+
+                                {/* Description */}
+                                <p className="text-xs sm:text-sm text-zinc-500 sm:max-w-xs leading-relaxed group-hover:text-zinc-400 transition-colors sm:text-right">
+                                    {f.desc}
+                                </p>
+                            </div>
+
+                            {/* Arrow */}
+                            <ArrowRight className="w-3.5 h-3.5 text-white/10 group-hover:text-white/30 transition-all group-hover:translate-x-0.5 shrink-0 mt-1 sm:mt-0" />
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
 
-                {/* Secondary Highlight Layer */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-[1440px] mx-auto">
-                     <div
-                        className="glass-card bg-[#121212]/40 p-16 relative overflow-hidden group border border-white/5 rounded-[40px]"
-                    >
-                        <div className="relative z-10">
-                            <div className="w-16 h-16 rounded-[20px] bg-white/[0.05] border border-white/[0.1] flex items-center justify-center mb-12 shadow-inner group-hover:scale-110 transition-transform">
-                                <Target className="w-8 h-8 text-white premium-icon" />
-                            </div>
-                            <h3 className="heading-serif text-5xl font-medium text-white mb-8 tracking-tight italic">Precision Ingest</h3>
-                            <p className="text-zinc-400 text-lg md:text-xl font-medium leading-relaxed max-w-sm mb-12">
-                                Filter noise with high-fidelity intent signals mapped directly to your specific product pain-points.
-                            </p>
-                            <div className="flex items-center gap-4 py-6 border-t border-white/[0.05]">
-                                <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))] shadow-[0_0_10px_hsla(var(--primary),0.6)]" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Advanced Mission Logic</span>
-                            </div>
-                        </div>
-                        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[hsl(var(--primary))]/10 blur-[80px] rounded-full -mr-32 -mt-32 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                    </div>
-
-                     <div
-                        className="glass-card bg-[#121212]/40 p-16 relative overflow-hidden group border border-white/5 rounded-[40px]"
-                    >
-                        <div className="relative z-10">
-                            <div className="w-16 h-16 rounded-[20px] bg-white/[0.05] border border-white/[0.1] flex items-center justify-center mb-12 shadow-inner group-hover:scale-110 transition-transform">
-                                <Zap className="w-8 h-8 text-white premium-icon" />
-                            </div>
-                            <h3 className="heading-serif text-5xl font-medium text-white mb-8 tracking-tight italic">Mission Execution</h3>
-                            <p className="text-zinc-400 text-lg md:text-xl font-medium leading-relaxed max-w-sm mb-12">
-                                Authentic, human-optimized replies tailored for Reddit, X, and LinkedIn. No spam, just results.
-                            </p>
-                            <div className="flex items-center gap-4 py-6 border-t border-white/[0.05]">
-                                <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--stone-500))] shadow-[0_0_10px_rgba(66,62,62,0.6)]" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Live Playbook Sync</span>
-                            </div>
-                        </div>
-                        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/5 blur-[80px] rounded-full -mr-32 -mt-32 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                    </div>
-                </div>
             </div>
         </section>
     );

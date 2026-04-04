@@ -166,7 +166,7 @@ export default function SignupPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 0.015, x: 0 }}
                         transition={{ duration: 1.5 }}
-                        className="text-[20vw] font-bold text-white tracking-tighter uppercase leading-none block -rotate-90 origin-left translate-x-12"
+                        className="text-[16.5vw] font-bold text-white tracking-tighter uppercase leading-none block -rotate-90 origin-left translate-x-12"
                     >
                         Mardis
                     </motion.span>
