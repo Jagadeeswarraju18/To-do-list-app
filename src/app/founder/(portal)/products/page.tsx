@@ -106,6 +106,9 @@ function ProductsPageContent() {
     const [productToDelete, setProductToDelete] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Discard Draft Modal State
+    const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
+
     // Prevent body scroll when modal is open
     useEffect(() => {
         if (isEditing) {
@@ -163,6 +166,20 @@ function ProductsPageContent() {
         return () => clearTimeout(timer);
     }, [formData.website_url, formData.logo_url]);
 
+    // Local Storage Persistence for NEW products
+    useEffect(() => {
+        if (!isEditing || formData.id) return; // Only save drafts for NEW products
+
+        const timer = setTimeout(() => {
+            // Check if there's actual data to save
+            const hasData = formData.name || formData.website_url || formData.description || formData.keywords.length > 0;
+            if (hasData) {
+                localStorage.setItem("marketingx_product_draft_v1", JSON.stringify(formData));
+            }
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [formData, isEditing]);
+
     useEffect(() => {
         if (loading || isEditing || products.length > 0 || hasAutoOpenedSetup.current) return;
         if (searchParams.get("setup") !== "1") return;
@@ -216,13 +233,36 @@ function ProductsPageContent() {
         setIsEditing(true);
     };
 
+    const handleCloseRequest = () => {
+        const isDirty = touchedFields.size > 0;
+        if (isDirty) {
+            setIsDiscardModalOpen(true);
+        } else {
+            setIsEditing(false);
+        }
+    };
+
     const handleCreateNew = () => {
         const productLimit = getProductLimitForTier(tier);
-        const plan = getPlanForTier(tier);
 
         if (products.length >= productLimit) {
             setUpgradeLimit(buildLimitPayload("products", tier, products.length, productLimit));
             return;
+        }
+
+        // Try to restore from localStorage
+        const savedDraft = localStorage.getItem("marketingx_product_draft_v1");
+        if (savedDraft) {
+            try {
+                const draft = JSON.parse(savedDraft);
+                setFormData(draft);
+                setTouchedFields(new Set(Object.keys(draft).filter(k => draft[k] && draft[k] !== "")));
+                setIsEditing(true);
+                toast.info("Resumed your previous draft.");
+                return;
+            } catch (e) {
+                console.error("Failed to parse draft:", e);
+            }
         }
 
         setFormData({
@@ -297,6 +337,53 @@ function ProductsPageContent() {
         }
     };
 
+    const handleClearForm = () => {
+        const initialState: ProductData = {
+            id: "",
+            name: "",
+            website_url: "",
+            logo_url: "",
+            description: "",
+            target_audience: "",
+            ideal_user: "",
+            business_model: "B2B",
+            pain_solved: "",
+            keywords: [],
+            pain_phrases: [],
+            scan_window: "24h",
+            outreach_tone: "",
+            competitors: [],
+            alternatives: [],
+            strongest_objection: "",
+            proof_results: [],
+            pricing_position: "",
+            founder_story: "",
+            prioritize_communities: [],
+            avoid_communities: [],
+        };
+        setFormData(initialState);
+        setTouchedFields(new Set());
+        setSuggestions({});
+        localStorage.removeItem("marketingx_product_draft_v1");
+        toast.success("Form cleared and draft removed.");
+    };
+
+    const handleApplyAllSuggestions = (receivedSuggestions?: any) => {
+        const targetSuggestions = receivedSuggestions || suggestions;
+        const updates: Partial<ProductData> = {};
+        
+        Object.keys(targetSuggestions).forEach(field => {
+            if (targetSuggestions[field] && targetSuggestions[field].value !== undefined) {
+                updates[field as keyof ProductData] = targetSuggestions[field].value;
+            }
+        });
+
+        if (Object.keys(updates).length > 0) {
+            setFormData(prev => ({ ...prev, ...updates }));
+            toast.success("Applied all AI suggestions!");
+        }
+    };
+
     const handleAnalyzeWebsite = async () => {
         const url = formData.website_url.trim();
         if (!url || cooldown) return;
@@ -308,6 +395,12 @@ function ProductsPageContent() {
 
         try {
             const res = await extractProductDetailsAction(url);
+            
+            // Even if there's an overall error (like scraping blocked), we might have a logo
+            if (res && (res as any).logo_url && !formData.logo_url) {
+                setFormData(prev => ({ ...prev, logo_url: (res as any).logo_url }));
+            }
+
             if (!res || 'error' in res) {
                 toast.error((res as any)?.error || "Failed to analyze website.");
             } else {
@@ -340,9 +433,33 @@ function ProductsPageContent() {
                 });
 
                 setSuggestions(newSuggestions);
-                if (Object.keys(updates).length > 0) {
+                
+                const updatedCount = Object.keys(updates).length;
+                const skippedCount = fields.filter(f => newSuggestions[f] && touchedFields.has(f)).length;
+
+                if (updatedCount > 0) {
                     setFormData(prev => ({ ...prev, ...updates }));
-                    toast.success("Website details added to your product profile.");
+                    if (skippedCount > 0) {
+                        toast.success(`${updatedCount} fields updated! (${skippedCount} were skipped as you've edited them)`, {
+                            description: "Review them below or force apply all suggestions.",
+                            duration: 8000,
+                            action: {
+                                label: "Apply All",
+                                onClick: () => handleApplyAllSuggestions(newSuggestions)
+                            }
+                        });
+                    } else {
+                        toast.success("Website details added to your product profile.");
+                    }
+                } else if (skippedCount > 0) {
+                    toast.info(`Found ${skippedCount} strategic suggestions!`, {
+                        description: "Your current edits were kept. Would you like to use the AI's data instead?",
+                        duration: 8000,
+                        action: {
+                            label: "Apply All",
+                            onClick: () => handleApplyAllSuggestions(newSuggestions)
+                        }
+                    });
                 } else {
                     toast.info("Scanned site. Review suggestions in the relevant fields.");
                 }
@@ -402,6 +519,7 @@ function ProductsPageContent() {
             }
 
             setSuccess(true);
+            localStorage.removeItem("marketingx_product_draft_v1"); // Clear draft on success
             setTimeout(() => {
                 setSuccess(false);
                 setIsEditing(false);
@@ -605,7 +723,6 @@ function ProductsPageContent() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={() => setIsEditing(false)}
                             className="fixed inset-0 bg-black/80 backdrop-blur-sm"
                         />
 
@@ -620,22 +737,42 @@ function ProductsPageContent() {
                             <div className="h-1 w-full bg-white/10" />
 
                             {/* Header */}
-                            <div className="p-8 border-b border-white/10 flex items-center justify-between">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2 text-xs font-black text-zinc-200 uppercase tracking-widest">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        Product / Details / {formData.id ? 'Edit' : 'Create'}
+                            <div className="p-5 border-b border-white/10 flex items-center justify-between bg-black/40 backdrop-blur-xl">
+                                <div className="space-y-0.5">
+                                    <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                                        Product / {formData.id ? 'Edit' : 'Create'}
                                     </div>
-                                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter">
+                                    <h2 className="text-lg font-black text-white uppercase tracking-tighter">
                                         {formData.id ? 'Edit' : 'Add'} Product
                                     </h2>
                                 </div>
-                                <button
-                                    onClick={() => setIsEditing(false)}
-                                    className="p-2 hover:bg-white/5 border border-white/10 rounded-lg transition-all text-zinc-500 hover:text-white"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleClearForm}
+                                        className="px-2.5 py-1.5 hover:bg-white/5 border border-white/10 rounded-lg transition-all text-zinc-500 hover:text-red-400 text-[9px] font-black uppercase tracking-widest flex items-center gap-2"
+                                    >
+                                        <Trash2 className="w-2.5 h-2.5" />
+                                        Clear
+                                    </button>
+                                    <button
+                                        onClick={handleCloseRequest}
+                                        className="p-1.5 hover:bg-white/5 border border-white/10 rounded-lg transition-all text-zinc-500 hover:text-white"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Tactical Warning Note - Compact Version */}
+                            <div className="mx-6 mt-4 p-2.5 bg-red-500/5 border border-red-500/10 rounded-lg flex items-center gap-3 ring-1 ring-red-500/10">
+                                <div className="p-1.5 bg-red-500/10 rounded border border-red-500/20 shrink-0">
+                                    <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                                </div>
+                                <p className="text-[10px] text-zinc-400 leading-tight font-medium">
+                                    <span className="text-red-500 font-black uppercase tracking-tighter mr-2">Accuracy Required:</span>
+                                    Auto Fill provides the foundation. Please <span className="text-white font-bold underline decoration-red-500/30 underline-offset-2">manually refine</span> keywords and pain points for quality leads.
+                                </p>
                             </div>
 
                             {/* Scrollable HUD Content */}
@@ -897,27 +1034,34 @@ function ProductsPageContent() {
                             <div className="p-8 border-t border-white/10 flex items-center justify-between bg-zinc-950/20">
                                 <button
                                     type="button"
-                                    onClick={() => setIsEditing(false)}
+                                    onClick={handleCloseRequest}
                                     className="px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition-all"
                                 >
                                     Cancel
                                 </button>
 
-                                <button
-                                    type="submit"
-                                    form="settings-form"
-                                    disabled={saving}
-                                    className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-900 disabled:text-zinc-600 text-black text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 transition-all active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
-                                >
-                                    {saving ? (
-                                        <>
-                                            <Loader2 className="w-3 h-3 animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        formData.id ? 'Save Product' : 'Create Product'
-                                    )}
-                                </button>
+                                {isExtracting ? (
+                                    <div className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 border border-emerald-500/20 rounded-xl text-emerald-500/70 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Mardis is filling details for you...
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="submit"
+                                        form="settings-form"
+                                        disabled={saving}
+                                        className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-900 disabled:text-zinc-600 text-black text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 transition-all active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                                    >
+                                        {saving ? (
+                                            <>
+                                                <Loader2 className="w-3 h-3 animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            formData.id ? 'Save Product' : 'Create Product'
+                                        )}
+                                    </button>
+                                )}
                             </div>
                         </motion.div>
                     </div>
@@ -927,6 +1071,19 @@ function ProductsPageContent() {
                 open={Boolean(upgradeLimit)}
                 onClose={() => setUpgradeLimit(null)}
                 limit={upgradeLimit}
+            />
+            <ConfirmModal
+                isOpen={isDiscardModalOpen}
+                onClose={() => setIsDiscardModalOpen(false)}
+                onConfirm={() => {
+                    localStorage.removeItem("marketingx_product_draft_v1");
+                    setIsDiscardModalOpen(false);
+                    setIsEditing(false);
+                }}
+                title="Discard Changes?"
+                description="Your progress is saved locally, but are you sure you want to close the form? You can resume later by clicking 'New Product'."
+                confirmText="Discard"
+                variant="primary"
             />
             <ConfirmModal
                 isOpen={isDeleteModalOpen}
@@ -1007,7 +1164,10 @@ function Input({
     label, value, onChange, placeholder, required, textarea, hint,
     suggestion, onApply, isShimmering 
 }: any) {
-    const showSuggestion = suggestion && suggestion.confidence < 0.75;
+    const showSuggestion = suggestion && (
+        suggestion.confidence < 0.75 || 
+        JSON.stringify(suggestion.value) !== JSON.stringify(value)
+    );
 
     return (
         <div className={`space-y-2 group/input transition-all duration-500 ${isShimmering ? "opacity-40 pointer-events-none animate-pulse" : ""}`}>
@@ -1093,7 +1253,10 @@ function StrategicTagEditor({
     onApply?: (val: any) => void;
     isShimmering?: boolean;
 }) {
-    const showSuggestion = suggestion && suggestion.confidence < 0.75;
+    const showSuggestion = suggestion && (
+        suggestion.confidence < 0.75 || 
+        JSON.stringify(suggestion.value) !== JSON.stringify(values)
+    );
 
     return (
         <div className={`space-y-3 transition-all duration-500 ${isShimmering ? "opacity-40 animate-pulse pointer-events-none" : ""}`}>

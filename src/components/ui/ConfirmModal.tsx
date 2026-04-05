@@ -50,68 +50,68 @@ export function ConfirmModal({
                         className="relative w-full max-w-md overflow-hidden rounded-[32px] border border-white/10 bg-[#0A0A0A] shadow-[0_20px_80px_rgba(0,0,0,0.55)]"
                     >
                         {/* Aesthetic Gradient */}
-                        <div className={`absolute inset-0 pointer-events-none ${
+                        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ${
                             isDanger 
-                                ? "bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.1),transparent_70%)]" 
-                                : "bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.1),transparent_70%)]"
+                                ? "bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.05),transparent_60%)]" 
+                                : "bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.05),transparent_60%)]"
                         }`} />
 
                         <div className="relative p-8">
-                            <div className="flex items-start justify-between gap-4">
+                            <div className="flex flex-col gap-6">
                                 <div className="space-y-4">
-                                    <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] ${
+                                    <div className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.3em] ${
                                         isDanger 
-                                            ? "border-red-500/20 bg-red-500/10 text-red-400" 
-                                            : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                                            ? "border-red-500/10 bg-red-500/5 text-red-500/60" 
+                                            : "border-emerald-500/10 bg-emerald-500/5 text-emerald-500/60"
                                     }`}>
-                                        <AlertCircle className="h-3.5 w-3.5" />
-                                        Confirmation Required
+                                        <div className={`w-1 h-1 rounded-full animate-pulse ${isDanger ? "bg-red-500" : "bg-emerald-500"}`} />
+                                        System Prompt
                                     </div>
                                     
                                     <div className="space-y-2">
-                                        <h2 className="text-2xl font-black uppercase tracking-tight text-white italic">
+                                        <h2 className="text-xl font-black uppercase tracking-widest text-white">
                                             {title}
                                         </h2>
-                                        <p className="text-sm leading-relaxed text-zinc-400">
+                                        <p className="text-xs leading-relaxed text-zinc-500 font-medium">
                                             {description}
                                         </p>
                                     </div>
                                 </div>
 
-                                <button
-                                    onClick={onClose}
-                                    className="rounded-xl border border-white/10 p-2 text-zinc-500 transition hover:bg-white/5 hover:text-white"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
+                                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end border-t border-white/5 pt-6">
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        disabled={isLoading}
+                                        className="rounded-xl border border-white/5 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-white/5 hover:text-white disabled:opacity-50 active:scale-95"
+                                    >
+                                        {cancelText}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={onConfirm}
+                                        disabled={isLoading}
+                                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3 text-[10px] font-black uppercase tracking-widest transition disabled:cursor-not-allowed disabled:opacity-50 active:scale-95 ${
+                                            isDanger 
+                                                ? "bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.1)]" 
+                                                : "bg-emerald-500 text-black hover:bg-emerald-400 shadow-[0_10px_20px_rgba(16,185,129,0.2)]"
+                                        }`}
+                                    >
+                                        {isLoading ? (
+                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                        ) : (
+                                            confirmText
+                                        )}
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                                <button
-                                    type="button"
-                                    onClick={onClose}
-                                    disabled={isLoading}
-                                    className="rounded-2xl border border-white/10 px-6 py-3 text-sm font-bold text-zinc-300 transition hover:bg-white/5 hover:text-white disabled:opacity-50"
-                                >
-                                    {cancelText}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={onConfirm}
-                                    disabled={isLoading}
-                                    className={`inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-black uppercase tracking-[0.2em] transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                                        isDanger 
-                                            ? "bg-red-500 text-white hover:bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.3)]" 
-                                            : "bg-white text-black hover:bg-zinc-200"
-                                    }`}
-                                >
-                                    {isLoading ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        confirmText
-                                    )}
-                                </button>
-                            </div>
+                            <button
+                                onClick={onClose}
+                                className="absolute top-6 right-6 rounded-lg border border-white/5 p-1.5 text-zinc-600 transition hover:bg-white/5 hover:text-white"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
                         </div>
                     </motion.div>
                 </div>

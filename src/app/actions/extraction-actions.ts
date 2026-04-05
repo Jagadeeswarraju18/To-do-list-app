@@ -34,7 +34,6 @@ export async function extractLogoAction(url: string): Promise<{ logo_url: string
         if (!targetUrl.startsWith("http")) targetUrl = `https://${targetUrl}`;
         const domain = new URL(targetUrl).hostname;
         
-        // Potential logo sources in priority order
         const candidates = [
             `https://logo.clearbit.com/${domain}`,
             `https://api.microlink.io?url=${targetUrl}&embed=logo.url`,
@@ -42,31 +41,29 @@ export async function extractLogoAction(url: string): Promise<{ logo_url: string
             `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
         ];
 
-        // We check candidates in order. 
-        // Microlink and Clearbit are high quality. 
-        // Google is a reliable fallback for at least a favicon.
-        for (const candidate of candidates) {
-            try {
+        // Race candidates in parallel to get the first successful logo
+        const logo = await Promise.any(
+            candidates.map(async (candidate) => {
                 const res = await fetch(candidate, { 
-                    method: 'GET', // Some services block HEAD, so we do a small GET
+                    method: 'GET',
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
                     },
                     cache: 'force-cache', 
                     next: { revalidate: 3600 },
-                    signal: AbortSignal.timeout(3000) // 3s timeout per service
+                    signal: AbortSignal.timeout(4000) // Slightly longer timeout for parallel
                 });
-                if (res.ok) return { logo_url: candidate };
-            } catch (e) {
-                // Continue to next candidate
-            }
-        }
+                if (res.ok) return candidate;
+                throw new Error("Failed to fetch logo");
+            })
+        ).catch(() => null);
 
-        return { logo_url: null };
+        return { logo_url: logo };
     } catch (err) {
         return { logo_url: null, error: "Invalid URL" };
     }
 }
+
 
 export async function extractProductDetailsAction(url: string): Promise<ExtractionResult | { error: string }> {
     const apiKey = process.env.XAI_API_KEY;
@@ -77,25 +74,39 @@ export async function extractProductDetailsAction(url: string): Promise<Extracti
     if (!targetUrl.startsWith("http")) targetUrl = `https://${targetUrl}`;
 
     try {
-        // 2. Fetch markdown from Jina Reader with 10s timeout
-        console.log(`[Scout] Scraping: ${targetUrl} via Jina...`);
-        const scraperRes = await fetch(`https://r.jina.ai/${targetUrl}`, {
+        // 2. Parallel: Fetch markdown from Jina Reader and extract logo
+        console.log(`[Scout] Analyzing: ${targetUrl}...`);
+        
+        const scraperPromise = fetch(`https://r.jina.ai/${targetUrl}`, {
             headers: { 'Accept': 'text/plain' },
-            next: { revalidate: 3600 } // Cache for 1 hour
+            next: { revalidate: 3600 } 
+        }).then(async res => {
+            if (res.status === 451 || res.status === 403) {
+                return { error: "This website is blocking our automated AI analyst. You can still fill the details manually below." };
+            }
+            if (!res.ok) throw new Error(`Scraper failed: ${res.statusText}`);
+            return { text: await res.text() };
+        }).catch(err => {
+            console.error("[Scraper Error]:", err.message);
+            return { error: "We couldn't read the website content. It might be protected or offline." };
         });
 
-        if (!scraperRes.ok) {
-            throw new Error(`Scraper failed: ${scraperRes.statusText}`);
-        }
+        const logoPromise = extractLogoAction(targetUrl);
 
-        const rawMarkdown = await scraperRes.text();
+        const [scraperRes, logoRes] = await Promise.all([scraperPromise, logoPromise]);
         
-        // Extract OG image or favicon for logo
-        let logoUrl: string | undefined;
+        let logoUrl = logoRes.logo_url || undefined;
+        let rawMarkdown = (scraperRes as any).text || "";
+
+        if ((scraperRes as any).error) {
+            // Return what we have (like the logo) but report the content error
+            return { error: (scraperRes as any).error, logo_url: logoUrl } as any;
+        }
         
-        // Use our lightweight helper first
-        const { logo_url: quickLogo } = await extractLogoAction(targetUrl);
-        logoUrl = quickLogo || undefined;
+        // Basic "junk filter" - if it's too short or clearly an error page
+        if (rawMarkdown.length < 200) {
+            return { error: "Website content too sparse for AI analysis.", logo_url: logoUrl } as any;
+        }
 
         // Still check markdown for specific overrides if they exist (OG Images, structured data)
         if (!logoUrl) {
@@ -130,11 +141,6 @@ export async function extractProductDetailsAction(url: string): Promise<Extracti
                 const domain = new URL(targetUrl);
                 logoUrl = `${domain.origin}/favicon.ico`;
             } catch (_) {}
-        }
-        
-        // Basic "junk filter" - if it's too short or clearly an error page
-        if (rawMarkdown.length < 200) {
-            return { error: "Website content too sparse for AI analysis." };
         }
 
         // 3. Ask Grok to parse the strategic context
