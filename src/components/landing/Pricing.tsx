@@ -3,9 +3,9 @@
 import { Check, ArrowRight, Sparkles, Loader2, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { buildCheckoutHeaders } from "@/lib/billing/client-checkout";
 import {
     getCompareAtForBilling,
     getPlanBadge,
@@ -14,39 +14,16 @@ import {
     PRICING_PLANS,
 } from "@/lib/pricing";
 import { getStarterOfferSpotsLeft } from "@/app/actions/get-founder-offer";
-import { useEffect } from "react";
+
 
 export function Pricing() {
-    const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
     const [spotsLeft, setSpotsLeft] = useState<number>(3); // loading state default
+    const router = useRouter();
 
     useEffect(() => {
         getStarterOfferSpotsLeft().then(setSpotsLeft);
     }, []);
 
-    const handleCheckout = async (planId: string) => {
-        setLoadingPlan(planId);
-
-        try {
-            const response = await fetch("/api/checkout", {
-                method: "POST",
-                headers: await buildCheckoutHeaders(),
-                body: JSON.stringify({ planId, billingCycle: "monthly" }),
-            });
-
-            const data = await response.json();
-
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                toast.error(data.error || "Failed to start checkout");
-            }
-        } catch {
-            toast.error("Something went wrong. Please try again.");
-        } finally {
-            setLoadingPlan(null);
-        }
-    };
 
     return (
         <section id="pricing" className="py-32 px-6 relative z-10 overflow-hidden bg-[#0A0A0A] scroll-mt-32">
@@ -173,21 +150,17 @@ export function Pricing() {
 
                                 <div className="mt-auto">
                                     <button
-                                        onClick={() => handleCheckout(plan.id)}
-                                        disabled={loadingPlan === plan.id || plan.id === "free"}
+                                        onClick={() => router.push("/login")}
+                                        disabled={plan.id === "free"}
                                         className={`w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 ${plan.popular
                                             ? "bg-white text-black hover:bg-zinc-200 shadow-white/10"
                                             : plan.id === "free"
                                                 ? "bg-white/5 text-zinc-700 opacity-50 pointer-events-none"
                                                 : "bg-white/5 text-zinc-300 border border-white/10 hover:bg-white/10"}`}
                                     >
-                                        {loadingPlan === plan.id ? (
-                                            <Loader2 className="h-4 w-4 animate-spin mx-auto text-inherit" />
-                                        ) : (
-                                            <span className="flex items-center justify-center gap-2">
-                                                {plan.cta} <ArrowRight className="w-3.5 h-3.5" />
-                                            </span>
-                                        )}
+                                        <span className="flex items-center justify-center gap-2">
+                                            {plan.cta} <ArrowRight className="w-3.5 h-3.5" />
+                                        </span>
                                     </button>
                                 </div>
                             </motion.div>
