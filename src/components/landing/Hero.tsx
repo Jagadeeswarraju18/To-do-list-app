@@ -93,7 +93,7 @@ export function Hero() {
                         Find buyers already asking for your product.
                     </h1>
                     <p className="mx-auto mb-6 max-w-xl px-4 text-center text-sm font-medium leading-relaxed text-zinc-500 md:text-lg">
-                        Mardis finds people on Reddit, X, and LinkedIn who need what you sell — then tells you exactly how to reach and market to them.
+                        Mardis finds people on Reddit, X, and LinkedIn who need what you sell, then tells you exactly how to reach and market to them.
                     </p>
                 </div>
 

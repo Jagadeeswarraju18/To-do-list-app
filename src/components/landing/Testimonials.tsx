@@ -17,7 +17,7 @@ const liveSignals = [
 
 const draftReply = {
     post: `"Honestly done with [Competitor]. Way too slow. Anyone know something better?"`,
-    reply: `We built Mardis after running into the same issue. It's faster and simpler — happy to give you a free trial this week if you want to try it.`,
+    reply: `We built Mardis after running into the same issue. It's faster and simpler, and happy to give you a free trial this week if you want to try it.`,
     score: 94,
 };
 

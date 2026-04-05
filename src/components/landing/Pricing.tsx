@@ -31,7 +31,7 @@ export function Pricing() {
             const response = await fetch("/api/checkout", {
                 method: "POST",
                 headers: await buildCheckoutHeaders(),
-                body: JSON.stringify({ planId, billingCycle: "yearly" }),
+                body: JSON.stringify({ planId, billingCycle: "monthly" }),
             });
 
             const data = await response.json();
@@ -68,7 +68,7 @@ export function Pricing() {
                     </h2>
 
                     <p className="text-zinc-500 max-w-xl mx-auto text-lg leading-relaxed font-medium">
-                        All paid plans are shown at the annual rate. Starter includes a founder offer for the first 10 members.
+                        All plans are billed monthly. Starter includes a founder offer for the first 10 members.
                     </p>
                 </motion.div>
 
@@ -83,10 +83,10 @@ export function Pricing() {
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2"
                 >
                     {PRICING_PLANS.map((plan) => {
-                        const price = getPriceForBilling(plan.id, "yearly");
-                        const compareAt = getCompareAtForBilling(plan.id, "yearly");
-                        const badge = getPlanBadge(plan.id, "yearly");
-                        const note = getPlanNote(plan.id, "yearly");
+                        const price = getPriceForBilling(plan.id, "monthly");
+                        const compareAt = getCompareAtForBilling(plan.id, "monthly");
+                        const badge = getPlanBadge(plan.id, "monthly");
+                        const note = getPlanNote(plan.id, "monthly");
 
                         return (
                             <motion.div
@@ -128,7 +128,7 @@ export function Pricing() {
                                         </div>
                                     ) : (
                                         <p className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.2em] mb-3">
-                                            Billed annually
+                                            Billed monthly
                                         </p>
                                     )}
 

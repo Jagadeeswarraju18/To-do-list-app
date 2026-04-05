@@ -14,7 +14,8 @@ import { toast } from "sonner";
 import { setActiveProductAction, deleteProductAction } from "@/app/actions/product-actions";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { DeleteButton } from "@/components/ui/DeleteButton";
-import { extractProductDetailsAction } from "@/app/actions/extraction-actions";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { extractProductDetailsAction, extractLogoAction } from "@/app/actions/extraction-actions";
 import { notifyActiveProductChanged } from "@/lib/active-product";
 import { getPlanForTier, getProductLimitForTier } from "@/lib/pricing";
 import { buildLimitPayload, type LimitPayload } from "@/lib/limit-utils";
@@ -100,6 +101,11 @@ function ProductsPageContent() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const hasAutoOpenedSetup = useRef(false);
 
+    // Deletion Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [productToDelete, setProductToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     // Prevent body scroll when modal is open
     useEffect(() => {
         if (isEditing) {
@@ -140,6 +146,22 @@ function ProductsPageContent() {
             setLoading(false);
         }
     }, [user, userLoading]);
+
+    // Automatic Logo Extraction
+    useEffect(() => {
+        const url = formData.website_url.trim();
+        // Only run if we have a URL and no logo already
+        if (!url || url.length < 8 || formData.logo_url) return;
+
+        const timer = setTimeout(async () => {
+            if (!url.includes('.') || url.includes(' ')) return;
+            try {
+                const res = await extractLogoAction(url);
+                if (res.logo_url) setFormData(prev => ({ ...prev, logo_url: res.logo_url as string }));
+            } catch (err) {}
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [formData.website_url, formData.logo_url]);
 
     useEffect(() => {
         if (loading || isEditing || products.length > 0 || hasAutoOpenedSetup.current) return;
@@ -244,19 +266,34 @@ function ProductsPageContent() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this product? All its signals and history will be lost.")) return;
+        setProductToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
 
-        const res = await deleteProductAction(id);
-        if (res.error) {
-            toast.error(res.error);
-        } else {
-            setProducts(prev => prev.filter(p => p.id !== id));
-            toast.success("Product deleted successfully");
-            if (activeProductId === id) {
-                setActiveProductId(null);
-                notifyActiveProductChanged(null);
-                await refreshData();
+    const confirmDelete = async () => {
+        if (!productToDelete) return;
+        
+        setIsDeleting(true);
+        try {
+            const res = await deleteProductAction(productToDelete);
+            
+            if (res?.error) {
+                toast.error(res.error);
+            } else {
+                setProducts(prev => prev.filter(p => p.id !== productToDelete));
+                toast.success("Product deleted successfully");
+                if (activeProductId === productToDelete) {
+                    setActiveProductId(null);
+                    notifyActiveProductChanged(null);
+                    await refreshData();
+                }
             }
+        } catch (err) {
+            toast.error("Failed to delete product. Please try again.");
+        } finally {
+            setIsDeleting(false);
+            setIsDeleteModalOpen(false);
+            setProductToDelete(null);
         }
     };
 
@@ -489,13 +526,7 @@ function ProductsPageContent() {
                                         <div className="flex gap-4 items-start">
                                             <div className="relative group/logo">
                                                 <div className="relative w-16 h-16 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-white/40 transition-colors shadow-2xl">
-                                                    {product.logo_url ? (
-                                                        <img src={product.logo_url} alt={product.name} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="text-2xl font-bold text-white/20 uppercase">
-                                                            {product.name?.charAt(0) || "P"}
-                                                        </div>
-                                                    )}
+                                                    <ProductLogo src={product.logo_url} name={product.name} size="large" />
                                                 </div>
                                             </div>
                                             <div className="min-w-0 pt-1 space-y-1">
@@ -619,7 +650,7 @@ function ProductsPageContent() {
                                                     value={formData.website_url}
                                                     onChange={(v: string) => updateField("website_url", v)}
                                                     placeholder="https://yourproduct.com"
-                                                    hint="Paste your URL and hit Auto Fill — we'll populate all fields for you."
+                                                    hint="Paste your URL and hit Auto Fill â€” we'll populate all fields for you."
                                                 />
                                                 {formData.website_url?.length > 5 && (
                                                     <button
@@ -667,14 +698,7 @@ function ProductsPageContent() {
                                                     </div>
                                                     <div className="relative group/logo cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                                                         <div className="w-24 h-24 rounded-[20px] bg-black border border-white/10 flex items-center justify-center overflow-hidden relative group-hover/logo:border-white/40 transition-all mx-auto">
-                                                            {formData.logo_url ? (
-                                                                <img src={formData.logo_url} alt="Logo" className="w-full h-full object-cover transition-transform duration-700 group-hover/logo:scale-110" />
-                                                            ) : (
-                                                                <div className="w-full h-full flex flex-col items-center justify-center gap-1.5">
-                                                                    <Camera className="w-5 h-5 text-zinc-700 group-hover/logo:text-white transition-colors" />
-                                                                    <span className="text-[8px] font-black uppercase tracking-[0.1em] text-zinc-700">Upload</span>
-                                                                </div>
-                                                            )}
+                                                            <ProductLogo src={formData.logo_url} name={formData.name} size="xlarge" allowUploadFallback />
                                                             {uploadingLogo && (
                                                                 <div className="absolute inset-0 bg-black/80 flex items-center justify-center backdrop-blur-md">
                                                                     <Loader2 className="animate-spin text-white w-6 h-6" />
@@ -904,6 +928,15 @@ function ProductsPageContent() {
                 onClose={() => setUpgradeLimit(null)}
                 limit={upgradeLimit}
             />
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                isLoading={isDeleting}
+                title="Delete Product?"
+                description="Are you sure? This will permanently delete your product and all its saved data."
+                confirmText="Delete"
+            />
         </>
     );
 }
@@ -913,6 +946,42 @@ export default function ProductsPage() {
         <Suspense fallback={<div className="flex items-center justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-white" /></div>}>
             <ProductsPageContent />
         </Suspense>
+    );
+}
+
+function ProductLogo({ src, name, size = "medium", allowUploadFallback = false }: { src?: string, name?: string, size?: "small" | "medium" | "large" | "xlarge", allowUploadFallback?: boolean }) {
+    const [error, setError] = useState(false);
+    const initials = (name || "P").charAt(0).toUpperCase();
+
+    const sizeClasses = {
+        small: "w-8 h-8 text-xs",
+        medium: "w-12 h-12 text-sm",
+        large: "w-16 h-16 text-2xl",
+        xlarge: "w-24 h-24 text-3xl"
+    };
+
+    if (!src || error) {
+        return (
+            <div className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/5`}>
+                {allowUploadFallback && !src ? (
+                    <>
+                        <Camera className="w-5 h-5 text-zinc-700 group-hover:text-white transition-colors" />
+                        <span className="text-[8px] font-black uppercase tracking-[0.1em] text-zinc-700">Upload</span>
+                    </>
+                ) : (
+                    <span className="font-black text-white/20 italic">{initials}</span>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <img 
+            src={src} 
+            alt={name || "Logo"} 
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            onError={() => setError(true)}
+        />
     );
 }
 
@@ -1031,7 +1100,7 @@ function StrategicTagEditor({
             <div className="flex items-center justify-between px-1">
                 <label className="text-sm font-black text-white block uppercase tracking-widest">{label}</label>
                 {suggestion && suggestion.confidence >= 0.75 && (
-                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">✨ AI Sync Active</span>
+                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">âœ¨ AI Sync Active</span>
                 )}
             </div>
             

@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Extraction Actions — AI Strategic Scout
+ * Extraction Actions: AI Strategic Scout
  * Powered by Jina Reader & Grok-4 (xAI)
  */
 
@@ -22,6 +22,50 @@ export interface ExtractionResult {
     proof_results: ExtractionField<string[]>;
     logo_url?: string;
     error?: string;
+}
+
+/**
+ * Lightweight action to get a brand logo from a URL.
+ * Does NOT scrape the page or use LLMs.
+ */
+export async function extractLogoAction(url: string): Promise<{ logo_url: string | null, error?: string }> {
+    try {
+        let targetUrl = url.trim();
+        if (!targetUrl.startsWith("http")) targetUrl = `https://${targetUrl}`;
+        const domain = new URL(targetUrl).hostname;
+        
+        // Potential logo sources in priority order
+        const candidates = [
+            `https://logo.clearbit.com/${domain}`,
+            `https://api.microlink.io?url=${targetUrl}&embed=logo.url`,
+            `https://unavatar.io/${domain}?fallback=false`,
+            `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+        ];
+
+        // We check candidates in order. 
+        // Microlink and Clearbit are high quality. 
+        // Google is a reliable fallback for at least a favicon.
+        for (const candidate of candidates) {
+            try {
+                const res = await fetch(candidate, { 
+                    method: 'GET', // Some services block HEAD, so we do a small GET
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                    },
+                    cache: 'force-cache', 
+                    next: { revalidate: 3600 },
+                    signal: AbortSignal.timeout(3000) // 3s timeout per service
+                });
+                if (res.ok) return { logo_url: candidate };
+            } catch (e) {
+                // Continue to next candidate
+            }
+        }
+
+        return { logo_url: null };
+    } catch (err) {
+        return { logo_url: null, error: "Invalid URL" };
+    }
 }
 
 export async function extractProductDetailsAction(url: string): Promise<ExtractionResult | { error: string }> {
@@ -48,12 +92,40 @@ export async function extractProductDetailsAction(url: string): Promise<Extracti
         
         // Extract OG image or favicon for logo
         let logoUrl: string | undefined;
-        const ogMatch = rawMarkdown.match(/!\[.*?\]\((https?:\/\/[^)]+(?:og|logo|icon|brand)[^)]*\.(?:png|jpg|svg|webp|ico))\)/i) 
-                     || rawMarkdown.match(/Image URL\s*:\s*(https?:\/\/[^\s]+)/i);
-        if (ogMatch?.[1]) {
-            logoUrl = ogMatch[1];
-        } else {
-            // Fallback: use /favicon.ico from domain
+        
+        // Use our lightweight helper first
+        const { logo_url: quickLogo } = await extractLogoAction(targetUrl);
+        logoUrl = quickLogo || undefined;
+
+        // Still check markdown for specific overrides if they exist (OG Images, structured data)
+        if (!logoUrl) {
+            const logoRegexes = [
+                /!\[.*?(?:logo|icon|brand|favicon).*?\]\((https?:\/\/[^)]+)\)/i,
+                /!\[.*?\]\((https?:\/\/[^)]+(?:logo|icon|brand|favicon|apple-touch)[^)]*\.(?:png|jpg|svg|webp|ico))\)/i,
+                /Image URL\s*:\s*(https?:\/\/[^\s]+)/i,
+                /og:image['"]\s*content=['"]([^'"]+)['"]/i,
+                /twitter:image['"]\s*content=['"]([^'"]+)['"]/i
+            ];
+            
+            for (const regex of logoRegexes) {
+                const match = rawMarkdown.match(regex);
+                if (match?.[1]) {
+                    let foundUrl = match[1];
+                    if (foundUrl.startsWith("//")) foundUrl = `https:${foundUrl}`;
+                    if (foundUrl.startsWith("/") && !foundUrl.startsWith("//")) {
+                        try {
+                            const d = new URL(targetUrl);
+                            foundUrl = `${d.origin}${foundUrl}`;
+                        } catch {}
+                    }
+                    logoUrl = foundUrl;
+                    break;
+                }
+            }
+        }
+
+        // Final fallback: standard favicon path
+        if (!logoUrl) {
             try {
                 const domain = new URL(targetUrl);
                 logoUrl = `${domain.origin}/favicon.ico`;

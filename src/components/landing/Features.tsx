@@ -7,7 +7,7 @@ const features = [
     {
         number: "01",
         title: "Find Warm Leads",
-        desc: "We scan Reddit, X, and LinkedIn for people who need exactly what you sell — right now.",
+        desc: "We scan Reddit, X, and LinkedIn for people who need exactly what you sell right now.",
         icon: Search,
     },
     {

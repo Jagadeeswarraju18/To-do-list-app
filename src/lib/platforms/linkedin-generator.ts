@@ -137,7 +137,7 @@ function fillTemplate(template: string, topic: string, productName?: string, pai
         '{unconventional_2}': `Do what competitors won't`,
         '{unconventional_3}': `Nail the fundamentals before scaling`,
         '{insight}': `Most people optimize for speed.\nThe best optimize for learning.`,
-        '{lesson_1}': `Progress isn't linear — and that's OK`,
+        '{lesson_1}': `Progress isn't linear, and that's OK`,
         '{lesson_2}': `The best ${topic} strategy is the one you'll actually follow`,
         '{lesson_3}': `Community > Competition, always`,
         '{action}': `one small experiment in ${topic}`,
@@ -194,7 +194,7 @@ export function generateEngagementIdeas(topic: string): EngagementIdea[] {
         },
         {
             type: 'comment',
-            text: `"Great point about ${topic}. One thing I'd add — most people underestimate how much the fundamentals matter vs chasing trends. Solid take."`,
+            text: `"Great point about ${topic}. One thing I'd add: most people underestimate how much the fundamentals matter vs chasing trends. Solid take."`,
             context: 'Engage thoughtfully on trending posts in your niche',
         },
         {

@@ -201,14 +201,14 @@ export function generateRedditPost(
 I've been lurking here for a while and wanted to share something that might help others who are dealing with ${painSolved}.
 
 **The Problem:**
-Like many of you, I was frustrated with ${painSolved}. I tried multiple solutions — spreadsheets, manual tracking, even other tools. Nothing stuck.
+Like many of you, I was frustrated with ${painSolved}. I tried multiple solutions: spreadsheets, manual tracking, even other tools. Nothing stuck.
 
 **What Changed:**
 After months of trial and error, I realized the core issue wasn't the tools. It was the approach. Here's what actually worked:
 
-1. **Simplify the process** — Instead of tracking everything, I focused on the 3 things that actually matter.
-2. **Build a system** — I created a simple workflow that takes 5 minutes/day instead of fighting fires.
-3. **Automate the boring parts** — The repetitive tasks were killing my motivation, so I found ways to eliminate them.
+1. **Simplify the process**: Instead of tracking everything, I focused on the 3 things that actually matter.
+2. **Build a system**: I created a simple workflow that takes 5 minutes/day instead of fighting fires.
+3. **Automate the boring parts**: The repetitive tasks were killing my motivation, so I found ways to eliminate them.
 
 **The Result:**
 Within 2 weeks, I went from constantly stressed about ${painSolved} to having a clear system that runs almost on autopilot.
