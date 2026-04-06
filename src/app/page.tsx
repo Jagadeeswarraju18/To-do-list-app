@@ -6,7 +6,7 @@ import { MarketTension } from "@/components/landing/MarketTension";
 import { Features } from "@/components/landing/Features";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Pricing } from "@/components/landing/Pricing";
-import { Testimonials } from "@/components/landing/Testimonials";
+import { LiveDemo } from "@/components/landing/LiveDemo";
 import { Footer } from "@/components/landing/Footer";
 import { FAQ } from "@/components/landing/FAQ";
 import { ValueCalculator } from "@/components/landing/ValueCalculator";
@@ -119,7 +119,7 @@ export default function LandingPage() {
                 <HowItWorks />
                 <Features />
                 <ValueCalculator />
-                <Testimonials />
+                <LiveDemo />
                 <Pricing />
                 <FAQ />
 

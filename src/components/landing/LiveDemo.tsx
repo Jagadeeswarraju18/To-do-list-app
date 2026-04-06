@@ -21,7 +21,7 @@ const draftReply = {
     score: 94,
 };
 
-export function Testimonials() {
+export function LiveDemo() {
     return (
         <section id="use-cases" className="py-16 px-6 relative z-10 bg-background overflow-hidden scroll-mt-32">
             <div className="max-w-6xl mx-auto">

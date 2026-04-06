@@ -47,16 +47,22 @@ export function HowItWorks() {
                     {steps.map((step, i) => (
                         <motion.div
                             variants={{
-                                hidden: i === 0 ? { opacity: 0, x: -150 } : i === 1 ? { opacity: 0, x: 150 } : { opacity: 0, y: 150 },
+                                hidden: { 
+                                    opacity: 0, 
+                                    y: 40,
+                                    scale: 0.98,
+                                    filter: "blur(4px)" // Added extra premium detail
+                                },
                                 visible: { 
                                     opacity: 1, 
-                                    x: 0, 
                                     y: 0, 
+                                    scale: 1,
+                                    filter: "blur(0px)",
                                     transition: { 
                                         type: "spring",
-                                        stiffness: 100,
-                                        damping: 18,
-                                        mass: 1
+                                        stiffness: 70, // Slower, heavier feel
+                                        damping: 24,   // No bounce, very smooth
+                                        mass: 1.2
                                     } 
                                 }
                             }}
