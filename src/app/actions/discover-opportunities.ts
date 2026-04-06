@@ -257,7 +257,8 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
             strongestObjection: product.strongest_objection || "",
             proofResults: product.proof_results || [],
             pricingPosition: product.pricing_position || "",
-            founderStory: product.founder_story || ""
+            founderStory: product.founder_story || "",
+            writingSamples: product.writing_samples || []
         })));
 
         const { plan, tier, usage } = await getUserUsageSnapshot(targetUserId);
@@ -381,7 +382,8 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
             strongestObjection: product.strongest_objection || "",
             proofResults: product.proof_results || [],
             pricingPosition: product.pricing_position || "",
-            founderStory: product.founder_story || ""
+            founderStory: product.founder_story || "",
+            writingSamples: product.writing_samples || []
         })));
 
         const currentRunId = run?.id;
@@ -510,7 +512,8 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
             strongestObjection: product.strongest_objection || "",
             proofResults: product.proof_results || [],
             pricingPosition: product.pricing_position || "",
-            founderStory: product.founder_story || ""
+            founderStory: product.founder_story || "",
+            writingSamples: product.writing_samples || []
         })));
 
         const { plan, tier, usage } = await getUserUsageSnapshot(targetUserId);
@@ -630,7 +633,8 @@ export async function regenerateSingleDM(opportunityId: string, redditReplyMode?
                 strongestObjection: product.strongest_objection || "",
                 proofResults: product.proof_results || [],
                 pricingPosition: product.pricing_position || "",
-                founderStory: product.founder_story || ""
+                founderStory: product.founder_story || "",
+                writingSamples: product.writing_samples || []
             }]);
             newDM = replies.get(author) || fallbackRedditReply(author, opp.tweet_content, product.name);
         } else if (opp.source === 'linkedin_post') {
@@ -643,7 +647,8 @@ export async function regenerateSingleDM(opportunityId: string, redditReplyMode?
                 strongestObjection: product.strongest_objection || "",
                 proofResults: product.proof_results || [],
                 pricingPosition: product.pricing_position || "",
-                founderStory: product.founder_story || ""
+                founderStory: product.founder_story || "",
+                writingSamples: product.writing_samples || []
             }]);
             newDM = replies.get(author) || fallbackLinkedInReply(author, product.name);
         } else {
@@ -656,7 +661,8 @@ export async function regenerateSingleDM(opportunityId: string, redditReplyMode?
                 strongestObjection: product.strongest_objection || "",
                 proofResults: product.proof_results || [],
                 pricingPosition: product.pricing_position || "",
-                founderStory: product.founder_story || ""
+                founderStory: product.founder_story || "",
+                writingSamples: product.writing_samples || []
             }]);
             newDM = dms.get(author) || fallbackDM(author, opp.tweet_content, product.name);
         }
@@ -697,4 +703,3 @@ export async function updateStatus(opportunityId: string, status: string) {
 export async function archiveOpportunity(id: string) {
     return updateStatus(id, 'archived');
 }
-

@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { 
     Loader2, Save, CheckCircle, AlertCircle, X, Plus, Target, Settings, 
     Search, Globe, Users, PenSquare, ExternalLink, ChevronRight, 
-    Camera, Trash2, Link2, LayoutGrid, Check, Wand2, Sparkles 
+    Camera, Trash2, Link2, LayoutGrid, Check, Wand2, Sparkles, Fingerprint, Mic
 } from "lucide-react";
 import { useUser } from "@/components/providers/UserProvider";
 import { toast } from "sonner";
@@ -43,6 +43,7 @@ type ProductData = {
     founder_story: string;
     prioritize_communities: string[];
     avoid_communities: string[];
+    writing_samples: string[];
     created_at?: string;
 };
 
@@ -84,6 +85,7 @@ function ProductsPageContent() {
         founder_story: "",
         prioritize_communities: [],
         avoid_communities: [],
+        writing_samples: [],
     });
 
     // Website analysis state
@@ -98,6 +100,7 @@ function ProductsPageContent() {
     const [proofInput, setProofInput] = useState("");
     const [priorityCommunityInput, setPriorityCommunityInput] = useState("");
     const [avoidCommunityInput, setAvoidCommunityInput] = useState("");
+    const [writingSampleInput, setWritingSampleInput] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
     const hasAutoOpenedSetup = useRef(false);
 
@@ -226,7 +229,8 @@ function ProductsPageContent() {
             pricing_position: product.pricing_position || "",
             founder_story: product.founder_story || "",
             prioritize_communities: product.prioritize_communities || [],
-            avoid_communities: product.avoid_communities || []
+            avoid_communities: product.avoid_communities || [],
+            writing_samples: product.writing_samples || []
         });
         setTouchedFields(new Set()); // Reset on new edit session
         setSuggestions({});
@@ -287,6 +291,7 @@ function ProductsPageContent() {
             founder_story: "",
             prioritize_communities: [],
             avoid_communities: [],
+            writing_samples: [],
         });
         setTouchedFields(new Set());
         setSuggestions({});
@@ -360,6 +365,7 @@ function ProductsPageContent() {
             founder_story: "",
             prioritize_communities: [],
             avoid_communities: [],
+            writing_samples: [],
         };
         setFormData(initialState);
         setTouchedFields(new Set());
@@ -511,6 +517,7 @@ function ProductsPageContent() {
                 founder_story: formData.founder_story,
                 prioritize_communities: formData.prioritize_communities,
                 avoid_communities: formData.avoid_communities,
+                writing_samples: formData.writing_samples,
                 scan_window: formData.scan_window,
                 outreach_tone: formData.outreach_tone,
                 updated_at: new Date().toISOString(),
@@ -875,7 +882,6 @@ function ProductsPageContent() {
                                                     onApply={(v: any) => updateField("target_audience", v)}
                                                     isShimmering={isExtracting && !touchedFields.has("target_audience")}
                                                 />
-                                                <Input label="Reply Tone" value={formData.outreach_tone || ''} onChange={(v: string) => updateField("outreach_tone", v)} placeholder="e.g. Direct and professional" hint="How should reply suggestions sound?" />
                                             </div>
                                             <div className="flex flex-col h-full">
                                                 <Input 
@@ -893,7 +899,57 @@ function ProductsPageContent() {
                                         </div>
                                     </Section>
 
-                                    {/* 3. Search Signals */}
+                                    {/* 3. Founder Voice Training */}
+                                    <Section title="Founder Voice Training" icon={<PenSquare className="w-5 h-5" />}>
+                                        <div className="space-y-6">
+                                            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-3">
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                                                            Founder Voice Sync
+                                                        </h3>
+                                                        <span className="text-[8px] bg-emerald-500 text-black px-2 py-0.5 rounded-full font-black tracking-widest">PRO FEATURE</span>
+                                                    </div>
+                                                    <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
+                                                        Paste examples of your previous successful tweets or messages. 
+                                                        Our AI will analyze your <span className="text-zinc-300 font-bold underline decoration-emerald-500/30 underline-offset-4">tone, cadence, and vocabulary</span> to generate replies that actually sound like you.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                <Input 
+                                                    label="Target Outreach Tone" 
+                                                    value={formData.outreach_tone} 
+                                                    onChange={(v: string) => updateField("outreach_tone", v)} 
+                                                    placeholder="e.g., Casual, professional, bold, technical..."
+                                                    hint="Describe your overall brand voice"
+                                                    suggestion={suggestions.outreach_tone}
+                                                    onApply={(v: any) => updateField("outreach_tone", v)}
+                                                    isShimmering={isExtracting && !touchedFields.has("outreach_tone")}
+                                                />
+                                                <div className="p-4 rounded-2xl bg-zinc-900/50 border border-white/5 flex flex-col justify-center gap-2 mt-4 ml-2">
+                                                    <p className="text-[10px] text-zinc-500 leading-tight">
+                                                        Generic AI replies often get flagged or ignored. Providing writing samples increases conversion rates by up to 3x and protects your account reputation.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <StrategicTagEditor
+                                                label="Your Writing Samples"
+                                                values={formData.writing_samples}
+                                                inputValue={writingSampleInput}
+                                                setInputValue={setWritingSampleInput}
+                                                textarea
+                                                placeholder="Paste a successful tweet, DM, or comment you've written..."
+                                                onAdd={() => addStrategicTag('writing_samples', writingSampleInput, () => setWritingSampleInput(""))}
+                                                onRemove={(value) => removeStrategicTag('writing_samples', value)}
+                                                hint="Add 2-3 samples for best results. Press Enter to save each sample."
+                                            />
+                                        </div>
+                                    </Section>
+
+                                    {/* 4. Search Signals */}
                                     <Section title="Search Signals" icon={<Search className="w-5 h-5" />}>
                                         <div className="space-y-8">
                                             <div>
@@ -1251,7 +1307,8 @@ function StrategicTagEditor({
     hint,
     suggestion,
     onApply,
-    isShimmering
+    isShimmering,
+    textarea
 }: {
     label: string;
     values: string[];
@@ -1264,6 +1321,7 @@ function StrategicTagEditor({
     suggestion?: { value: any, confidence: number, source_quote: string };
     onApply?: (val: any) => void;
     isShimmering?: boolean;
+    textarea?: boolean;
 }) {
     const showSuggestion = suggestion && (
         suggestion.confidence < 0.75 || 
@@ -1275,7 +1333,7 @@ function StrategicTagEditor({
             <div className="flex items-center justify-between px-1">
                 <label className="text-sm font-black text-white block uppercase tracking-widest">{label}</label>
                 {suggestion && suggestion.confidence >= 0.75 && (
-                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">âœ¨ AI Sync Active</span>
+                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">✨ AI Sync Active</span>
                 )}
             </div>
             
@@ -1313,16 +1371,26 @@ function StrategicTagEditor({
                 )}
             </AnimatePresence>
 
-            <div className="flex items-center gap-3 px-4 py-2 bg-zinc-900 rounded-xl border border-white/5 focus-within:border-white/20 transition-all shadow-inner">
-                <input
-                    type="text"
-                    value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && (e.preventDefault(), onAdd())}
-                    placeholder={placeholder}
-                    className="bg-transparent text-sm w-full outline-none placeholder:text-zinc-400 text-white"
-                />
-                <button type="button" onClick={onAdd} className="text-zinc-500 hover:text-white transition-colors">
+            <div className="flex items-start gap-3 px-4 py-2 bg-zinc-900 rounded-xl border border-white/5 focus-within:border-white/20 transition-all shadow-inner">
+                {textarea ? (
+                    <textarea
+                        value={inputValue}
+                        onChange={e => setInputValue(e.target.value)}
+                        onKeyDown={e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), onAdd())}
+                        placeholder={placeholder}
+                        className="bg-transparent text-sm w-full outline-none placeholder:text-zinc-400 text-white min-h-[80px] py-1 resize-none"
+                    />
+                ) : (
+                    <input
+                        type="text"
+                        value={inputValue}
+                        onChange={e => setInputValue(e.target.value)}
+                        onKeyDown={e => e.key === "Enter" && (e.preventDefault(), onAdd())}
+                        placeholder={placeholder}
+                        className="bg-transparent text-sm w-full outline-none placeholder:text-zinc-400 text-white h-10"
+                    />
+                )}
+                <button type="button" onClick={onAdd} className="text-zinc-500 hover:text-white transition-colors pt-2">
                     <Plus className="w-4 h-4" />
                 </button>
             </div>

@@ -14,6 +14,7 @@ interface DMGeneratorInput {
     proofResults?: string[];
     pricingPosition?: string;
     founderStory?: string;
+    writingSamples?: string[];
 }
 
 /**
@@ -71,6 +72,11 @@ Proof points: ${product.proofResults?.length ? product.proofResults.join(" | ") 
 Pricing position: ${product.pricingPosition || "None specified"}
 Founder context: ${product.founderStory || "None specified"}
 
+${product.writingSamples?.length ? `FOUNDER'S ACTUAL WRITING SAMPLES (MIMIC THIS STYLE STRICTLY):
+${product.writingSamples.map((s, i) => `SAMPLE ${i + 1}: "${s}"`).join("\n")}
+
+When writing the DMs, strictly adopt the founder's cadence, vocabulary, and sentence structure as seen in these samples.` : ""}
+
 YOUR JOB:
 For each tweet, write a personalized DM that:
 1. Shows you ACTUALLY READ and UNDERSTOOD their specific frustration
@@ -88,7 +94,7 @@ CRITICAL RULES FOR SOUNDING HUMAN:
 - Short sentences. Break thoughts up. Like this.
 - NO hyphens (—), NO em dashes, NO semicolons
 - NO bullet points or numbered lists
-- NO emojis overload (max 1 emoji per DM, or none)
+- STRICTLY NO EMOJIS. Keep the text clean and professional.
 - NO generic phrases like "I came across your tweet" or "I noticed your post"
 - NEVER start with "Hey there" or "Hi there"
 - Each DM MUST be different from every other DM. vary the opening, structure, tone
@@ -201,6 +207,7 @@ interface RedditReplyInput {
     proofResults?: string[];
     pricingPosition?: string;
     founderStory?: string;
+    writingSamples?: string[];
 }
 
 /**
@@ -277,6 +284,11 @@ Pricing position: ${product.pricingPosition || "None specified"}
 Founder context: ${product.founderStory || "None specified"}
 ${personaInstruction}
 
+${product.writingSamples?.length ? `FOUNDER'S ACTUAL WRITING SAMPLES (MIMIC THIS STYLE STRICTLY):
+${product.writingSamples.map((s, i) => `SAMPLE ${i + 1}: "${s}"`).join("\n")}
+
+When writing the Reddit replies, strictly adopt the founder's cadence, vocabulary, and sentence structure as seen in these samples. Ensure it still feels native to Reddit.` : ""}
+
 YOUR JOB:
 Write a helpful, genuine Reddit reply for each post that:
 1. Actually addresses their problem or question first
@@ -295,7 +307,7 @@ CRITICAL RULES FOR REDDIT TONE:
 - Share your product as "something I built for exactly this"
 - Use Reddit-natural language: "honestly", "tbh", "imo", "fwiw"
 - NO hyphens, NO em dashes, NO semicolons
-- NO emojis (Reddit doesn't use emojis much)
+- STRICTLY NO EMOJIS. Reddit is a text-heavy platform; keep it clean.
 - Keep it 2 to 4 sentences max. Reddit likes concise replies.
 - Each reply MUST be unique and different
 - Match the energy of the subreddit (casual for casual subs, more detailed for technical subs)
@@ -402,6 +414,7 @@ interface LinkedInReplyInput {
     proofResults?: string[];
     pricingPosition?: string;
     founderStory?: string;
+    writingSamples?: string[];
 }
 
 /**
@@ -446,6 +459,7 @@ TONE:
 - Insightful and value-added (not just salesy)
 - Short (2-3 sentences)
 - Professional yet approachable
+- STRICTLY NO EMOJIS
 - Mention the product as a solution you built for this exact problem
 - Use proof or founder credibility only when it strengthens the comment naturally
 
@@ -456,6 +470,11 @@ CONTEXT:
 - Proof points: ${product.proofResults?.length ? product.proofResults.join(" | ") : "None specified"}
 - Pricing position: ${product.pricingPosition || "None specified"}
 - Founder context: ${product.founderStory || "None specified"}
+
+${product.writingSamples?.length ? `FOUNDER'S ACTUAL WRITING SAMPLES (MIMIC THIS STYLE STRICTLY):
+${product.writingSamples.map((s, i) => `SAMPLE ${i + 1}: "${s}"`).join("\n")}
+
+When writing the LinkedIn comments, strictly adopt the founder's cadence, vocabulary, and sentence structure as seen in these samples. Maintain professional utility but in the founder's voice.` : ""}
 
 BAD: "Buy my tool at link.com"
 GOOD: "Really interesting perspective on {pain}. I actually dealt with this so much that I built {productName} (${productLink}) to automate the {process}. Might be worth a look if you're still struggling with it."`
@@ -468,6 +487,8 @@ GOOD: "Really interesting perspective on {pain}. I actually dealt with this so m
                 temperature: 0.7,
             }),
         });
+
+        if (!response.ok) return results;
 
         const data = await response.json();
         const content = data.choices?.[0]?.message?.content;

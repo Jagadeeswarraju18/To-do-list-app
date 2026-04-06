@@ -34,38 +34,36 @@ export default function SignupPage() {
         setLoading(true);
         setError(null);
 
-        const { error, data } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: name,
-                    role: role,
-                    onboarding_complete: false
+        try {
+            const { error, data } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: name,
+                        role: role,
+                        onboarding_complete: false
+                    }
+                }
+            });
+
+            if (error) {
+                setError(error.message);
+                setLoading(false);
+                return;
+            }
+
+            if (data.user) {
+                // Check if user has a profile for the selected role
+                if (role === "founder") {
+                    router.push("/founder/products?setup=1");
+                } else {
+                    router.push("/creator/onboarding");
                 }
             }
-        });
-
-        if (error) {
-            setError(error.message);
+        } catch (err: any) {
+            setError(err.message || "An unexpected error occurred");
             setLoading(false);
-        } else if (data.user) {
-            // Send Welcome Email (Non-blocking)
-            fetch("/api/notifications/welcome", {
-                method: "POST",
-                body: JSON.stringify({
-                    email: data.user.email,
-                    userName: email.split("@")[0], // Fallback name from email
-                    role: role
-                })
-            }).catch(err => console.error("Failed to send welcome email:", err));
-
-            // Check if user has a profile for the selected role
-            if (role === "founder") {
-                router.push("/founder/products?setup=1");
-            } else {
-                router.push("/creator/onboarding");
-            }
         }
     };
 
@@ -79,21 +77,17 @@ export default function SignupPage() {
                 }
             });
             if (error) throw error;
-        } catch (error: any) {
-            setError(error.message);
+        } catch (err: any) {
+            setError(err.message);
         }
     };
 
     return (
         <div className="min-h-screen bg-[#0A0A0A] flex flex-col md:flex-row text-white font-sans overflow-hidden">
-            {/* Background elements */}
             <div className="fixed inset-0 cyber-grid opacity-[0.03] pointer-events-none" />
             
-            {/* Left Panel: Marketing Content */}
             <div className="hidden md:flex md:w-1/2 lg:w-[60%] relative flex-col justify-center gap-16 p-12 overflow-hidden border-r border-white/5 bg-[#0A0A0A]">
-                {/* Background Animation Elements */}
                 <div className="absolute inset-0 pointer-events-none z-0">
-                    {/* Animated Grid Parallax */}
                     <motion.div 
                         animate={{ 
                             x: [-10, 10],
@@ -108,10 +102,8 @@ export default function SignupPage() {
                         className="absolute inset-[-20%] cyber-grid opacity-[0.03]" 
                     />
 
-                    {/* Atmospheric Glow */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] opacity-30" />
 
-                    {/* Refined Branding Ripples */}
                     {[...Array(3)].map((_, i) => (
                         <motion.div 
                             key={`ripple-${i}`}
@@ -130,7 +122,6 @@ export default function SignupPage() {
                         />
                     ))}
 
-                    {/* Denser Floating Nodes */}
                     {[...Array(12)].map((_, i) => (
                         <motion.div
                             key={`node-${i}`}
@@ -161,7 +152,6 @@ export default function SignupPage() {
                     ))}
                 </div>
 
-                {/* Large Background Text */}
                 <div className="absolute top-1/2 left-0 -translate-y-1/2 pointer-events-none select-none z-0">
                     <motion.span 
                         initial={{ opacity: 0, x: -20 }}
@@ -238,11 +228,9 @@ export default function SignupPage() {
                 </div>
             </div>
 
-            {/* Right Panel: Auth Card */}
             <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col items-center justify-center p-4 sm:p-6 relative z-10 bg-[#0A0A0A]">
                 <div className="w-full max-w-[380px] animate-fade-up">
                     <div className="glass-panel p-5 sm:p-8 border-white/5 shadow-2xl relative overflow-hidden rounded-[32px]">
-                        {/* Role Icon */}
                         <div className="flex justify-center mb-5 relative">
                             <div className={`w-14 h-14 rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-700 bg-primary/10 border border-primary/20`}>
                                 {role === 'founder' ? <Briefcase className="w-7 h-7 text-white" /> : <Palette className="w-7 h-7 text-white" />}
