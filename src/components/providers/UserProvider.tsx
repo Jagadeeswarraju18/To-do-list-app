@@ -23,15 +23,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         try {
             const { data: { user: authUser } } = await supabase.auth.getUser();
-            setUser(authUser);
 
             if (authUser) {
-                // First get the active_product_id from profile
+                // First get the active_product_id and has_seen_tour from profile
                 const { data: profile } = await supabase
                     .from("profiles")
-                    .select("active_product_id")
+                    .select("active_product_id, has_seen_tour")
                     .eq("id", authUser.id)
                     .maybeSingle();
+
+                // Merge auth user with profile data
+                setUser({ ...authUser, ...profile });
 
                 let productId = profile?.active_product_id;
 
@@ -57,6 +59,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 } else {
                     setProduct(null);
                 }
+            } else {
+                setUser(null);
+                setProduct(null);
             }
         } catch (err) {
             console.error("[UserProvider] Error loading user data:", err);

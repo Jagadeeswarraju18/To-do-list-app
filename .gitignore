@@ -18,3 +18,4 @@ build
 !supabase/**/*.js
 !supabase/**/*.mjs
 .vercel
+/public/marketing/

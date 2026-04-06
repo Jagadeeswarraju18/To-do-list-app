@@ -7,6 +7,7 @@ CREATE TABLE public.profiles (
   email TEXT NOT NULL,
   full_name TEXT,
   avatar_url TEXT,
+  has_seen_tour BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

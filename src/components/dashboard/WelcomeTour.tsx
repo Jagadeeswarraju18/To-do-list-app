@@ -7,6 +7,8 @@ import {
     LayoutDashboard, ListFilter, Share2, 
     Swords, Users, Package, Settings, Sparkles 
 } from "lucide-react";
+import { useUser } from "@/components/providers/UserProvider";
+import { createClient } from "@/lib/supabase/client";
 
 interface Step {
     id: string;
@@ -77,6 +79,7 @@ const TOUR_STEPS: Step[] = [
 ];
 
 export function WelcomeTour() {
+    const { user, loading } = useUser();
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [coords, setCoords] = useState({ top: 0, left: 0, width: 0, height: 0 });
@@ -104,14 +107,18 @@ export function WelcomeTour() {
     }, []);
 
     useEffect(() => {
+        if (loading || !user) return;
+        
         // Check for first-time visit
-        const hasSeenTour = localStorage.getItem("mardis_tour_completed");
-        if (!hasSeenTour) {
+        const hasSeenTourLocal = localStorage.getItem("mardis_tour_completed");
+        const hasSeenTourDB = user.has_seen_tour;
+        
+        if (!hasSeenTourLocal && !hasSeenTourDB) {
             // Delay slightly to ensure elements are rendered
             const timer = setTimeout(startTour, 1500);
             return () => clearTimeout(timer);
         }
-    }, [startTour]);
+    }, [startTour, loading, user]);
 
     useEffect(() => {
         // Listen for manual trigger
@@ -142,9 +149,15 @@ export function WelcomeTour() {
         }
     };
 
-    const handleComplete = () => {
+    const handleComplete = async () => {
         setIsOpen(false);
         localStorage.setItem("mardis_tour_completed", "true");
+        
+        // Persist to database so it doesn't show up on other devices/logins
+        if (user?.id) {
+            const supabase = createClient();
+            await supabase.from("profiles").update({ has_seen_tour: true }).eq("id", user.id);
+        }
     };
 
     if (!isOpen) return null;
@@ -189,21 +202,23 @@ export function WelcomeTour() {
             <AnimatePresence mode="wait">
                 <motion.div
                     key={step.id}
-                    initial={{ opacity: 0, scale: 0.8, x: 200, rotate: 5 }}
+                    initial={{ opacity: 0, scale: 0.9, rotateX: 15, y: 30, filter: "blur(10px)" }}
                     animate={{ 
                         opacity: 1, 
                         scale: 1, 
-                        x: 0,
-                        rotate: 0
+                        rotateX: 0,
+                        y: 0,
+                        filter: "blur(0px)"
                     }}
-                    exit={{ opacity: 0, scale: 0.8, x: -200, rotate: -5 }}
+                    exit={{ opacity: 0, scale: 1.1, rotateX: -15, y: -30, filter: "blur(10px)" }}
                     transition={{ 
                         type: "spring", 
-                        stiffness: 500, 
-                        damping: 25,
-                        mass: 0.7
+                        stiffness: 400, 
+                        damping: 35,
+                        mass: 0.8
                     }}
                     className="relative pointer-events-auto z-20"
+                    style={{ perspective: 1000 }}
                 >
                     <div className="w-[350px] glass-panel p-8 border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.7)] relative overflow-hidden bg-zinc-950/98">
                         {/* Progress Bar */}
@@ -218,9 +233,14 @@ export function WelcomeTour() {
 
                         <div className="flex items-start justify-between mb-6 mt-2">
                             <motion.div 
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ delay: 0.2 }}
+                                initial={{ scale: 0, rotate: -45 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                transition={{ 
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 20,
+                                    delay: 0.1 
+                                }}
                                 className="p-3 rounded-2xl bg-white/5 border border-white/10 text-white shadow-xl"
                             >
                                 {step.icon}
@@ -236,22 +256,27 @@ export function WelcomeTour() {
                         <div className="space-y-6">
                             <div>
                                 <motion.h3 
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.1 }}
+                                    initial={{ opacity: 0, y: 10, letterSpacing: "0.05em" }}
+                                    animate={{ opacity: 1, y: 0, letterSpacing: "0em" }}
+                                    transition={{ delay: 0.15, duration: 0.3 }}
                                     className="text-2xl font-black text-white uppercase tracking-tight mb-2"
                                 >
                                     {step.title}
                                 </motion.h3>
-                                <p className="text-zinc-400 text-[13px] leading-relaxed font-medium">
+                                <motion.p 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2, duration: 0.3 }}
+                                    className="text-zinc-400 text-[13px] leading-relaxed font-medium"
+                                >
                                     {step.content}
-                                </p>
+                                </motion.p>
                             </div>
 
                             <motion.div 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
+                                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                transition={{ delay: 0.25, duration: 0.3 }}
                                 className="bg-white/[0.02] rounded-[24px] p-5 border border-white/5 space-y-2 relative overflow-hidden"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-30" />
