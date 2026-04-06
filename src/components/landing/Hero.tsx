@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue } from "framer-motion";
-import { Cpu, Check, Linkedin, Sparkles, Target, Compass, ArrowRight } from "lucide-react";
+import { Cpu, Check, Linkedin, Sparkles, Target, Compass, ArrowRight, CreditCard } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import Link from "next/link";
 import { useState, useEffect, type MouseEvent } from "react";
@@ -97,13 +97,17 @@ export function Hero() {
                     </p>
                 </div>
 
-                <div className="mb-10">
+                <div className="mb-10 flex flex-col items-center gap-3">
                     <Link href="/signup">
                         <button className="premium-button h-14 px-12 text-[14px] shadow-2xl active:scale-95 transition-transform">
-                            Find My Buyers
+                            Start Finding for Free
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </button>
                     </Link>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600 flex items-center gap-2">
+                        <CreditCard className="w-3 h-3" />
+                        No credit card required.
+                    </p>
                 </div>
 
                 <div className="group relative h-[500px] sm:h-[600px] w-full max-w-[1440px] overflow-hidden rounded-[32px] border border-white/[0.08] bg-black shadow-[0_50px_100px_rgba(0,0,0,0.8)]">
