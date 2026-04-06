@@ -2,7 +2,7 @@
 
 /**
  * Extraction Actions: AI Strategic Scout
- * Powered by Jina Reader & Grok-4 (xAI)
+ * Powered by Jina Reader & OpenAI GPT-5.4
  */
 
 interface ExtractionField<T = string> {
@@ -14,19 +14,26 @@ interface ExtractionField<T = string> {
 export interface ExtractionResult {
     name: ExtractionField;
     description: ExtractionField;
-    pain_solved: ExtractionField;
+    target_audience: ExtractionField;
     ideal_user: ExtractionField<string[]>;
+    pain_solved: ExtractionField;
+    keywords: ExtractionField<string[]>;
+    pain_phrases: ExtractionField<string[]>;
+    outreach_tone: ExtractionField;
     competitors: ExtractionField<string[]>;
     alternatives: ExtractionField<string[]>;
     strongest_objection: ExtractionField;
     proof_results: ExtractionField<string[]>;
+    pricing_position: ExtractionField;
+    founder_story: ExtractionField;
+    prioritize_communities: ExtractionField<string[]>;
+    avoid_communities: ExtractionField<string[]>;
     logo_url?: string;
     error?: string;
 }
 
 /**
  * Lightweight action to get a brand logo from a URL.
- * Does NOT scrape the page or use LLMs.
  */
 export async function extractLogoAction(url: string): Promise<{ logo_url: string | null, error?: string }> {
     try {
@@ -41,17 +48,16 @@ export async function extractLogoAction(url: string): Promise<{ logo_url: string
             `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
         ];
 
-        // Race candidates in parallel to get the first successful logo
         const logo = await Promise.any(
             candidates.map(async (candidate) => {
                 const res = await fetch(candidate, { 
                     method: 'GET',
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                        'User-Agent': 'Mozilla/5.0'
                     },
                     cache: 'force-cache', 
                     next: { revalidate: 3600 },
-                    signal: AbortSignal.timeout(4000) // Slightly longer timeout for parallel
+                    signal: AbortSignal.timeout(4000)
                 });
                 if (res.ok) return candidate;
                 throw new Error("Failed to fetch logo");
@@ -64,18 +70,15 @@ export async function extractLogoAction(url: string): Promise<{ logo_url: string
     }
 }
 
-
 export async function extractProductDetailsAction(url: string): Promise<ExtractionResult | { error: string }> {
-    const apiKey = process.env.XAI_API_KEY;
-    if (!apiKey) return { error: "XAI_API_KEY not found" };
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) return { error: "OPENAI_API_KEY not found" };
 
-    // 1. Sanitize URL
     let targetUrl = url.trim();
     if (!targetUrl.startsWith("http")) targetUrl = `https://${targetUrl}`;
 
     try {
-        // 2. Parallel: Fetch markdown from Jina Reader and extract logo
-        console.log(`[Scout] Analyzing: ${targetUrl}...`);
+        console.log(`[Scout] Analyzing with GPT-5.4: ${targetUrl}...`);
         
         const scraperPromise = fetch(`https://r.jina.ai/${targetUrl}`, {
             headers: { 'Accept': 'text/plain' },
@@ -92,120 +95,82 @@ export async function extractProductDetailsAction(url: string): Promise<Extracti
         });
 
         const logoPromise = extractLogoAction(targetUrl);
-
         const [scraperRes, logoRes] = await Promise.all([scraperPromise, logoPromise]);
         
         let logoUrl = logoRes.logo_url || undefined;
         let rawMarkdown = (scraperRes as any).text || "";
 
         if ((scraperRes as any).error) {
-            // Return what we have (like the logo) but report the content error
             return { error: (scraperRes as any).error, logo_url: logoUrl } as any;
         }
         
-        // Basic "junk filter" - if it's too short or clearly an error page
         if (rawMarkdown.length < 200) {
             return { error: "Website content too sparse for AI analysis.", logo_url: logoUrl } as any;
         }
 
-        // Still check markdown for specific overrides if they exist (OG Images, structured data)
-        if (!logoUrl) {
-            const logoRegexes = [
-                /!\[.*?(?:logo|icon|brand|favicon).*?\]\((https?:\/\/[^)]+)\)/i,
-                /!\[.*?\]\((https?:\/\/[^)]+(?:logo|icon|brand|favicon|apple-touch)[^)]*\.(?:png|jpg|svg|webp|ico))\)/i,
-                /Image URL\s*:\s*(https?:\/\/[^\s]+)/i,
-                /og:image['"]\s*content=['"]([^'"]+)['"]/i,
-                /twitter:image['"]\s*content=['"]([^'"]+)['"]/i
-            ];
-            
-            for (const regex of logoRegexes) {
-                const match = rawMarkdown.match(regex);
-                if (match?.[1]) {
-                    let foundUrl = match[1];
-                    if (foundUrl.startsWith("//")) foundUrl = `https:${foundUrl}`;
-                    if (foundUrl.startsWith("/") && !foundUrl.startsWith("//")) {
-                        try {
-                            const d = new URL(targetUrl);
-                            foundUrl = `${d.origin}${foundUrl}`;
-                        } catch {}
-                    }
-                    logoUrl = foundUrl;
-                    break;
-                }
-            }
-        }
-
-        // Final fallback: standard favicon path
-        if (!logoUrl) {
-            try {
-                const domain = new URL(targetUrl);
-                logoUrl = `${domain.origin}/favicon.ico`;
-            } catch (_) {}
-        }
-
-        // 3. Ask Grok to parse the strategic context
         const prompt = `
-        You are a high-level strategic marketing analyst (Strategic Scout).
-        Your job is to read the provided markdown of a landing page and extract the product's positioning.
+        You are a world-class strategic marketing analyst (Strategic Scout).
+        Your job is to read the provided markdown of a landing page and extract the product's deep strategic positioning.
 
         URL: ${targetUrl}
         CONTENT:
-        ${rawMarkdown.slice(0, 15000)} // Limit to fit context window
+        ${rawMarkdown.slice(0, 15000)}
 
         Extract the following fields into a strictly valid JSON object. 
-        For EACH field, provide a "value", a "confidence" (0.0 to 1.0), and a "source_quote" (a short sentence from the text that proves your extraction).
+        For EACH field, provide a "value", a "confidence" (0.0 to 1.0), and a "source_quote" (a short sentence from the text).
 
         SCHEMA:
         {
           "name": { "value": "Name", "confidence": 0.9, "source_quote": "..." },
           "description": { "value": "Detailed elevator pitch", "confidence": 0.8, "source_quote": "..." },
+          "target_audience": { "value": "Broad industry/role (e.g. B2B Sales Teams)", "confidence": 0.8, "source_quote": "..." },
+          "ideal_user": { "value": ["Specific Title 1", "Specific Title 2"], "confidence": 0.7, "source_quote": "..." },
           "pain_solved": { "value": "The core problem it fixes", "confidence": 0.7, "source_quote": "..." },
-          "ideal_user": { "value": ["Role1", "Role2"], "confidence": 0.6, "source_quote": "..." },
-          "competitors": { "value": ["Competitor1", "Competitor2"], "confidence": 0.5, "source_quote": "..." },
-          "alternatives": { "value": ["Manual spreadsheet", "GummySearch"], "confidence": 0.5, "source_quote": "..." },
+          "keywords": { "value": ["Keyword1", "Keyword2"], "confidence": 0.6, "source_quote": "..." },
+          "pain_phrases": { "value": ["Phrase users use to describe pain"], "confidence": 0.6, "source_quote": "..." },
+          "outreach_tone": { "value": "Casual/Professional/Bold/Direct", "confidence": 0.7, "source_quote": "..." },
+          "competitors": { "value": ["Direct Competitor 1", "Direct Competitor 2"], "confidence": 0.5, "source_quote": "..." },
+          "alternatives": { "value": ["Manual spreadsheet", "Old software"], "confidence": 0.5, "source_quote": "..." },
           "strongest_objection": { "value": "Top reason someone wouldn't buy", "confidence": 0.4, "source_quote": "..." },
-          "proof_results": { "value": ["Increased conversion by X", "Used by Y teams"], "confidence": 0.6, "source_quote": "..." }
+          "proof_results": { "value": ["Growth stat", "Customer quote snippet"], "confidence": 0.6, "source_quote": "..." },
+          "pricing_position": { "value": "Value/Premium/Freemium/Enterprise", "confidence": 0.5, "source_quote": "..." },
+          "founder_story": { "value": "Brief context on why this was built", "confidence": 0.4, "source_quote": "..." },
+          "prioritize_communities": { "value": ["r/SaaS", "r/marketing"], "confidence": 0.4, "source_quote": "Suggest relevant subreddits based on niche if not on page" },
+          "avoid_communities": { "value": ["r/general"], "confidence": 0.4, "source_quote": "Suggest irrelevant subreddits to avoid" }
         }
 
         RULES:
-        1. "competitors" & "alternatives": If they aren't on the page, use your general knowledge of this product category to suggest them, but set confidence to < 0.6.
-        2. "source_quote": Must be an EXACT small snippet of text from the content.
+        1. If a field is not explicitly on the page, use your high-level intelligence to suggest sensible values, but keep confidence below 0.5.
+        2. "source_quote" must be an EXACT snippet of text from the content.
         3. No conversational text. Only valid JSON.
         `;
 
-        console.log(`[Scout] Analyzing with Grok-4...`);
-        const grokRes = await fetch("https://api.x.ai/v1/chat/completions", {
+        const grokRes = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: "grok-4-1-fast-reasoning",
+                model: "gpt-5.4",
                 messages: [
                     { role: "system", content: "You are a professional JSON extractor. Return only a single valid JSON object." },
                     { role: "user", content: prompt }
                 ],
-                temperature: 0.1, // High precision
+                response_format: { type: "json_object" },
+                temperature: 0.1,
             }),
         });
 
         if (!grokRes.ok) {
-            throw new Error(`Grok failed: ${grokRes.statusText}`);
+            throw new Error(`OpenAI failed: ${grokRes.statusText}`);
         }
 
         const data = await grokRes.json();
         const content = data.choices?.[0]?.message?.content;
-        
-        if (!content) throw new Error("Grok returned empty response");
+        if (!content) throw new Error("OpenAI returned empty response");
 
-        // Strip markdown code fences if present
-        let cleaned = content.trim();
-        if (cleaned.startsWith("```")) {
-            cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-        }
-
-        const result = JSON.parse(cleaned);
+        const result = JSON.parse(content);
         return { ...result, logo_url: logoUrl } as ExtractionResult;
 
     } catch (err: any) {

@@ -408,8 +408,11 @@ function ProductsPageContent() {
                 const updates: Partial<ProductData> = {};
 
                 const fields = [
-                    'name', 'description', 'pain_solved', 'ideal_user', 
-                    'competitors', 'alternatives', 'strongest_objection', 'proof_results'
+                    'name', 'description', 'target_audience', 'ideal_user', 
+                    'pain_solved', 'keywords', 'pain_phrases', 'outreach_tone',
+                    'competitors', 'alternatives', 'strongest_objection', 
+                    'proof_results', 'pricing_position', 'founder_story',
+                    'prioritize_communities', 'avoid_communities'
                 ];
 
                 // Apply logo from extraction result if not already set
@@ -419,15 +422,24 @@ function ProductsPageContent() {
 
                 fields.forEach(field => {
                     const data = (res as any)[field];
-                    if (data && data.value) {
+                    if (data && data.value !== undefined) {
+                        let finalValue = data.value;
+                        
+                        // Handle array to string join for ideal_user
+                        if (field === 'ideal_user' && Array.isArray(finalValue)) {
+                            finalValue = finalValue.join(", ");
+                        }
+
                         newSuggestions[field] = {
-                            value: data.value,
+                            value: finalValue,
                             confidence: data.confidence,
                             source_quote: data.source_quote
                         };
 
-                        if (data.confidence >= 0.75 && !touchedFields.has(field)) {
-                            updates[field as keyof ProductData] = data.value;
+                        const isFieldEmpty = !formData[field as keyof ProductData] || (Array.isArray(formData[field as keyof ProductData]) && (formData[field as keyof ProductData] as any).length === 0);
+                        
+                        if ((data.confidence >= 0.6 || isFieldEmpty) && !touchedFields.has(field)) {
+                            updates[field as keyof ProductData] = finalValue as any;
                         }
                     }
                 });
@@ -771,7 +783,7 @@ function ProductsPageContent() {
                                 </div>
                                 <p className="text-[10px] text-zinc-400 leading-tight font-medium">
                                     <span className="text-red-500 font-black uppercase tracking-tighter mr-2">Accuracy Required:</span>
-                                    Auto Fill provides the foundation. Please <span className="text-white font-bold underline decoration-red-500/30 underline-offset-2">manually refine</span> keywords and pain points for quality leads.
+                                    Check these auto filled sections and try to add more things for better leads. Auto Fill provides the foundation, but your unique insights win.
                                 </p>
                             </div>
 
