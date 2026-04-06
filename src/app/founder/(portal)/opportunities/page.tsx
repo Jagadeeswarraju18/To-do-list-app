@@ -54,7 +54,6 @@ export default function OpportunitiesPage() {
     const [activeTab, setActiveTab] = useState<TabFilter>('all');
     const [showArchived, setShowArchived] = useState(false);
     const [showSessionMenu, setShowSessionMenu] = useState(false);
-    const [showSessionMenuMobile, setShowSessionMenuMobile] = useState(false);
     const [discoveryRuns, setDiscoveryRuns] = useState<DiscoveryRun[]>([]);
     const [activeRunId, setActiveRunId] = useState<string | null>(null);
 
@@ -294,7 +293,7 @@ export default function OpportunitiesPage() {
     });
 
     return (
-        <div className="space-y-10 animate-fade-up">
+        <div className="space-y-10 animate-fade-up max-w-full overflow-x-hidden px-1">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                 <div className="space-y-1">
@@ -347,7 +346,7 @@ export default function OpportunitiesPage() {
             </div>
 
             {/* Condensed Discovery Console */}
-            <div className="glass-panel p-5 sm:p-6 space-y-6">
+            <div className="glass-panel p-4 sm:p-8 space-y-6 sm:space-y-8 relative overflow-hidden backdrop-blur-2xl border-white/10 group max-w-full">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="space-y-0.5">
                         <h3 className="text-sm font-bold uppercase tracking-widest text-white">Scan</h3>
@@ -357,13 +356,13 @@ export default function OpportunitiesPage() {
                                 : "Select a lookback window and scan for high-intent signals."}
                         </p>
                     </div>
-                    <div className="flex bg-black p-1 rounded-3xl border border-white/10 w-full md:w-fit overflow-x-auto no-scrollbar">
+                    <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 w-full md:w-fit overflow-x-auto no-scrollbar gap-0.5 relative max-w-full shrink-0">
                         {SCAN_WINDOW_OPTIONS.map(option => (
                             <button
                                 key={option.value}
                                 onClick={() => setScanWindow(option.value)}
-                                className={`px-2.5 sm:px-4 py-2 rounded-2xl text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${scanWindow === option.value
-                                    ? 'bg-zinc-800 text-white border border-white/20 shadow-lg'
+                                className={`px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl text-[9px] sm:text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${scanWindow === option.value
+                                    ? 'bg-zinc-800 text-white border border-white/10 shadow-lg'
                                     : 'text-zinc-500 hover:text-white hover:bg-white/5'
                                     }`}
                             >
@@ -373,7 +372,7 @@ export default function OpportunitiesPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <DiscoveryButton
                         label="Manual Signal"
                         sublabel="Import target source"
@@ -415,102 +414,42 @@ export default function OpportunitiesPage() {
             </div>
 
             {/* Filter Bar */}
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5 relative z-40">
-                <div className="flex flex-nowrap items-center justify-start gap-4 shrink-0 w-full lg:w-auto overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <div className="flex items-center gap-1.5 bg-black p-1.5 rounded-3xl border border-white/10 shrink-0 w-full sm:w-auto">
+            <div className="flex flex-col xl:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5 relative z-40 w-full overflow-hidden px-1">
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 shrink-0 w-full xl:w-auto">
+                    <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/5 shrink-0 w-full sm:w-auto">
                         <button
                             onClick={() => setShowArchived(false)}
-                            className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 rounded-2xl text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${!showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+                            className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${!showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-zinc-500/70 hover:text-white hover:bg-white/5'}`}
                         >
                             Active Intelligence
                         </button>
                         <button
                             onClick={() => setShowArchived(true)}
-                            className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 rounded-2xl text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+                            className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-2xl ${showArchived ? 'bg-primary text-white shadow-primary/20' : 'text-zinc-500/70 hover:text-white hover:bg-white/5'}`}
                         >
-                            Historical Archive
+                            Archive
                         </button>
-                    </div>
-
-                    {/* Mobile Only Session Selector BUTTON */}
-                    <div className="lg:hidden flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest shrink-0 whitespace-nowrap">
-                        SESS:
-                        <div className="relative group/session">
-                            <button
-                                onClick={() => setShowSessionMenuMobile(!showSessionMenuMobile)}
-                                className="flex items-center gap-2 bg-[#111111] border border-white/5 rounded-xl px-3 py-2 hover:border-white/10 transition-all text-[10px] font-bold text-white uppercase tracking-widest min-w-[100px] justify-between"
-                            >
-                                {activeRunId ? new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleDateString() : "ALL"}
-                                <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${showSessionMenuMobile ? 'rotate-180' : ''}`} />
-                            </button>
-                        </div>
                     </div>
                 </div>
 
-                {/* Mobile Session Selector DROPDOWN MENU */}
-                {showSessionMenuMobile && (
-                    <div className="lg:hidden">
-                        <div className="fixed inset-0 z-40" onClick={() => setShowSessionMenuMobile(false)} />
-                        <div className="absolute right-0 sm:right-auto sm:left-4 top-[72px] w-[240px] bg-[#0A0A0A]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 animate-in fade-in zoom-in-95 duration-200">
-                            <button
-                                onClick={() => {
-                                    setActiveRunId(null);
-                                    setShowSessionMenuMobile(false);
-                                }}
-                                className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 ${!activeRunId ? 'bg-white text-black shadow-lg shadow-white/10' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
-                            >
-                                All Time Results
-                            </button>
-                            <div className="h-px bg-white/5 my-1 mx-2" />
-                            <div className="max-h-[300px] overflow-y-auto no-scrollbar py-1">
-                                {discoveryRuns
-                                    .filter(run => activeTab === 'all' || run.platform === activeTab)
-                                    .map(run => (
-                                        <button
-                                            key={run.id}
-                                            onClick={() => {
-                                                setActiveRunId(run.id);
-                                                setShowSessionMenuMobile(false);
-                                            }}
-                                            className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 flex items-center justify-between group ${activeRunId === run.id ? 'bg-white text-black' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
-                                        >
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px]">{run.started_at ? new Date(run.started_at).toLocaleDateString() : 'Unknown Date'}</span>
-                                                <span className={`text-[8px] font-medium ${activeRunId === run.id ? 'text-black/50' : 'text-gray-600'}`}>
-                                                    {run.platform?.toUpperCase() || 'PLATFORM'}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className={`text-[10px] font-black ${activeRunId === run.id ? 'text-black' : 'text-emerald-500/80'}`}>
-                                                    {run.leads_found || 0}
-                                                </span>
-                                                <div className={`w-1.5 h-1.5 rounded-full ${activeRunId === run.id ? 'bg-black/20' : 'bg-white/5'}`} />
-                                            </div>
-                                        </button>
-                                    ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div className="flex flex-wrap lg:flex-nowrap items-center gap-4 xl:ml-auto w-full xl:w-auto justify-center xl:justify-end">
-                    {/* Desktop Only Session Selector */}
-                    <div className="hidden lg:flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest shrink-0 relative">
+                <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4 xl:ml-auto w-full xl:w-auto justify-center xl:justify-end">
+                    {/* Session Selector */}
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest shrink-0 relative">
                         SESSION:
                         <div className="relative group/session">
                             <button
                                 onClick={() => setShowSessionMenu(!showSessionMenu)}
-                                className="flex items-center gap-3 bg-[#111111] border border-white/5 rounded-xl px-4 py-2 hover:border-white/10 transition-all text-[10px] font-bold text-white uppercase tracking-widest min-w-[160px] justify-between"
+                                className="flex items-center gap-3 bg-[#111111] border border-white/5 rounded-xl px-4 py-2 hover:border-white/10 transition-all text-[10px] font-bold text-white uppercase tracking-widest min-w-[150px] sm:min-w-[160px] justify-between"
                             >
                                 {activeRunId ? (
                                     <span className="flex items-center gap-2">
                                         <span className="text-primary w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
-                                        {new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleDateString()} {new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleDateString()}
                                     </span>
                                 ) : "All Time"}
                                 <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform ${showSessionMenu ? 'rotate-180' : ''}`} />
                             </button>
-
+                            
                             {showSessionMenu && (
                                 <>
                                     <div className="fixed inset-0 z-40" onClick={() => setShowSessionMenu(false)} />
@@ -520,12 +459,12 @@ export default function OpportunitiesPage() {
                                                 setActiveRunId(null);
                                                 setShowSessionMenu(false);
                                             }}
-                                            className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 ${!activeRunId ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                                            className="w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 bg-primary text-white shadow-lg"
                                         >
                                             All Time Results
                                         </button>
                                         <div className="h-px bg-white/5 my-1 mx-2" />
-                                        <div className="max-h-[400px] overflow-y-auto no-scrollbar py-1">
+                                        <div className="max-h-[300px] overflow-y-auto no-scrollbar py-1">
                                             {discoveryRuns
                                                 .filter(run => activeTab === 'all' || run.platform === activeTab)
                                                 .map(run => (
@@ -535,22 +474,13 @@ export default function OpportunitiesPage() {
                                                             setActiveRunId(run.id);
                                                             setShowSessionMenu(false);
                                                         }}
-                                                    className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 flex items-center justify-between group ${activeRunId === run.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                                                        className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 flex items-center justify-between group ${activeRunId === run.id ? 'bg-white text-black' : 'text-gray-500 hover:text-white hover:bg-white/10'}`}
                                                     >
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px]">
-                                                                {new Date(run.started_at).toLocaleDateString()} {new Date(run.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                            </span>
-                                                            <span className={`text-[8px] font-medium ${activeRunId === run.id ? 'text-black/50' : 'text-gray-600'}`}>
-                                                                {run.platform.toUpperCase()}
-                                                            </span>
+                                                            <span className="text-[10px]">{new Date(run.started_at).toLocaleDateString()}</span>
+                                                            <span className="text-[8px] opacity-50">{run.platform.toUpperCase()}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`text-[10px] font-bold ${activeRunId === run.id ? 'text-black' : 'text-white'}`}>
-                                                                {run.leads_found || 0}
-                                                            </span>
-                                                            <div className={`w-1.5 h-1.5 rounded-full ${activeRunId === run.id ? 'bg-black/20' : 'bg-white/5'}`} />
-                                                        </div>
+                                                        <span className="text-[10px] font-black">{run.leads_found || 0}</span>
                                                     </button>
                                                 ))}
                                         </div>
@@ -560,14 +490,14 @@ export default function OpportunitiesPage() {
                         </div>
                     </div>
 
-                    <div className="h-6 w-px bg-white/5 hidden lg:block" />
+                    <div className="h-6 w-px bg-white/5 hidden xl:block" />
 
-                    <div className="flex overflow-x-auto no-scrollbar items-center bg-black p-1 rounded-2xl border border-white/10 gap-1 w-full max-w-full sm:w-auto -mx-4 px-4 sm:mx-0 sm:px-1">
+                    <div className="flex overflow-x-auto no-scrollbar items-center bg-black/40 p-1 rounded-2xl border border-white/5 gap-1 w-full max-w-full xl:w-auto shrink-0 shadow-2xl">
                         {[
                             { id: 'all', label: 'ALL', count: opportunities.filter(o => showArchived ? isHandled(o) : !isHandled(o)).length, color: 'emerald', icon: null },
                             { id: 'x', label: 'X', count: opportunities.filter(o => o.source === 'tweet_url' && (showArchived ? isHandled(o) : !isHandled(o))).length, color: 'zinc', icon: <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg> },
-                            { id: 'reddit', label: 'REDDIT', count: opportunities.filter(o => o.source === 'reddit_post' && (showArchived ? isHandled(o) : !isHandled(o))).length, color: 'orange', icon: <MessageCircle className="w-3.5 h-3.5" /> },
-                            { id: 'linkedin', label: 'LINKEDIN', count: opportunities.filter(o => o.source === 'linkedin_post' && (showArchived ? isHandled(o) : !isHandled(o))).length, color: 'blue', icon: <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg> }
+                            { id: 'reddit', label: 'REDDIT', count: opportunities.filter(o => o.source === 'reddit_post' && (showArchived ? isHandled(o) : !isHandled(o))).length, color: 'orange', icon: null },
+                            { id: 'linkedin', label: 'LINKEDIN', count: opportunities.filter(o => o.source === 'linkedin_post' && (showArchived ? isHandled(o) : !isHandled(o))).length, color: 'blue', icon: null }
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -575,16 +505,16 @@ export default function OpportunitiesPage() {
                                     setActiveTab(tab.id as TabFilter);
                                     setActiveRunId(null);
                                 }}
-                                className={`flex items-center gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all shrink-0 whitespace-nowrap ${activeTab === tab.id
-                                    ? tab.color === 'orange' ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/20'
-                                        : tab.color === 'blue' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all shrink-0 whitespace-nowrap ${activeTab === tab.id
+                                    ? tab.color === 'orange' ? 'bg-orange-600 text-white shadow-lg'
+                                        : tab.color === 'blue' ? 'bg-blue-600 text-white shadow-lg'
                                             : tab.color === 'emerald' ? 'bg-zinc-800 text-white border border-white/20 shadow-xl'
                                                 : 'bg-zinc-800 text-white'
                                     : 'text-zinc-500 hover:text-white hover:bg-white/10'
                                     }`}
                             >
-                                {tab.icon && React.cloneElement(tab.icon as React.ReactElement, { className: "w-3 h-3 sm:w-3.5 sm:h-3.5" })}
-                                {tab.label} ({tab.count})
+                                {tab.icon && React.cloneElement(tab.icon as React.ReactElement, { className: "w-3 h-3" })}
+                                {tab.label} <span className="opacity-50 ml-1">{tab.count}</span>
                             </button>
                         ))}
                     </div>
@@ -760,16 +690,16 @@ function DiscoveryButton({ platform, icon, loading, onClick, label, sublabel, di
         <button
             onClick={onClick}
             disabled={loading || disabled}
-            className="group relative flex flex-col items-center justify-center gap-2 p-4 rounded-[20px] bg-black/40 border border-white/5 hover:border-white/20 transition-all overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed text-white"
+            className="group relative flex flex-col items-center justify-center gap-1.5 p-2.5 sm:p-4 rounded-[20px] bg-black/40 border border-white/5 hover:border-white/20 transition-all overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed text-white"
         >
             <div className={`absolute inset-0 bg-gradient-to-br ${glowColors} to-transparent pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity`} />
             <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors" />
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all group-hover:scale-105 border ${iconColors} shadow-xl relative z-10`}>
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : React.cloneElement(icon as React.ReactElement, { className: "w-4 h-4" })}
+            <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-105 border ${iconColors} shadow-xl relative z-10`}>
+                {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : React.cloneElement(icon as React.ReactElement, { className: "w-3.5 h-3.5 sm:w-5 sm:h-5" })}
             </div>
-            <div className="text-center relative z-10">
-                <div className="text-[10px] font-black text-white uppercase tracking-widest group-hover:scale-105 transition-transform">{label}</div>
-                {sublabel && <div className="text-[9px] text-zinc-300 font-bold uppercase tracking-wider mt-0.5 opacity-80 group-hover:opacity-100 transition-opacity whitespace-nowrap">{sublabel}</div>}
+            <div className="text-center relative z-10 px-1">
+                <div className="text-[9px] sm:text-[11px] font-black text-white uppercase tracking-widest group-hover:scale-105 transition-transform leading-tight">{label}</div>
+                {sublabel && <div className="text-[8px] sm:text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-0.5 opacity-80 group-hover:opacity-100 transition-opacity leading-tight">{sublabel}</div>}
             </div>
         </button>
     );

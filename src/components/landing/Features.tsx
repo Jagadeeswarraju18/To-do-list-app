@@ -1,38 +1,33 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search, Layers, Bot, Bell, Shield, Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 const features = [
     {
         number: "01",
         title: "Find Warm Leads",
         desc: "We scan Reddit, X, and LinkedIn for people who need exactly what you sell right now.",
-        icon: Search,
     },
     {
         number: "02",
         title: "No Spam. No Bots.",
         desc: "Every reply we draft sounds human and fits the conversation naturally.",
-        icon: Layers,
     },
     {
         number: "03",
         title: "Works While You Sleep",
         desc: "Mardis runs 24/7. New leads land in your inbox. You just show up and reply.",
-        icon: Bot,
     },
     {
         number: "04",
         title: "Instant Alerts",
         desc: "The moment a new lead appears, you know. First to reply usually wins the deal.",
-        icon: Bell,
     },
     {
         number: "05",
         title: "Safe for Every Platform",
         desc: "We follow community rules on every platform. No bans, no shadowbans, ever.",
-        icon: Shield,
     },
 ];
 
@@ -70,47 +65,73 @@ export function Features() {
                     whileInView="visible"
                     viewport={{ once: true, margin: "-100px" }}
                     variants={{
-                        visible: { transition: { staggerChildren: 0.08 } },
+                        visible: { transition: { staggerChildren: 0.1 } },
                         hidden: {}
                     }}
-                    className="divide-y divide-white/5 border-y border-white/5"
+                    className="divide-y divide-white/5 border-y border-white/5 relative"
                 >
                     {features.map((f, i) => (
                         <motion.div
                             key={f.title}
                             variants={{
-                                hidden: { opacity: 0, y: 20 },
-                                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+                                hidden: i % 2 === 0 ? { opacity: 0, x: -150 } : { opacity: 0, x: 150 },
+                                visible: { 
+                                    opacity: 1, 
+                                    x: 0, 
+                                    transition: { 
+                                        type: "spring", 
+                                        stiffness: 100, 
+                                        damping: 18,
+                                        mass: 1
+                                    } 
+                                }
                             }}
-                            className="group flex flex-row items-start sm:items-center gap-4 sm:gap-6 py-6 sm:py-5 hover:bg-white/[0.015] px-4 -mx-4 rounded-xl transition-colors duration-200 cursor-default"
+                            className="group flex flex-row items-start sm:items-center gap-4 sm:gap-6 py-8 sm:py-6 hover:bg-white/[0.02] px-6 -mx-6 rounded-xl transition-all duration-300 cursor-default relative overflow-hidden"
                         >
-                            {/* Number */}
-                            <span className="w-8 shrink-0 text-[10px] sm:text-[11px] font-black text-white/15 tabular-nums group-hover:text-white/30 transition-colors mt-1 sm:mt-0">
-                                {f.number}
-                            </span>
+                            {/* Row Scan Line */}
+                            <motion.div 
+                                initial={{ left: "-100%" }}
+                                whileInView={{ left: "100%" }}
+                                transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 + (i * 0.1) }}
+                                className="absolute top-0 bottom-0 w-32 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent z-0 pointer-events-none"
+                            />
 
-                            {/* Icon */}
-                            <div className="w-8 h-8 shrink-0 rounded-lg border border-white/5 bg-white/[0.03] flex items-center justify-center group-hover:bg-white/[0.06] group-hover:border-white/10 transition-all duration-200 mt-0.5 sm:mt-0">
-                                <f.icon className="w-3.5 h-3.5 text-white/30 group-hover:text-white/60 transition-colors" />
+                            {/* Targeting Brackets (Hover) */}
+                            <div className="absolute left-0 top-2 bottom-2 w-[1px] bg-white/40 scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center" />
+                            <div className="absolute right-0 top-2 bottom-2 w-[1px] bg-white/40 scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center" />
+
+                            {/* Number */}
+                            <div className="flex flex-col gap-1 w-10 shrink-0">
+                                <span className="text-[9px] font-mono font-black text-white/10 group-hover:text-white/30 transition-colors uppercase">
+                                    ID:
+                                </span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-white/20 tabular-nums group-hover:text-white/60 transition-colors">
+                                    {f.number}
+                                </span>
                             </div>
 
                             {/* Title & Mobile Description */}
-                            <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 overflow-hidden">
-                                <h3 className="w-full sm:w-48 shrink-0 font-semibold text-sm text-white/70 group-hover:text-white transition-colors tracking-tight">
+                            <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-8 overflow-hidden relative z-10">
+                                <h3 className="w-full sm:w-72 shrink-0 font-black text-sm sm:text-base text-white/60 group-hover:text-white transition-colors tracking-tighter uppercase italic">
                                     {f.title}
                                 </h3>
 
                                 {/* Separator (Desktop Only) */}
-                                <div className="hidden sm:block h-[1px] flex-1 bg-white/5 group-hover:bg-white/10 transition-colors" />
+                                <div className="hidden sm:block h-[1px] flex-1 bg-white/5 group-hover:bg-white/10 transition-colors relative">
+                                    <div className="absolute right-0 -top-1 w-1 h-1 rounded-full bg-white/10" />
+                                </div>
 
                                 {/* Description */}
-                                <p className="text-xs sm:text-sm text-zinc-500 sm:max-w-xs leading-relaxed group-hover:text-zinc-400 transition-colors sm:text-right">
+                                <p className="text-xs sm:text-sm text-zinc-500 sm:max-w-sm leading-relaxed group-hover:text-zinc-400 transition-colors sm:text-right font-medium">
                                     {f.desc}
                                 </p>
                             </div>
 
                             {/* Arrow */}
-                            <ArrowRight className="w-3.5 h-3.5 text-white/10 group-hover:text-white/30 transition-all group-hover:translate-x-0.5 shrink-0 mt-1 sm:mt-0" />
+                            <div className="flex flex-col items-center gap-2 opacity-20 group-hover:opacity-100 transition-all group-hover:translate-x-1">
+                                <span className="text-[8px] font-mono font-black text-white/40 rotate-90 hidden sm:block">GO</span>
+                                <ArrowRight className="w-4 h-4 text-white group-hover:text-yellow-400 transition-colors shrink-0" />
+                            </div>
                         </motion.div>
                     ))}
                 </motion.div>

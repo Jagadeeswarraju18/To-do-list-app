@@ -181,10 +181,10 @@
 
 /* Premium UI Utilities */
 .premium-button {
-    @apply relative px-6 py-2.5 rounded-full font-bold text-[13px] uppercase tracking-wider transition-all duration-500 overflow-hidden flex items-center justify-center gap-2;
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, #423E3E 100%);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--premium-shadow);
+    @apply relative px-6 py-2.5 rounded-full font-bold text-[13px] uppercase tracking-wider transition-all duration-500 overflow-hidden flex items-center justify-center gap-2 text-white;
+    background: linear-gradient(135deg, #4A2E2E 0%, #2A1B1B 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
 .premium-button::before {
@@ -194,8 +194,8 @@
 }
 
 .premium-button:hover {
-    @apply scale-[1.02] -translate-y-0.5 border-white/20;
-    box-shadow: 0 25px 50px -12px rgba(54, 34, 34, 0.5), 0 0 20px rgba(180, 83, 9, 0.2);
+    @apply scale-[1.03] -translate-y-0.5 border-white/20;
+    box-shadow: 0 15px 40px -10px rgba(61, 38, 38, 0.4), 0 0 15px rgba(255, 255, 255, 0.05);
 }
 
 .premium-button:hover::before {

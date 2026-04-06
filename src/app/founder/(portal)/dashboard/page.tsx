@@ -120,32 +120,32 @@ export default function DashboardPage() {
             {/* Dashboard Header */}
             <div className="relative group/header overflow-visible">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-transparent rounded-[40px] blur-2xl opacity-50 group-hover/header:opacity-100 transition duration-1000" />
-                <div className="relative glass-panel p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-white/5">
-                <div className="relative z-10 flex items-start gap-4">
+                <div className="relative glass-panel p-5 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-white/5">
+                <div className="relative z-10 flex items-start gap-3 md:gap-4">
                         <div className="relative">
                             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-                            <div className="relative w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-[0_0_25px_rgba(54,34,34,0.3)]">
-                                <BrandLogo size="sm" className="scale-125" />
+                            <div className="relative w-9 h-9 md:w-11 md:h-11 rounded-xl bg-primary text-white flex items-center justify-center shadow-[0_0_25px_rgba(54,34,34,0.3)] border border-white/10">
+                                <BrandLogo size="sm" className="scale-75 md:scale-90" />
                             </div>
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white">
+                                <h1 className="text-lg md:text-2xl font-bold tracking-tight text-white">
                                     Dashboard
                                 </h1>
                                 {product ? (
                                     <Link href="/founder/opportunities" className="hidden sm:flex items-center gap-2 px-2 py-0.5 bg-primary/5 border border-primary/20 rounded-full hover:bg-primary/20 transition-all shadow-lg shadow-black/5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                        <span className="text-[9px] font-black text-white uppercase tracking-widest">Scanning Active</span>
+                                        <span className="text-[8px] md:text-[9px] font-black text-white uppercase tracking-widest">Scanning Active</span>
                                     </Link>
                                 ) : (
                                     <div className="hidden sm:flex items-center gap-2 px-2 py-0.5 bg-amber-500/5 border border-amber-500/20 rounded-full shadow-lg shadow-black/5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                                        <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Setup Needed</span>
+                                        <span className="text-[8px] md:text-[9px] font-black text-amber-400 uppercase tracking-widest">Setup Needed</span>
                                     </div>
                                 )}
                             </div>
-                            <p className="text-zinc-400 font-normal tracking-tight text-sm">
+                            <p className="text-zinc-400 font-normal tracking-tight text-xs md:text-sm">
                                 {product ? (
                                     <>Tracking demand signals for <span className="text-white font-semibold">{product.name}</span>.</>
                                 ) : (
@@ -154,17 +154,17 @@ export default function DashboardPage() {
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 md:gap-3">
                         <button 
                             onClick={() => window.dispatchEvent(new CustomEvent("start-mardis-tour"))}
-                            className="px-4 py-3 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/5 rounded-xl transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest"
+                            className="px-3 md:px-4 py-2.5 md:py-3 bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/5 rounded-xl transition-all flex items-center gap-2 text-[9px] md:text-[10px] font-bold uppercase tracking-widest"
                         >
-                            <HelpCircle className="w-3.5 h-3.5" />
+                            <HelpCircle className="w-3 md:w-3.5 h-3 md:h-3.5" />
                             Tour
                         </button>
                         <Link href={product ? "/founder/products" : "/founder/products?setup=1"}>
-                            <button className="group relative px-6 py-3 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-xl transition-all shadow-xl shadow-primary/10 active:scale-95 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
-                                {product ? "Edit Product" : "Add Product"} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            <button className="group relative px-4 md:px-6 py-2.5 md:py-3 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-xl transition-all shadow-xl shadow-primary/10 active:scale-95 flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest">
+                                {product ? "Edit Product" : "Add Product"} <ArrowRight className="w-3.5 md:w-4 h-3.5 md:h-4 group-hover:translate-x-1 transition-transform" />
                             </button>
                         </Link>
                     </div>
@@ -184,40 +184,40 @@ export default function DashboardPage() {
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass-panel p-12 border-dashed border-white/5 flex flex-col items-center justify-center text-center space-y-8 relative overflow-hidden"
+                    className="glass-panel p-8 md:p-12 border-dashed border-white/5 flex flex-col items-center justify-center text-center space-y-6 md:space-y-8 relative overflow-hidden"
                 >
                     <div className="absolute inset-0 opacity-[0.03] pointer-events-none cyber-grid" />
                     
                     <div className="relative">
                         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse" />
-                        <div className="relative w-24 h-24 rounded-3xl bg-zinc-900 border border-white/10 flex items-center justify-center shadow-2xl">
-                            <BrandLogo size="lg" className="opacity-80" />
+                        <div className="relative w-14 h-14 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-zinc-900 border border-white/10 flex items-center justify-center shadow-2xl">
+                            <BrandLogo size="sm" className="md:size-md opacity-90 scale-125" />
                         </div>
                     </div>
-
-                    <div className="space-y-3 relative z-10">
-                            <div className="flex items-center justify-center gap-3 mb-2">
-                                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-400/80">Get Started</span>
+ 
+                    <div className="space-y-2 md:space-y-3 relative z-10">
+                            <div className="flex items-center justify-center gap-2 md:gap-3 mb-1 md:mb-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] text-amber-400/80">Get Started</span>
                             </div>
-                            <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Add Your Product Website</h2>
-                            <p className="text-zinc-500 max-w-lg mx-auto text-sm font-medium leading-relaxed">
+                            <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter">Add Your Product Website</h2>
+                            <p className="text-zinc-500 max-w-lg mx-auto text-xs md:text-sm font-medium leading-relaxed">
                                 Start with your website. Mardis will analyze it, prefill your product details, and use that context to find better matches.
                             </p>
                         </div>
-
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <Link href="/founder/products?setup=1">
-                                <button className="relative group px-10 py-5 bg-primary hover:bg-[#423F3E] text-white font-black rounded-2xl transition-all shadow-2xl shadow-primary/20 active:scale-95 flex items-center gap-4 text-[11px] uppercase tracking-[0.2em]">
+ 
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 w-full sm:w-auto">
+                            <Link href="/founder/products?setup=1" className="w-full sm:w-auto">
+                                <button className="w-full relative group px-8 md:px-10 py-4 md:py-5 bg-primary hover:bg-[#423F3E] text-white font-black rounded-xl md:rounded-2xl transition-all shadow-2xl shadow-primary/20 active:scale-95 flex items-center justify-center gap-3 md:gap-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em]">
                                     Add Website
-                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    <ArrowRight className="w-3.5 md:w-4 h-3.5 md:h-4 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </Link>
                             <button 
                                 onClick={() => window.dispatchEvent(new CustomEvent("start-mardis-tour"))}
-                                className="px-8 py-5 bg-white/5 border border-white/5 hover:bg-white/10 text-zinc-400 hover:text-white rounded-2xl transition-all text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3"
+                                className="w-full sm:w-auto px-6 md:px-8 py-4 md:py-5 bg-white/5 border border-white/5 hover:bg-white/10 text-zinc-400 hover:text-white rounded-xl md:rounded-2xl transition-all text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 md:gap-3"
                             >
-                                <HelpCircle className="w-4 h-4" />
+                                <HelpCircle className="w-3.5 md:w-4 h-3.5 md:h-4" />
                                 Show Tour
                             </button>
                         </div>
@@ -295,30 +295,30 @@ export default function DashboardPage() {
                             className="lg:col-span-2 space-y-8"
                         >
                             {/* Distribution Roadmap */}
-                            <div className="glass-panel p-8 relative overflow-hidden group/brief">
-                                <div className="flex items-center justify-between mb-10">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-2 bg-white/10 rounded-lg">
-                                            <Target className="w-6 h-6 text-white" />
+                            <div className="glass-panel p-5 md:p-8 relative overflow-hidden group/brief">
+                                <div className="flex items-center justify-between mb-6 md:mb-10">
+                                    <div className="flex items-start md:items-center gap-3 md:gap-4">
+                                        <div className="p-1.5 md:p-2 bg-white/10 rounded-lg">
+                                            <Target className="w-5 h-5 md:w-6 md:h-6 text-white" />
                                         </div>
                                         <div>
-                                            <h3 className="text-sm font-bold uppercase tracking-widest text-white">Strategy Brief</h3>
+                                            <h3 className="text-xs md:text-sm font-bold uppercase tracking-widest text-white">Strategy Brief</h3>
                                             <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">Target: High Intent Distribution</p>
                                         </div>
                                     </div>
-                                    <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full">
-                                        <span className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider">Updated 2m ago</span>
+                                    <div className="hidden xs:block px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                                        <span className="text-[9px] md:text-[10px] text-zinc-400 font-semibold uppercase tracking-wider">Updated 2m ago</span>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2">
                                             <div className="w-1 h-3 bg-white rounded-full" />
-                                            <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Dynamic Strategy Brief</h4>
+                                            <h4 className="text-[10px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Dynamic Strategy Brief</h4>
                                         </div>
-                                        <div className="p-6 bg-black/40 border border-white/5 rounded-3xl relative group/card transition-all hover:border-white/20 min-h-[140px] flex items-center">
-                                            <p className="text-[13px] text-zinc-300 leading-relaxed italic font-medium">
+                                        <div className="p-5 md:p-6 bg-black/40 border border-white/5 rounded-2xl md:rounded-3xl relative group/card transition-all hover:border-white/20 min-h-[120px] md:min-h-[140px] flex items-center">
+                                            <p className="text-xs md:text-[13px] text-zinc-300 leading-relaxed italic font-medium">
                                                 &quot;{recentSignals.length > 0 ? (() => {
                                                     const categories = recentSignals.map(s => s.intent_category || 'Other');
                                                     const counts: any = {};
@@ -365,11 +365,11 @@ export default function DashboardPage() {
                                     </div>
                                 </div>
 
-                                <div className="mt-10">
+                                <div className="mt-8 md:mt-10">
                                     <Link href="/founder/opportunities">
-                                        <button className="w-full py-5 bg-primary hover:bg-[#423F3E] text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] transition-all flex items-center justify-center gap-4 shadow-2xl shadow-primary/20 hover:scale-[1.01] active:scale-95">
+                                        <button className="w-full py-4 md:py-5 bg-primary hover:bg-[#423F3E] text-white rounded-xl md:rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] transition-all flex items-center justify-center gap-3 md:gap-4 shadow-2xl shadow-primary/20 hover:scale-[1.01] active:scale-95">
                                             View Opportunities
-                                            <Zap className="w-4 h-4 fill-current" />
+                                            <Zap className="w-3.5 md:w-4 h-3.5 md:h-4 fill-current" />
                                         </button>
                                     </Link>
                                 </div>
@@ -379,17 +379,17 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.6 }}
-                            className="glass-panel p-8 flex flex-col space-y-8 relative overflow-hidden group h-fit border-zinc-500/10"
+                            className="glass-panel p-5 md:p-8 flex flex-col space-y-6 md:space-y-8 relative overflow-hidden group h-fit border-zinc-500/10"
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
-                                    <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">Live Feed</div>
-                                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                                    <div className="text-[9px] md:text-[10px] font-semibold uppercase tracking-widest text-zinc-400">Live Feed</div>
+                                    <h3 className="text-xs md:text-sm font-bold text-white flex items-center gap-2">
                                         Recent Opportunities
                                     </h3>
                                 </div>
-                                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:bg-white/10 transition-all">
-                                    <BrandLogo size="sm" className="opacity-80" />
+                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:bg-white/10 transition-all">
+                                    <BrandLogo size="xs" className="md:size-sm opacity-80" />
                                 </div>
                             </div>
 
@@ -479,18 +479,18 @@ function MetricCard({ title, value, subtext, icon, accentColor, delay }: any) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className={`glass-card p-6 group cursor-default relative overflow-hidden ${accents[accentColor] || accents.primary}`}
+            className={`glass-card p-4 md:p-6 group cursor-default relative overflow-hidden ${accents[accentColor] || accents.primary}`}
         >
             <div className="flex items-start justify-between mb-4">
-                <div className="p-2 bg-white/5 rounded-xl border border-white/5 transition-all duration-500">
+                <div className="p-1.5 md:p-2 bg-white/5 rounded-lg md:rounded-xl border border-white/5 transition-all duration-500">
                     {icon}
                 </div>
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300">{title}</div>
+                <div className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300">{title}</div>
             </div>
             
             <div className="space-y-1">
-                <div className="text-2xl font-bold tracking-tight text-white">{value}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-400">{subtext}</div>
+                <div className="text-xl md:text-2xl font-bold tracking-tight text-white">{value}</div>
+                <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-400">{subtext}</div>
             </div>
 
             <div className="absolute bottom-0 left-0 h-1 w-0 bg-white group-hover:w-full transition-all duration-700" />

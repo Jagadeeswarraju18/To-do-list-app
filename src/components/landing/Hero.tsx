@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue } from "framer-motion";
-import { Cpu, Check, Linkedin, Sparkles, Target, Compass } from "lucide-react";
+import { Cpu, Check, Linkedin, Sparkles, Target, Compass, ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import Link from "next/link";
 import { useState, useEffect, type MouseEvent } from "react";
@@ -99,8 +99,9 @@ export function Hero() {
 
                 <div className="mb-10">
                     <Link href="/signup">
-                        <button className="rounded-full bg-white px-10 py-3.5 text-[14px] font-black uppercase tracking-[0.2em] text-black shadow-2xl transition-all hover:bg-zinc-200">
+                        <button className="premium-button h-14 px-12 text-[14px] shadow-2xl active:scale-95 transition-transform">
                             Find My Buyers
+                            <ArrowRight className="w-4 h-4 ml-2" />
                         </button>
                     </Link>
                 </div>

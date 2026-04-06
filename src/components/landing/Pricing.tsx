@@ -152,15 +152,11 @@ export function Pricing() {
                                     <button
                                         onClick={() => router.push("/login")}
                                         disabled={plan.id === "free"}
-                                        className={`w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 ${plan.popular
-                                            ? "bg-white text-black hover:bg-zinc-200 shadow-white/10"
-                                            : plan.id === "free"
-                                                ? "bg-white/5 text-zinc-700 opacity-50 pointer-events-none"
-                                                : "bg-white/5 text-zinc-300 border border-white/10 hover:bg-white/10"}`}
+                                        className={`w-full h-14 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${plan.id === "free"
+                                            ? "bg-white/5 text-zinc-700 opacity-50 pointer-events-none"
+                                            : "premium-button"}`}
                                     >
-                                        <span className="flex items-center justify-center gap-2">
-                                            {plan.cta} <ArrowRight className="w-3.5 h-3.5" />
-                                        </span>
+                                        {plan.cta} <ArrowRight className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
                             </motion.div>
@@ -170,7 +166,7 @@ export function Pricing() {
 
                 <div className="mt-32 text-center">
                     <p className="text-zinc-700 text-xs font-medium">
-                        Need a custom enterprise solution? <Link href="/contact" className="text-zinc-500 hover:text-white underline underline-offset-8 transition-colors">Request Callback</Link>
+                        Need a custom enterprise solution? <a href="mailto:hello@mardishub.com?subject=Enterprise%20Custom%20Solution%20Request" className="text-zinc-500 hover:text-white underline underline-offset-8 transition-colors">Reach out</a>
                     </p>
                 </div>
             </div>

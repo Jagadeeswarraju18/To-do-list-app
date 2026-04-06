@@ -86,24 +86,38 @@ export function WelcomeTour() {
 
     const updateStepCoords = useCallback(() => {
         const step = TOUR_STEPS[currentStep];
-        const element = document.getElementById(step.targetId);
-        if (element) {
-            const rect = element.getBoundingClientRect();
-            // Broader coordinates for better "coverage"
-            const newCoords = {
-                top: rect.top - 4,
-                left: rect.left - 4,
-                width: rect.width + 8,
-                height: rect.height + 8
-            };
-            setCoords(newCoords);
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // On mobile, the sidebar needs time to animate in. 
+        // We check for mobile using window.innerWidth < 768
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        
+        const calculate = () => {
+            const element = document.getElementById(step.targetId);
+            if (element) {
+                const rect = element.getBoundingClientRect();
+                const newCoords = {
+                    top: rect.top - 4,
+                    left: rect.left - 4,
+                    width: rect.width + 8,
+                    height: rect.height + 8
+                };
+                setCoords(newCoords);
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        };
+
+        if (isMobile && currentStep === 0) {
+            // First step on mobile: wait for sidebar animation
+            setTimeout(calculate, 400); 
+        } else {
+            calculate();
         }
     }, [currentStep]);
 
     const startTour = useCallback(() => {
         setIsOpen(true);
         setCurrentStep(0);
+        window.dispatchEvent(new CustomEvent("mardis-tour-active", { detail: { active: true } }));
     }, []);
 
     useEffect(() => {
@@ -151,6 +165,7 @@ export function WelcomeTour() {
 
     const handleComplete = async () => {
         setIsOpen(false);
+        window.dispatchEvent(new CustomEvent("mardis-tour-active", { detail: { active: false } }));
         localStorage.setItem("mardis_tour_completed", "true");
         
         // Persist to database so it doesn't show up on other devices/logins
@@ -165,7 +180,7 @@ export function WelcomeTour() {
     const step = TOUR_STEPS[currentStep];
 
     return (
-        <div className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center">
+        <div className="fixed inset-0 z-[10000] pointer-events-none flex items-center justify-end sm:justify-center p-2 sm:p-0">
             {/* Dark Overlay with Highlight Hole */}
             <div 
                 className="absolute inset-0 bg-black/85 backdrop-blur-[3px] transition-all duration-500"
@@ -217,10 +232,10 @@ export function WelcomeTour() {
                         damping: 35,
                         mass: 0.8
                     }}
-                    className="relative pointer-events-auto z-20"
+                    className="relative pointer-events-auto z-20 w-[48%] sm:w-[350px]"
                     style={{ perspective: 1000 }}
                 >
-                    <div className="w-[350px] glass-panel p-8 border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.7)] relative overflow-hidden bg-zinc-950/98">
+                    <div className="w-full glass-panel p-3.5 md:p-8 border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.7)] relative overflow-hidden bg-zinc-950/98">
                         {/* Progress Bar */}
                         <div className="absolute top-0 left-0 right-0 h-1 bg-white/5">
                             <motion.div 
@@ -241,7 +256,7 @@ export function WelcomeTour() {
                                     damping: 20,
                                     delay: 0.1 
                                 }}
-                                className="p-3 rounded-2xl bg-white/5 border border-white/10 text-white shadow-xl"
+                                className="p-2 md:p-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-white shadow-xl [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-6 md:[&>svg]:h-6"
                             >
                                 {step.icon}
                             </motion.div>
@@ -259,7 +274,7 @@ export function WelcomeTour() {
                                     initial={{ opacity: 0, y: 10, letterSpacing: "0.05em" }}
                                     animate={{ opacity: 1, y: 0, letterSpacing: "0em" }}
                                     transition={{ delay: 0.15, duration: 0.3 }}
-                                    className="text-2xl font-black text-white uppercase tracking-tight mb-2"
+                                    className="text-sm md:text-2xl font-black text-white uppercase tracking-tight mb-1 md:mb-2"
                                 >
                                     {step.title}
                                 </motion.h3>
@@ -267,7 +282,7 @@ export function WelcomeTour() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2, duration: 0.3 }}
-                                    className="text-zinc-400 text-[13px] leading-relaxed font-medium"
+                                    className="text-zinc-400 text-[9px] md:text-[13px] leading-relaxed font-medium"
                                 >
                                     {step.content}
                                 </motion.p>
@@ -277,13 +292,13 @@ export function WelcomeTour() {
                                 initial={{ opacity: 0, y: 10, scale: 0.98 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 transition={{ delay: 0.25, duration: 0.3 }}
-                                className="bg-white/[0.02] rounded-[24px] p-5 border border-white/5 space-y-2 relative overflow-hidden"
+                                className="bg-white/[0.02] rounded-xl md:rounded-[24px] p-2.5 md:p-5 border border-white/5 space-y-1 md:space-y-2 relative overflow-hidden"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-30" />
-                                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-600 flex items-center gap-2 relative">
-                                    <Play className="w-3 h-3 fill-current" /> Manual Protocol:
+                                <p className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.4em] text-zinc-600 flex items-center gap-1.5 md:gap-2 relative">
+                                    <Play className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current" /> Manual Protocol:
                                 </p>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed relative">
+                                <p className="text-[9px] md:text-xs text-zinc-300 font-medium leading-relaxed relative">
                                     {step.instruction}
                                 </p>
                             </motion.div>
@@ -297,21 +312,21 @@ export function WelcomeTour() {
                                         0{currentStep + 1}
                                     </span>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-1.5 md:gap-2">
                                     {currentStep > 0 && (
                                         <button
                                             onClick={handleBack}
-                                            className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-widest"
+                                            className="px-3 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all text-[8px] md:text-[10px] font-black uppercase tracking-widest"
                                         >
                                             Prev
                                         </button>
                                     )}
                                     <button
                                         onClick={handleNext}
-                                        className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 group/btn"
+                                        className="flex items-center gap-1.5 md:gap-2 px-4 md:px-8 py-2 md:py-2.5 rounded-lg md:rounded-xl bg-white text-black text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 group/btn"
                                     >
                                         {currentStep === TOUR_STEPS.length - 1 ? "Start" : "Next"}
-                                        <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                                        <ChevronRight className="w-3 md:w-3.5 h-3 md:h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                                     </button>
                                 </div>
                             </div>

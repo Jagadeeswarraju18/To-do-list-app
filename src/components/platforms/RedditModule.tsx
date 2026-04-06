@@ -770,14 +770,32 @@ export default function RedditModule({ product }: { product: any }) {
                                     />
                                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-600" />
                                 </div>
-                                <button
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.96 }}
                                     onClick={handleSearch}
                                     disabled={!niche.trim() || generating}
-                                    className="premium-button h-11 px-6 shadow-orange-500/20 shrink-0"
+                                    className="premium-button h-11 px-8 shadow-orange-500/20 shrink-0 relative overflow-hidden group"
                                 >
-                                    {generating ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <BrandLogo size="sm" className="scale-125" />}
-                                    {generating ? "Scanning..." : "Scan"}
-                                </button>
+                                    {/* Tactical Pulse Effect when scanning */}
+                                    {generating && (
+                                        <motion.div 
+                                            initial={{ scale: 0.8, opacity: 0.5 }}
+                                            animate={{ scale: 2, opacity: 0 }}
+                                            transition={{ duration: 1, repeat: Infinity, ease: "easeOut" }}
+                                            className="absolute inset-0 bg-white/20 rounded-full"
+                                        />
+                                    )}
+
+                                    <div className="relative z-10 flex items-center gap-2">
+                                        {generating ? (
+                                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                                        ) : (
+                                            <Search className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                        )}
+                                        <span className="tracking-[0.2em]">{generating ? "Scanning..." : "Scan"}</span>
+                                    </div>
+                                </motion.button>
                             </div>
 
                             {/* Footer meta */}

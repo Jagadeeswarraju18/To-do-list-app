@@ -61,11 +61,16 @@ export function Footer() {
                     <div className="space-y-8">
                         <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-600">Mardis</h4>
                         <ul className="space-y-4">
-                            {["Resources", "About Us", "Careers", "Contact", "LinkedIn"].map(l => (
-                                <li key={l}>
-                                    <Link href="#" className="text-gray-400 text-[13px] font-medium hover:text-white transition-colors">{l}</Link>
-                                </li>
-                            ))}
+                            {["Resources", "About Us", "Careers", "Contact", "LinkedIn"].map((l) => {
+                                const href = l === "Contact" ? "mailto:hello@mardishub.com?subject=Contact%20Enquiry" : "#";
+                                return (
+                                    <li key={l}>
+                                        <Link href={href} className={l === "Contact" ? "text-gray-400 text-[13px] font-medium hover:text-white transition-colors" : "text-gray-400 text-[13px] font-medium hover:text-white transition-colors"}>
+                                            {l}
+                                        </Link>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     </div>
 

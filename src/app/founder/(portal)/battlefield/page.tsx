@@ -179,33 +179,30 @@ export default function BattlefieldPage() {
         <div className="space-y-10 pb-20 animate-fade-up">
             {/* Header Area */}
             <div className="relative group/header">
-                <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-transparent rounded-[40px] blur-2xl opacity-50 transition duration-1000" />
-                <div className="relative glass-panel p-5 md:p-6 overflow-hidden border-white/5">
-                    <div className="absolute -top-24 -right-24 opacity-5 pointer-events-none transition-transform duration-1000">
-                        <Swords className="w-96 h-96 text-white" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-transparent rounded-[32px] blur-2xl opacity-50 pointer-events-none" />
+                <div className="relative glass-panel p-4 sm:p-6 overflow-hidden border-white/5 rounded-[24px] sm:rounded-[40px]">
+                    <div className="absolute -top-20 -right-20 opacity-[0.03] pointer-events-none hidden sm:block">
+                        <Swords className="w-80 h-80 text-white" />
                     </div>
-
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-4">
-                                <div className="bg-white/10 text-white p-2.5 rounded-xl border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
-                                    <Swords className="w-6 h-6" />
+                    
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6 relative z-10">
+                        <div className="space-y-3 w-full md:w-auto">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-white/10 text-white p-2.5 rounded-xl border border-white/10 shrink-0">
+                                    <Swords className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
-                                <div>
-                                    <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">
-                                        The Battlefield
-                                    </h1>
-                                    <div className="h-1 w-12 bg-white rounded-full mt-1" />
-                                </div>
+                                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase italic">
+                                    The Battlefield
+                                </h1>
                             </div>
-                            <p className="text-zinc-400 text-sm max-w-xl font-normal leading-relaxed">
-                                Deploy hunter-bot strategy to track leads who are actively looking to <span className="text-white font-semibold">switch from your competitors</span>.
+                            <p className="text-zinc-400 text-xs sm:text-sm max-w-xl font-medium leading-relaxed uppercase tracking-wider opacity-80">
+                                Intercept and analyze leads looking to <span className="text-white font-bold">switch from rivals</span>.
                             </p>
-                            <div className="flex flex-wrap gap-4">
-                                <div className="flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 rounded-full">
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-white">
                                     <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_#FFFFFF]" />
-                                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
-                                        {opportunities.length} High-Intent Signals
+                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-zinc-300">
+                                        {opportunities.length} Tactical Signals
                                     </span>
                                 </div>
                             </div>
@@ -214,11 +211,11 @@ export default function BattlefieldPage() {
                         <button
                             onClick={handleDiscover}
                             disabled={discovering}
-                            className="group relative px-8 py-3.5 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-xl transition-all shadow-2xl shadow-primary/20 active:scale-95 disabled:opacity-50 flex items-center gap-3 overflow-hidden text-[10px] tracking-[0.2em] uppercase"
+                            className="w-full md:w-auto group relative px-8 py-3.5 bg-primary hover:bg-[#423F3E] text-white font-bold rounded-xl transition-all shadow-2xl shadow-primary/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden text-[10px] tracking-[0.2em] uppercase"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                             {discovering ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />}
-                            Execute Strategic Scout
+                            Execute Scout
                         </button>
                     </div>
                 </div>
@@ -321,11 +318,31 @@ export default function BattlefieldPage() {
                 )}
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/5 w-full md:w-fit overflow-x-auto no-scrollbar">
-                        <button onClick={() => setActiveTab('all')} className={`px-4 sm:px-8 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>Tactical View</button>
-                        <button onClick={() => setActiveTab('x')} className={`px-4 sm:px-8 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'x' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>X Intelligence</button>
-                        <button onClick={() => setActiveTab('reddit')} className={`px-4 sm:px-8 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'reddit' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>Reddit Intelligence</button>
-                        <button onClick={() => setActiveTab('linkedin')} className={`px-4 sm:px-8 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === 'linkedin' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white'}`}>LinkedIn Intelligence</button>
+                    <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 w-full md:w-fit overflow-x-auto no-scrollbar gap-1">
+                        <button 
+                            onClick={() => setActiveTab('all')} 
+                            className={`flex-1 sm:flex-none px-5 sm:px-8 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                        >
+                            Tactical<span className="hidden sm:inline"> View</span>
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('x')} 
+                            className={`flex-1 sm:flex-none px-5 sm:px-8 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'x' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                        >
+                            X<span className="hidden sm:inline"> Intelligence</span>
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('reddit')} 
+                            className={`flex-1 sm:flex-none px-5 sm:px-8 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'reddit' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                        >
+                            Reddit<span className="hidden sm:inline"> Intelligence</span>
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('linkedin')} 
+                            className={`flex-1 sm:flex-none px-5 sm:px-8 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'linkedin' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                        >
+                            LinkedIn<span className="hidden sm:inline"> Intelligence</span>
+                        </button>
                     </div>
 
                     <div className="flex items-center gap-3 text-zinc-500">

@@ -30,6 +30,22 @@ export function Sidebar() {
         setMobileOpen(false);
     }, [pathname]);
 
+    // Listen for tour status to auto-open sidebar on mobile
+    useEffect(() => {
+        const handleTourStatus = (e: any) => {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile) {
+                if (e.detail?.active) {
+                    setMobileOpen(true);
+                } else {
+                    setMobileOpen(false);
+                }
+            }
+        };
+        window.addEventListener("mardis-tour-active", handleTourStatus as any);
+        return () => window.removeEventListener("mardis-tour-active", handleTourStatus as any);
+    }, []);
+
     // Prevent body scroll when mobile nav is open
     useEffect(() => {
         if (mobileOpen) {
@@ -75,9 +91,9 @@ export function Sidebar() {
     ];
 
     const sidebarContent = (
-        <div className="flex flex-col h-full gap-2.5 p-3 no-scrollbar overflow-y-auto">
+        <div className="flex flex-col h-full gap-2 p-2 md:gap-2.5 md:p-3 no-scrollbar overflow-y-auto">
             {/* Module 1: Brand Pod */}
-            <div id="nav-brand" className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-5 shadow-2xl flex items-center justify-between group/brand transition-all hover:bg-black/80">
+            <div id="nav-brand" className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[32px] p-3.5 md:p-5 shadow-2xl flex items-center justify-between group/brand transition-all hover:bg-black/80">
                 <div className="flex items-center gap-4">
                     <div className="relative">
                         {isCreatorView ? (
@@ -95,12 +111,6 @@ export function Sidebar() {
                         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mt-1.5">Alpha Deck</span>
                     </div>
                 </div>
-                <button
-                    onClick={() => setMobileOpen(false)}
-                    className="md:hidden p-2 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
-                >
-                    <X className="w-5 h-5" />
-                </button>
             </div>
 
             {/* Module 2: Navigation Pod */}
@@ -137,7 +147,7 @@ export function Sidebar() {
     return (
         <>
             {/* Mobile Top Bar */}
-            <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-black/60 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-6">
+            <div className="md:hidden fixed top-0 left-0 right-0 z-[100] h-16 bg-black/60 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-6">
                 <div className="flex items-center gap-3">
                     {isCreatorView ? (
                         <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center">
@@ -174,7 +184,7 @@ export function Sidebar() {
                             animate={{ x: 0 }}
                             exit={{ x: "-100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="md:hidden fixed inset-y-0 left-0 z-[70] w-[70%] sm:w-64 flex flex-col"
+                            className="md:hidden fixed inset-y-0 left-0 z-[110] w-[48%] sm:w-64 flex flex-col"
                         >
                             {sidebarContent}
                         </motion.aside>
