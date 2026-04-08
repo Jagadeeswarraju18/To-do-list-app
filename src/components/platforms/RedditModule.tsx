@@ -1224,15 +1224,15 @@ export default function RedditModule({ product }: { product: any }) {
                                                     className="premium-button h-12 shadow-orange-500/20"
                                                 >
                                                     <BookOpen className="h-4 w-4" />
-                                                    DEPLOY TO REDDIT
+                                                    GO TO REDDIT
                                                 </button>
                                                 <button
                                                     onClick={() => handleCopy(`${generatedPost.title}\n\n${generatedPost.body}`, "draft")}
                                                     className="px-6 h-12 rounded-2xl border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
                                                 >
-                                                    {copiedIdx === "draft" ? "COPIED" : "COPY TO CLIPBOARD"}
+                                                    {copiedIdx === "draft" ? "COPIED" : "COPY TEXT"}
                                                 </button>
-                                                <SaveButton onClick={handleSavePostDraft} loading={saving} label="STASH IN VAULT" className="h-12" />
+                                                <SaveButton onClick={handleSavePostDraft} loading={saving} label="SAVE DRAFT" className="h-12" />
                                             </div>
                                         </div>
                                     ) : (
@@ -1339,7 +1339,7 @@ export default function RedditModule({ product }: { product: any }) {
                                                     className="premium-button h-12 shadow-orange-500/10"
                                                 >
                                                     <BookOpen className="h-4 w-4" />
-                                                    DEPLOY ACTIVE REPLY
+                                                    COPY REPLY
                                                 </button>
                                                 {opp.tweet_url && (
                                                     <a
