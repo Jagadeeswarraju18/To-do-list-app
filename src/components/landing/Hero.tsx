@@ -99,8 +99,8 @@ export function Hero() {
 
                 <div className="mb-10 flex flex-col items-center gap-3">
                     <Link href="/signup">
-                        <button className="premium-button h-14 px-12 text-[14px] shadow-2xl active:scale-95 transition-transform">
-                            Start Finding for Free
+                        <button className="premium-button h-14 px-12 text-[14px] shadow-2xl active:scale-95 transition-transform uppercase tracking-widest font-black">
+                            Find Buyers Now
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </button>
                     </Link>

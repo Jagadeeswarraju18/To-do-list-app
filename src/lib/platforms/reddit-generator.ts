@@ -12,6 +12,12 @@ export type SubredditSuggestion = {
     reason: string;
     rules_summary: string[];
     tone: string;
+    tags?: string[];
+    audience?: string[];
+    intent?: 'high' | 'medium' | 'low';
+    fitScore?: number;
+    fitLabel?: 'high_intent' | 'related';
+    fitReasons?: string[];
 };
 
 export type RedditPost = {
@@ -27,24 +33,24 @@ export type RedditPost = {
 // --- Subreddit Database (Niche -> Suggestions) ---
 const SUBREDDIT_MAP: Record<string, SubredditSuggestion[]> = {
     'saas': [
-        { name: 'r/SaaS', members: '52k', relevance: 'high', reason: 'Core SaaS community for builders and users', rules_summary: ['No direct promotion', 'Include context and value', 'Flair required'], tone: 'Technical, builder-focused' },
-        { name: 'r/startups', members: '1.2m', relevance: 'high', reason: 'Startup ecosystem discussions and advice', rules_summary: ['No self-promotion', 'Share lessons learned', 'Be helpful first'], tone: 'Experienced, mentor-style' },
-        { name: 'r/Entrepreneur', members: '2.3m', relevance: 'medium', reason: 'Broad entrepreneurship community', rules_summary: ['Value-first content', 'No affiliate links', 'Engage genuinely'], tone: 'Practical, action-oriented' },
-        { name: 'r/microsaas', members: '18k', relevance: 'high', reason: 'Focused on small SaaS products and indie hackers', rules_summary: ['Share revenue transparently', 'Build in public welcome', 'No spam'], tone: 'Indie, transparent' },
-        { name: 'r/SaaSMarketing', members: '8k', relevance: 'high', reason: 'Strategic marketing specifically for SaaS', rules_summary: ['No spam', 'Value-first discussion'], tone: 'Strategic' },
-        { name: 'r/growthhacking', members: '130k', relevance: 'medium', reason: 'Rapid scale tactics and experiments', rules_summary: ['Share data', 'Experiments welcome', 'No vague advice'], tone: 'Experimental' },
-        { name: 'r/ProductManagement', members: '250k', relevance: 'medium', reason: 'SaaS product strategy and user feedback', rules_summary: ['Professional focus', 'No low-effort posts'], tone: 'Professional' },
-        { name: 'r/EntrepreneurRideAlong', members: '125k', relevance: 'medium', reason: 'Building businesses from scratch', rules_summary: ['Detailed updates welcome', 'Data-driven posts preferred', 'No low-effort posts'], tone: 'Data-heavy, transparent' },
+        { name: 'r/SaaS', members: '52k', relevance: 'high', reason: 'Core SaaS community for builders and users', rules_summary: ['No direct promotion', 'Include context and value', 'Flair required'], tone: 'Technical, builder-focused', tags: ['saas', 'builders', 'founders', 'software'], audience: ['builders', 'founders'], intent: 'high' },
+        { name: 'r/startups', members: '1.2m', relevance: 'high', reason: 'Startup ecosystem discussions and advice', rules_summary: ['No self-promotion', 'Share lessons learned', 'Be helpful first'], tone: 'Experienced, mentor-style', tags: ['startup', 'founders', 'growth'], audience: ['founders'], intent: 'high' },
+        { name: 'r/Entrepreneur', members: '2.3m', relevance: 'medium', reason: 'Broad entrepreneurship community', rules_summary: ['Value-first content', 'No affiliate links', 'Engage genuinely'], tone: 'Practical, action-oriented', tags: ['business', 'founders', 'growth'], audience: ['founders'], intent: 'medium' },
+        { name: 'r/microsaas', members: '18k', relevance: 'high', reason: 'Focused on small SaaS products and indie hackers', rules_summary: ['Share revenue transparently', 'Build in public welcome', 'No spam'], tone: 'Indie, transparent', tags: ['saas', 'indie', 'build-in-public', 'founders'], audience: ['builders', 'indie hackers'], intent: 'high' },
+        { name: 'r/SaaSMarketing', members: '8k', relevance: 'high', reason: 'Strategic marketing specifically for SaaS', rules_summary: ['No spam', 'Value-first discussion'], tone: 'Strategic', tags: ['saas', 'marketing', 'growth'], audience: ['marketers', 'founders'], intent: 'medium' },
+        { name: 'r/growthhacking', members: '130k', relevance: 'medium', reason: 'Rapid scale tactics and experiments', rules_summary: ['Share data', 'Experiments welcome', 'No vague advice'], tone: 'Experimental', tags: ['growth', 'experiments', 'metrics', 'saas'], audience: ['growth operators', 'founders'], intent: 'high' },
+        { name: 'r/ProductManagement', members: '250k', relevance: 'medium', reason: 'SaaS product strategy and user feedback', rules_summary: ['Professional focus', 'No low-effort posts'], tone: 'Professional', tags: ['product', 'saas', 'software'], audience: ['product teams'], intent: 'medium' },
+        { name: 'r/EntrepreneurRideAlong', members: '125k', relevance: 'medium', reason: 'Building businesses from scratch', rules_summary: ['Detailed updates welcome', 'Data-driven posts preferred', 'No low-effort posts'], tone: 'Data-heavy, transparent', tags: ['builders', 'founders', 'build-in-public', 'metrics'], audience: ['builders'], intent: 'high' },
     ],
     'marketing': [
-        { name: 'r/marketing', members: '450k', relevance: 'high', reason: 'General marketing strategy and tactics', rules_summary: ['No self-promo', 'Case studies welcome', 'Source your claims'], tone: 'Professional, strategic' },
-        { name: 'r/digital_marketing', members: '180k', relevance: 'high', reason: 'Digital-first marketing discussions', rules_summary: ['No link dropping', 'Share real results', 'Help others first'], tone: 'Tactical, results-driven' },
-        { name: 'r/SEO', members: '350k', relevance: 'high', reason: 'Organic search visibility and strategy', rules_summary: ['No self-promotion', 'Include context'], tone: 'Data-driven' },
-        { name: 'r/PPC', members: '150k', relevance: 'high', reason: 'Paid acquisition and ad strategy', rules_summary: ['Professional discussion only'], tone: 'ROI-focused' },
-        { name: 'r/socialmedia', members: '320k', relevance: 'medium', reason: 'Social media strategy and trends', rules_summary: ['No self-promotion', 'Share strategies, not tools', 'Be specific with advice'], tone: 'Trend-aware, practical' },
-        { name: 'r/content_marketing', members: '65k', relevance: 'medium', reason: 'Content strategy discussions', rules_summary: ['Quality over quantity', 'Case studies preferred', 'No blog spam'], tone: 'Long-form, analytical' },
-        { name: 'r/Affiliatemarketing', members: '120k', relevance: 'high', reason: 'Affiliate network and strategy talk', rules_summary: ['No affiliate links'], tone: 'Tactical' },
-        { name: 'r/AskMarketing', members: '100k', relevance: 'medium', reason: 'Beginner-friendly marketing advice', rules_summary: ['Be helpful', 'No broad spam'], tone: 'Educational' },
+        { name: 'r/marketing', members: '450k', relevance: 'high', reason: 'General marketing strategy and tactics', rules_summary: ['No self-promo', 'Case studies welcome', 'Source your claims'], tone: 'Professional, strategic', tags: ['marketing', 'strategy', 'distribution'], audience: ['marketers'], intent: 'medium' },
+        { name: 'r/digital_marketing', members: '180k', relevance: 'high', reason: 'Digital-first marketing discussions', rules_summary: ['No link dropping', 'Share real results', 'Help others first'], tone: 'Tactical, results-driven', tags: ['marketing', 'growth', 'distribution'], audience: ['marketers'], intent: 'medium' },
+        { name: 'r/SEO', members: '350k', relevance: 'high', reason: 'Organic search visibility and strategy', rules_summary: ['No self-promotion', 'Include context'], tone: 'Data-driven', tags: ['seo', 'marketing'], audience: ['marketers'], intent: 'medium' },
+        { name: 'r/PPC', members: '150k', relevance: 'high', reason: 'Paid acquisition and ad strategy', rules_summary: ['Professional discussion only'], tone: 'ROI-focused', tags: ['ppc', 'ads', 'marketing'], audience: ['marketers'], intent: 'medium' },
+        { name: 'r/socialmedia', members: '320k', relevance: 'medium', reason: 'Social media strategy and trends', rules_summary: ['No self-promotion', 'Share strategies, not tools', 'Be specific with advice'], tone: 'Trend-aware, practical', tags: ['social', 'creators', 'content'], audience: ['creators', 'marketers'], intent: 'medium' },
+        { name: 'r/content_marketing', members: '65k', relevance: 'medium', reason: 'Content strategy discussions', rules_summary: ['Quality over quantity', 'Case studies preferred', 'No blog spam'], tone: 'Long-form, analytical', tags: ['content', 'marketing', 'distribution'], audience: ['marketers', 'creators'], intent: 'medium' },
+        { name: 'r/Affiliatemarketing', members: '120k', relevance: 'high', reason: 'Affiliate network and strategy talk', rules_summary: ['No affiliate links'], tone: 'Tactical', tags: ['affiliate', 'marketing'], audience: ['marketers'], intent: 'low' },
+        { name: 'r/AskMarketing', members: '100k', relevance: 'medium', reason: 'Beginner-friendly marketing advice', rules_summary: ['Be helpful', 'No broad spam'], tone: 'Educational', tags: ['marketing', 'education'], audience: ['marketers'], intent: 'low' },
     ],
     'ai': [
         { name: 'r/artificial', members: '420k', relevance: 'high', reason: 'AI news, research, and discussion', rules_summary: ['No clickbait', 'Cite sources', 'Technical discussion encouraged'], tone: 'Academic, curious' },
@@ -85,13 +91,13 @@ const SUBREDDIT_MAP: Record<string, SubredditSuggestion[]> = {
         { name: 'r/loseit', members: '3.8m', relevance: 'medium', reason: 'Weight loss support community', rules_summary: ['Be supportive', 'Share your journey', 'No pills/supplements promotion'], tone: 'Supportive, community-driven' },
     ],
     'solopreneur': [
-        { name: 'r/SideProject', members: '180k', relevance: 'high', reason: 'Showcase and feedback for side projects', rules_summary: ['No low-effort spam', 'Show your progress', 'Feedback-oriented'], tone: 'Supportive, constructive' },
-        { name: 'r/solopreneur', members: '8k', relevance: 'high', reason: 'One-person business builders', rules_summary: ['Founder-led discussions', 'No spam', 'Value-first'], tone: 'Determined, practical' },
-        { name: 'r/SmallBusiness', members: '1.2m', relevance: 'medium', reason: 'General small business and agency talk', rules_summary: ['No referral links', 'Be helpful', 'No broad spam'], tone: 'Practical, professional' },
-        { name: 'r/indiehackers', members: '20k', relevance: 'high', reason: 'Indie builders building in public', rules_summary: ['Show your work', 'No spam', 'Help others'], tone: 'Transparent, indie' },
-        { name: 'r/IndieHackers', members: '20k', relevance: 'high', reason: 'The primary home for indie builders', rules_summary: ['Show your work', 'No spam'], tone: 'Transparent' },
-        { name: 'r/RoastMyStartup', members: '15k', relevance: 'high', reason: 'Brutally honest feedback on your venture', rules_summary: ['Be thick-skinned', 'Be constructive'], tone: 'Critical' },
-        { name: 'r/AlphaandBetausers', members: '35k', relevance: 'medium', reason: 'Early adopters for new tools', rules_summary: ['No referral links', 'Follow format'], tone: 'Early-adopter' },
+        { name: 'r/SideProject', members: '180k', relevance: 'high', reason: 'Showcase and feedback for side projects', rules_summary: ['No low-effort spam', 'Show your progress', 'Feedback-oriented'], tone: 'Supportive, constructive', tags: ['side-project', 'builders', 'build-in-public', 'show-your-work'], audience: ['builders', 'indie hackers'], intent: 'high' },
+        { name: 'r/solopreneur', members: '8k', relevance: 'high', reason: 'One-person business builders', rules_summary: ['Founder-led discussions', 'No spam', 'Value-first'], tone: 'Determined, practical', tags: ['solopreneur', 'founders', 'builders'], audience: ['founders'], intent: 'high' },
+        { name: 'r/SmallBusiness', members: '1.2m', relevance: 'medium', reason: 'General small business and agency talk', rules_summary: ['No referral links', 'Be helpful', 'No broad spam'], tone: 'Practical, professional', tags: ['business', 'operators'], audience: ['founders'], intent: 'medium' },
+        { name: 'r/indiehackers', members: '20k', relevance: 'high', reason: 'Indie builders building in public', rules_summary: ['Show your work', 'No spam', 'Help others'], tone: 'Transparent, indie', tags: ['indie', 'builders', 'build-in-public', 'founders'], audience: ['builders', 'indie hackers'], intent: 'high' },
+        { name: 'r/IndieHackers', members: '20k', relevance: 'high', reason: 'The primary home for indie builders', rules_summary: ['Show your work', 'No spam'], tone: 'Transparent', tags: ['indie', 'builders', 'build-in-public', 'founders'], audience: ['builders', 'indie hackers'], intent: 'high' },
+        { name: 'r/RoastMyStartup', members: '15k', relevance: 'high', reason: 'Brutally honest feedback on your venture', rules_summary: ['Be thick-skinned', 'Be constructive'], tone: 'Critical', tags: ['startup', 'feedback', 'founders'], audience: ['founders'], intent: 'medium' },
+        { name: 'r/AlphaandBetausers', members: '35k', relevance: 'medium', reason: 'Early adopters for new tools', rules_summary: ['No referral links', 'Follow format'], tone: 'Early-adopter', tags: ['launch', 'feedback', 'early-users'], audience: ['builders', 'founders'], intent: 'high' },
     ],
     'dev': [
         { name: 'r/webdev', members: '1.6m', relevance: 'medium', reason: 'Web development news and tutorials', rules_summary: ['No self-promotion', 'Ask technical questions', 'Be professional'], tone: 'Professional, technical' },
@@ -104,11 +110,121 @@ const SUBREDDIT_MAP: Record<string, SubredditSuggestion[]> = {
 };
 
 // --- Fuzzy Subreddit Matching ---
-export function findSubreddits(niche: string): SubredditSuggestion[] {
+type ProductCommunityContext = {
+    name?: string;
+    description?: string;
+    targetAudience?: string;
+    painSolved?: string;
+    keywords?: string[];
+    prioritizeCommunities?: string[];
+    avoidCommunities?: string[];
+};
+
+const HIGH_INTENT_TERMS = [
+    'saas',
+    'startup',
+    'builder',
+    'build in public',
+    'build-in-public',
+    'indie',
+    'founder',
+    'launch',
+    'ship',
+    'traction',
+    'side project',
+    'growth',
+    'dashboard',
+    'metrics',
+    'creator'
+];
+
+function tokenize(text: string) {
+    return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s/-]+/g, " ")
+        .split(/\s+/)
+        .filter(Boolean);
+}
+
+function normalizeSubredditName(name: string) {
+    return name.toLowerCase().replace(/^r\//, "");
+}
+
+function scoreSubreddit(
+    subreddit: SubredditSuggestion,
+    contextText: string,
+    priorityCommunities: string[],
+    avoidCommunities: string[]
+) {
+    const contextTokens = new Set(tokenize(contextText));
+    const fitReasons: string[] = [];
+    let score = subreddit.relevance === "high" ? 34 : subreddit.relevance === "medium" ? 22 : 12;
+
+    if (subreddit.intent === "high") score += 12;
+    if (subreddit.intent === "medium") score += 5;
+
+    const tags = subreddit.tags || [];
+    const audiences = subreddit.audience || [];
+
+    const directTagHits = tags.filter((tag) => contextText.includes(tag.toLowerCase()) || contextTokens.has(tag.toLowerCase()));
+    if (directTagHits.length > 0) {
+        score += Math.min(18, directTagHits.length * 6);
+        fitReasons.push(`${directTagHits[0]} fit`);
+    }
+
+    const audienceHits = audiences.filter((audience) => contextText.includes(audience.toLowerCase()));
+    if (audienceHits.length > 0) {
+        score += Math.min(12, audienceHits.length * 4);
+        fitReasons.push(`${audienceHits[0]} audience`);
+    }
+
+    const hasHighIntentProductShape = HIGH_INTENT_TERMS.some((term) => contextText.includes(term));
+    const isBuilderCommunity = tags.some((tag) => ['saas', 'startup', 'builders', 'founders', 'indie', 'build-in-public', 'side-project', 'growth'].includes(tag));
+    const isMarketingCommunity = tags.some((tag) => ['marketing', 'content', 'distribution', 'social', 'seo', 'ppc'].includes(tag));
+
+    if (hasHighIntentProductShape && isBuilderCommunity) {
+        score += 16;
+        fitReasons.push("builder-native");
+    }
+
+    if (contextText.includes("creator") && tags.some((tag) => ['creators', 'social', 'content'].includes(tag))) {
+        score += 8;
+        fitReasons.push("creator-adjacent");
+    }
+
+    if (contextText.includes("marketing") && isMarketingCommunity) {
+        score += 8;
+        fitReasons.push("marketing-adjacent");
+    }
+
+    const normalizedName = normalizeSubredditName(subreddit.name);
+    if (priorityCommunities.some((community) => normalizeSubredditName(community) === normalizedName)) {
+        score += 28;
+        fitReasons.push("product-prioritized");
+    }
+
+    if (avoidCommunities.some((community) => normalizeSubredditName(community) === normalizedName)) {
+        score -= 45;
+        fitReasons.push("de-prioritized");
+    }
+
+    const fitLabel: 'high_intent' | 'related' = score >= 58 ? "high_intent" : "related";
+
+    return {
+        ...subreddit,
+        fitScore: Math.max(0, Math.min(100, score)),
+        fitLabel,
+        fitReasons: fitReasons.slice(0, 3)
+    };
+}
+
+export function findSubreddits(niche: string, product?: ProductCommunityContext): SubredditSuggestion[] {
     const normalized = niche.toLowerCase().trim();
     const words = normalized.split(/\s+/);
     const results: SubredditSuggestion[] = [];
     const matchedCategories = new Set<string>();
+    const priorityCommunities = product?.prioritizeCommunities || [];
+    const avoidCommunities = product?.avoidCommunities || [];
 
     // Keyword synonym mapping
     const synonyms: Record<string, string[]> = {
@@ -175,14 +291,32 @@ export function findSubreddits(niche: string): SubredditSuggestion[] {
     }
 
     // Deduplicate by name and return
-    const uniqueMap = new Map();
+    const uniqueMap = new Map<string, SubredditSuggestion>();
     results.forEach(sub => {
-        if (!uniqueMap.has(sub.name)) {
-            uniqueMap.set(sub.name, sub);
+        const normalizedName = normalizeSubredditName(sub.name);
+        if (!uniqueMap.has(normalizedName)) {
+            uniqueMap.set(normalizedName, sub);
         }
     });
 
-    return Array.from(uniqueMap.values()); // Return ALL matches found
+    const productContext = [
+        normalized,
+        product?.name || "",
+        product?.description || "",
+        product?.targetAudience || "",
+        product?.painSolved || "",
+        ...(product?.keywords || []),
+        ...priorityCommunities
+    ]
+        .join(" ")
+        .toLowerCase();
+
+    return Array.from(uniqueMap.values())
+        .map((sub) => scoreSubreddit(sub, productContext, priorityCommunities, avoidCommunities))
+        .sort((a, b) => {
+            if ((b.fitScore || 0) !== (a.fitScore || 0)) return (b.fitScore || 0) - (a.fitScore || 0);
+            return a.name.localeCompare(b.name);
+        });
 }
 
 // --- Reddit Post Generator ---

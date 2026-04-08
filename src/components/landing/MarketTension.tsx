@@ -7,7 +7,7 @@ const fadeUp = (delay = 0) => ({
     initial: { opacity: 0, y: 20 },
     whileInView: { opacity: 1, y: 0 },
     viewport: { once: true, margin: "-100px" },
-    transition: { duration: 0.8, ease: "easeOut", delay },
+    transition: { duration: 0.8, ease: "easeOut" as any, delay },
 });
 
 export function MarketTension() {
@@ -54,7 +54,7 @@ export function MarketTension() {
                             </div>
                             <div className="text-right">
                                 <p className="text-3xl font-black text-white/10 tabular-nums leading-none">14H</p>
-                                <p className="text-[8px] uppercase tracking-widest text-zinc-700 mt-0.5">wasted / week</p>
+                                <p className="text-[8px] uppercase tracking-widest text-zinc-500 mt-0.5">wasted / week</p>
                             </div>
                         </div>
 
@@ -62,7 +62,7 @@ export function MarketTension() {
                         <h3 className="heading-serif text-2xl text-white mb-2 leading-none">
                             You search.
                         </h3>
-                        <h3 className="heading-serif text-2xl italic text-zinc-600 mb-8 leading-none">
+                        <h3 className="heading-serif text-2xl italic text-zinc-400 mb-8 leading-none">
                             All day.
                         </h3>
 
@@ -83,7 +83,7 @@ export function MarketTension() {
                                     className="flex items-center gap-3"
                                 >
                                     <div className="h-7 w-7 shrink-0 rounded-full border border-white/5 bg-white/5 flex items-center justify-center">
-                                        <Icon className="h-3 w-3 text-zinc-700" />
+                                        <Icon className="h-3 w-3 text-zinc-500" />
                                     </div>
                                     <div className={`h-7 rounded-lg ${w} bg-white/[0.03] border border-white/5`} />
                                 </motion.div>
@@ -92,10 +92,10 @@ export function MarketTension() {
 
                         {/* Body copy */}
                         <div className="border-t border-white/5 pt-6">
-                            <p className="text-sm text-zinc-600 leading-relaxed">
+                            <p className="text-base text-zinc-100 leading-relaxed">
                                 You scroll Reddit, X, and LinkedIn for hours looking for potential customers.
                             </p>
-                            <p className="text-sm italic text-zinc-700 mt-1">
+                            <p className="text-base italic text-zinc-400 mt-2">
                                 By the time you find one, it's already too late.
                             </p>
                         </div>
@@ -174,7 +174,7 @@ export function MarketTension() {
 
                         {/* Body copy */}
                         <div className="border-t border-white/5 pt-6">
-                            <p className="text-sm text-zinc-400 leading-relaxed">
+                            <p className="text-base text-zinc-300 leading-relaxed">
                                 Mardis scans Reddit, X, and LinkedIn and surfaces people actively looking for what you sell.
                             </p>
                             <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mt-3">
