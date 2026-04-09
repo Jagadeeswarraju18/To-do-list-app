@@ -7,6 +7,7 @@ import { SignalButton } from "@/components/ui/SignalButton";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+const socialImageUrl = "https://www.mardishub.com/api/social-image?v=2026-04-10";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
     const { data: product } = await getPublicProductDetails(params.id);
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
             url: `/discover/${params.id}`,
             images: [
                 {
-                    url: "https://www.mardishub.com/og-new.png",
+                    url: socialImageUrl,
                     width: 1352,
                     height: 827,
                     alt: `Preview of ${product.name}`
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
             card: "summary_large_image",
             title: `${product.name} | Mardis Apps`,
             description: product.description || product.pain_solved,
-            images: ["https://www.mardishub.com/og-new.png"]
+            images: [socialImageUrl]
         }
     };
 }
