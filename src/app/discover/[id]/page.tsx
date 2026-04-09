@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
             url: `/discover/${params.id}`,
             images: [
                 {
-                    url: "/og-image.png",
+                    url: "/og-new.png",
                     width: 1200,
                     height: 630,
                     alt: `Preview of ${product.name}`
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
             card: "summary_large_image",
             title: `${product.name} | Mardis Apps`,
             description: product.description || product.pain_solved,
-            images: ["/twitter-image.png"]
+            images: ["/og-new.png"]
         }
     };
 }

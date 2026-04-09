@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         type: "website",
         images: [
             {
-                url: "/og-image.png",
+                url: "/og-new.png",
                 width: 1200,
                 height: 630,
                 alt: "Mardis apps directory preview"
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Discover | Mardis Apps",
         description: "Browse the best tools and apps built by the Mardis founder community.",
-        images: ["/twitter-image.png"]
+        images: ["/og-new.png"]
     }
 };
 
