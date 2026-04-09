@@ -21,9 +21,9 @@ export const metadata: Metadata = {
         type: "website",
         images: [
             {
-                url: "/og-new.png",
-                width: 1200,
-                height: 630,
+                url: "https://www.mardishub.com/og-new.png",
+                width: 1352,
+                height: 827,
                 alt: "Mardis demand capture software preview"
             }
         ]
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
         description: "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
-        images: ["/og-new.png"]
+        images: ["https://www.mardishub.com/og-new.png"]
     },
 };
 
