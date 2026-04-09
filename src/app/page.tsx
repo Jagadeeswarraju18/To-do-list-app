@@ -11,7 +11,7 @@ import { Footer } from "@/components/landing/Footer";
 import { FAQ } from "@/components/landing/FAQ";
 import { ValueCalculator } from "@/components/landing/ValueCalculator";
 
-const socialImageUrl = "https://www.mardishub.com/og-new.png";
+const socialImageUrl = "https://www.mardishub.com/X-og.png";
 
 export const metadata: Metadata = {
     title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",

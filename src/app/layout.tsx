@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const socialImageUrl = "https://www.mardishub.com/og-new.png";
+const socialImageUrl = "https://www.mardishub.com/X-og.png";
 
 export const metadata: Metadata = {
     title: {
@@ -24,8 +24,8 @@ export const metadata: Metadata = {
         images: [
             {
                 url: socialImageUrl,
-                width: 1352,
-                height: 827,
+                width: 1200,
+                height: 630,
                 alt: "Mardis demand capture software preview"
             }
         ]
