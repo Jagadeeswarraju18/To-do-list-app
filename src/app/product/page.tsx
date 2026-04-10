@@ -26,6 +26,8 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
+        site: "@Mardishub",
+        creator: "@Jagadeeswarrrr",
         title: "Mardis Product",
         description: "Demand capture software for Reddit, X, and LinkedIn.",
         images: [socialImageUrl]

@@ -34,6 +34,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         },
         twitter: {
             card: "summary_large_image",
+            site: "@Mardishub",
+            creator: "@Jagadeeswarrrr",
             title: `${product.name} | Mardis Apps`,
             description: product.description || product.pain_solved,
             images: [socialImageUrl]

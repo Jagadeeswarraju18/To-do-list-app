@@ -27,6 +27,8 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
+        site: "@Mardishub",
+        creator: "@Jagadeeswarrrr",
         title: "Discover | Mardis Apps",
         description: "Browse the best tools and apps built by the Mardis founder community.",
         images: [socialImageUrl]

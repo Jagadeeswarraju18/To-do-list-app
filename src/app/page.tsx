@@ -37,6 +37,8 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
+        site: "@Mardishub",
+        creator: "@Jagadeeswarrrr",
         title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
         description:
             "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
