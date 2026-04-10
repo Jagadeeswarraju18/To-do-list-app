@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const socialImageUrl = "https://mardishub.com/X-og.png";
 const siteUrl = "https://mardishub.com";
 
 export const metadata: Metadata = {
@@ -23,21 +22,12 @@ export const metadata: Metadata = {
         description: "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
         url: siteUrl,
         siteName: "Mardis",
-        type: "website",
-        images: [
-            {
-                url: socialImageUrl,
-                width: 1352,
-                height: 827,
-                alt: "Mardis demand capture software preview"
-            }
-        ]
+        type: "website"
     },
     twitter: {
         card: "summary_large_image",
         title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
         description: "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
-        images: [socialImageUrl],
         site: "@Mardishub",
         creator: "@Mardishub"
     }
