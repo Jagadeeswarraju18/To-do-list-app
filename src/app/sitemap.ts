@@ -8,7 +8,7 @@ type PublicProductSitemapRow = {
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = "https://www.mardishub.com";
+    const baseUrl = "https://mardishub.com";
     const now = new Date();
 
     const staticRoutes: MetadataRoute.Sitemap = [

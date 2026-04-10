@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-const productUrl = "https://www.mardishub.com/product";
-const socialImageUrl = "https://www.mardishub.com/og-new.png";
+const productUrl = "https://mardishub.com/product";
+const socialImageUrl = "https://mardishub.com/og.png";
 
 export const metadata: Metadata = {
     title: "Mardis Product - Demand Capture Software for Reddit, X, and LinkedIn",
@@ -49,7 +49,7 @@ function ProductSchema() {
                         "@type": "Brand",
                         name: "Mardis Hub"
                     },
-                    image: "https://www.mardishub.com/logo.jpg",
+                    image: "https://mardishub.com/logo.jpg",
                     url: productUrl,
                     additionalProperty: [
                         {

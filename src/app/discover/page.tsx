@@ -3,7 +3,7 @@ import { DiscoverClientPage } from "./DiscoverClientPage";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-const socialImageUrl = "https://www.mardishub.com/og-new.png";
+const socialImageUrl = "https://mardishub.com/og.png";
 
 export const metadata: Metadata = {
     title: "Discover | Mardis Apps",

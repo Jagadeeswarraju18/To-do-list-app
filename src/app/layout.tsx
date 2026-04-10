@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const socialImageUrl = "https://www.mardishub.com/og-new.png";
+const socialImageUrl = "https://mardishub.com/og.png";
 
 export const metadata: Metadata = {
     title: {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
         template: "%s | Mardis"
     },
     description: "Mardis is demand capture software that finds high-intent conversations across Reddit, X, and LinkedIn, ranks them, and helps teams respond with rule-aware drafts.",
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.mardishub.com"),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://mardishub.com"),
     icons: {
         icon: "/favicon.png",
         shortcut: "/favicon.png",
@@ -20,6 +20,8 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
         description: "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
+        url: "https://mardishub.com",
+        siteName: "Mardis",
         type: "website",
         images: [
             {

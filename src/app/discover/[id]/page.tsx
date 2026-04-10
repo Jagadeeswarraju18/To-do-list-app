@@ -7,7 +7,7 @@ import { SignalButton } from "@/components/ui/SignalButton";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-const socialImageUrl = "https://www.mardishub.com/og-new.png";
+const socialImageUrl = "https://mardishub.com/og.png";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
     const { data: product } = await getPublicProductDetails(params.id);
@@ -59,19 +59,19 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Home",
-                "item": "https://www.mardishub.com/"
+                "item": "https://mardishub.com/"
             },
             {
                 "@type": "ListItem",
                 "position": 2,
                 "name": "Discover",
-                "item": "https://www.mardishub.com/discover"
+                "item": "https://mardishub.com/discover"
             },
             {
                 "@type": "ListItem",
                 "position": 3,
                 "name": product.name,
-                "item": `https://www.mardishub.com/discover/${params.id}`
+                "item": `https://mardishub.com/discover/${params.id}`
             }
         ]
     };
