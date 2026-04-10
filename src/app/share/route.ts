@@ -21,11 +21,67 @@ const html = `<!DOCTYPE html>
   <meta name="twitter:title" content="Mardis - Demand Capture Software for Reddit, X, and LinkedIn" />
   <meta name="twitter:description" content="Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts." />
   <meta name="twitter:image" content="${imageUrl}" />
-  <meta http-equiv="refresh" content="0;url=${targetUrl}" />
-  <link rel="canonical" href="${targetUrl}" />
+  <link rel="canonical" href="${shareUrl}" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #050505;
+      color: #ffffff;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      max-width: 720px;
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      background: #0c0c0c;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    }
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .content {
+      padding: 24px;
+    }
+    h1 {
+      font-size: 32px;
+      line-height: 1.1;
+      margin: 0 0 12px;
+    }
+    p {
+      color: #c8c8c8;
+      font-size: 18px;
+      line-height: 1.5;
+      margin: 0 0 20px;
+    }
+    a {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #000000;
+      text-decoration: none;
+      font-weight: 700;
+    }
+  </style>
 </head>
 <body>
-  <p>Redirecting to <a href="${targetUrl}">${targetUrl}</a>...</p>
+  <main class="card">
+    <img src="${imageUrl}" alt="Mardis demand capture software preview" />
+    <div class="content">
+      <h1>Mardis</h1>
+      <p>Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.</p>
+      <a href="${targetUrl}">Open Mardis</a>
+    </div>
+  </main>
 </body>
 </html>`;
 
