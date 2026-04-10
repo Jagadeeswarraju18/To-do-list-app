@@ -11,7 +11,7 @@ import { Footer } from "@/components/landing/Footer";
 import { FAQ } from "@/components/landing/FAQ";
 import { ValueCalculator } from "@/components/landing/ValueCalculator";
 
-const socialImageUrl = "https://mardishub.com/og-x.png";
+const socialImageUrl = "https://mardishub.com/X-og.png";
 const siteUrl = "https://mardishub.com";
 
 export const metadata: Metadata = {
@@ -41,7 +41,9 @@ export const metadata: Metadata = {
         title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
         description:
             "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
-        images: [socialImageUrl]
+        images: [socialImageUrl],
+        site: "@Mardishub",
+        creator: "@Mardishub"
     }
 };
 
