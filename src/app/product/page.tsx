@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 const productUrl = "https://www.mardishub.com/product";
-const socialImageUrl = "https://www.mardishub.com/x-og-card.png";
+const socialImageUrl = "https://www.mardishub.com/og-new.png";
 
 export const metadata: Metadata = {
     title: "Mardis Product - Demand Capture Software for Reddit, X, and LinkedIn",
@@ -26,17 +26,9 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        site: "@Mardishub",
-        creator: "@Jagadeeswarrrr",
         title: "Mardis Product",
         description: "Demand capture software for Reddit, X, and LinkedIn.",
         images: [socialImageUrl]
-    },
-    other: {
-        "og:image:secure_url": socialImageUrl,
-        "twitter:image:src": socialImageUrl,
-        "twitter:image:alt": "Mardis product preview",
-        "twitter:url": productUrl
     }
 };
 

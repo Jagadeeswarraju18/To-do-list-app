@@ -3,7 +3,7 @@ import { DiscoverClientPage } from "./DiscoverClientPage";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-const socialImageUrl = "https://www.mardishub.com/x-og-card.png";
+const socialImageUrl = "https://www.mardishub.com/og-new.png";
 
 export const metadata: Metadata = {
     title: "Discover | Mardis Apps",
@@ -27,17 +27,9 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        site: "@Mardishub",
-        creator: "@Jagadeeswarrrr",
         title: "Discover | Mardis Apps",
         description: "Browse the best tools and apps built by the Mardis founder community.",
         images: [socialImageUrl]
-    },
-    other: {
-        "og:image:secure_url": socialImageUrl,
-        "twitter:image:src": socialImageUrl,
-        "twitter:image:alt": "Mardis apps directory preview",
-        "twitter:url": "https://www.mardishub.com/discover"
     }
 };
 
