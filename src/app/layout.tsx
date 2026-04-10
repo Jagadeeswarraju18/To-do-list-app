@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const socialImageUrl = "https://www.mardishub.com/X-og.png";
+const socialImageUrl = "https://www.mardishub.com/x-og-card.png";
 
 export const metadata: Metadata = {
     title: {
@@ -36,6 +36,12 @@ export const metadata: Metadata = {
         description: "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
         images: [socialImageUrl]
     },
+    other: {
+        "og:image:secure_url": socialImageUrl,
+        "twitter:image:src": socialImageUrl,
+        "twitter:image:alt": "Mardis demand capture software preview",
+        "twitter:url": "https://www.mardishub.com"
+    }
 };
 
 export default function RootLayout({
