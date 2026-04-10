@@ -11,7 +11,7 @@ import { Footer } from "@/components/landing/Footer";
 import { FAQ } from "@/components/landing/FAQ";
 import { ValueCalculator } from "@/components/landing/ValueCalculator";
 
-const socialImageUrl = "https://images.weserv.nl/?url=mardishub.com/og-x.png";
+const socialImageUrl = "https://mardishub.com/og-x.png";
 const siteUrl = "https://mardishub.com";
 
 export const metadata: Metadata = {

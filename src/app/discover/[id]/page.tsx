@@ -7,7 +7,7 @@ import { SignalButton } from "@/components/ui/SignalButton";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-const socialImageUrl = "https://images.weserv.nl/?url=mardishub.com/og-x.png";
+const socialImageUrl = "https://mardishub.com/og-x.png";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
     const { data: product } = await getPublicProductDetails(params.id);

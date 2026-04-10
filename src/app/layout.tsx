@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const socialImageUrl = "https://images.weserv.nl/?url=mardishub.com/og-x.png";
+const socialImageUrl = "https://mardishub.com/og-x.png";
 const siteUrl = "https://mardishub.com";
 
 export const metadata: Metadata = {
