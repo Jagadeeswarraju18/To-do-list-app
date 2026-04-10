@@ -3,7 +3,7 @@ import { DiscoverClientPage } from "./DiscoverClientPage";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-const socialImageUrl = "https://mardishub.com/og.png?v=2";
+const socialImageUrl = "https://mardishub.com/og-x.png";
 const discoverUrl = "https://mardishub.com/discover";
 
 export const metadata: Metadata = {

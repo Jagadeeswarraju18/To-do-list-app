@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 const productUrl = "https://mardishub.com/product";
-const socialImageUrl = "https://mardishub.com/og.png?v=2";
+const socialImageUrl = "https://mardishub.com/og-x.png";
 
 export const metadata: Metadata = {
     title: "Mardis Product - Demand Capture Software for Reddit, X, and LinkedIn",
