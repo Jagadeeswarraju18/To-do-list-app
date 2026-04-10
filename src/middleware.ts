@@ -45,6 +45,13 @@ function tooManyRequestsResponse(message: string, headers: Record<string, string
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
+    const host = request.headers.get("host") || "";
+
+    if (host.startsWith("www.")) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.hostname = host.slice(4);
+        return NextResponse.redirect(redirectUrl, 308);
+    }
 
     if (isAuthRateLimitedPath(pathname)) {
         const fingerprint = await createFingerprint(request);
