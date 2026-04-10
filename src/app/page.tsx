@@ -11,20 +11,21 @@ import { Footer } from "@/components/landing/Footer";
 import { FAQ } from "@/components/landing/FAQ";
 import { ValueCalculator } from "@/components/landing/ValueCalculator";
 
-const socialImageUrl = "https://mardishub.com/og.png";
+const socialImageUrl = "https://mardishub.com/og.png?v=2";
+const siteUrl = "https://mardishub.com";
 
 export const metadata: Metadata = {
     title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
     description:
         "Mardis is demand capture software that finds high-intent conversations across Reddit, X, and LinkedIn, ranks them, and helps teams respond with rule-aware drafts.",
     alternates: {
-        canonical: "/"
+        canonical: siteUrl
     },
     openGraph: {
         title: "Mardis - Demand Capture Software for Reddit, X, and LinkedIn",
         description:
             "Find high-intent conversations across Reddit, X, and LinkedIn and act on them with rule-aware drafts.",
-        url: "/",
+        url: siteUrl,
         type: "website",
         images: [
             {

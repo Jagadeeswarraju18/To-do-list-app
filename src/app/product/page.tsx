@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 const productUrl = "https://mardishub.com/product";
-const socialImageUrl = "https://mardishub.com/og.png";
+const socialImageUrl = "https://mardishub.com/og.png?v=2";
 
 export const metadata: Metadata = {
     title: "Mardis Product - Demand Capture Software for Reddit, X, and LinkedIn",
     description: "Mardis is a web-based demand capture product that finds high-intent conversations across Reddit, X, and LinkedIn, scores them, and helps teams reply safely with native-sounding drafts.",
     alternates: {
-        canonical: "/product"
+        canonical: productUrl
     },
     openGraph: {
         title: "Mardis Product",
         description: "Demand capture software for Reddit, X, and LinkedIn.",
-        url: "/product",
+        url: productUrl,
         type: "website",
         images: [
             {

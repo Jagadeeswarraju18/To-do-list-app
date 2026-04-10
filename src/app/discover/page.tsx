@@ -3,18 +3,19 @@ import { DiscoverClientPage } from "./DiscoverClientPage";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-const socialImageUrl = "https://mardishub.com/og.png";
+const socialImageUrl = "https://mardishub.com/og.png?v=2";
+const discoverUrl = "https://mardishub.com/discover";
 
 export const metadata: Metadata = {
     title: "Discover | Mardis Apps",
     description: "Browse the best tools and apps built by the Mardis founder community.",
     alternates: {
-        canonical: "/discover"
+        canonical: discoverUrl
     },
     openGraph: {
         title: "Discover | Mardis Apps",
         description: "Browse the best tools and apps built by the Mardis founder community.",
-        url: "/discover",
+        url: discoverUrl,
         type: "website",
         images: [
             {
