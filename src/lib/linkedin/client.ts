@@ -1,5 +1,6 @@
 import { RedditPost as LinkedInPost, ProductContext } from "../reddit/client";
 import { semanticReRank } from "../semantic/re-ranker";
+import { inferSearchIntentProfile } from "../discovery/search-intent";
 
 /**
  * Uses Grok's web_search tool via the Responses API to find LinkedIn signals.
@@ -16,7 +17,10 @@ export async function searchLinkedInOpportunities(
         return { error: "xAI API configuration missing. Please add XAI_API_KEY to .env.local." };
     }
 
-    const allTerms = [...keywords, ...phrases].filter(Boolean);
+    const intentProfile = product
+        ? inferSearchIntentProfile(product, keywords, phrases)
+        : { familyLabel: "general customer pain", searchTerms: [...keywords, ...phrases].filter(Boolean), platformCues: phrases.filter(Boolean) };
+    const allTerms = intentProfile.searchTerms;
     if (allTerms.length === 0) return { error: "No search terms provided" };
 
     const productBrief = product
@@ -71,6 +75,10 @@ Search LinkedIn (site:linkedin.com/posts) for professional posts where people ar
 1. Frustrated with "${product?.pain_solved || allTerms[0]}"
 2. Asking for recommendations for tools like "${product?.name || 'this'}"
 3. Discussing professional pain points related to: ${allTerms.slice(0, 3).join(", ")}
+4. Describing pain in the family "${intentProfile.familyLabel}"
+
+Strong cues from real professionals:
+${intentProfile.platformCues.map(term => `- ${term}`).join("\n")}
 
 Prioritize posts from the last ${maxDays} days.`
             }),
@@ -95,17 +103,24 @@ Prioritize posts from the last ${maxDays} days.`
         const rankingRequest = {
             targetConcept: targetConcept,
             items: posts.map(p => ({ id: p.id, text: p.text, raw: p })),
-            threshold: 0.45 // High threshold for LinkedIn
+            threshold: 0.30 // Lower threshold because LinkedIn phrasing is often vague but still useful
         };
 
         const rankingResult = await semanticReRank<any>(rankingRequest);
         console.log(`📉 Filtered out ${rankingResult.originalCount - rankingResult.filteredCount} low-signal LinkedIn posts.`);
         console.log("-----------------------------------------");
 
-        const finalPosts = rankingResult.items.map(item => ({
+        const rankedPosts = rankingResult.items.map(item => ({
             ...item.raw,
             similarity_score: item.similarityScore
         }));
+
+        const finalPosts = rankedPosts.length > 0
+            ? rankedPosts
+            : posts.map(post => ({
+                ...post,
+                similarity_score: typeof (post as any).similarity_score === "number" ? (post as any).similarity_score : 0.5
+            }));
 
         return { tweets: finalPosts as LinkedInPost[], error: undefined };
     } catch (error: any) {
@@ -114,8 +129,24 @@ Prioritize posts from the last ${maxDays} days.`
 }
 
 function extractResponseText(data: any): string {
+    if (typeof data === "string") return data;
     if (data.choices?.[0]?.message?.content) return data.choices[0].message.content;
-    if (data.output?.[0]?.content?.[0]?.text) return data.output[0].content[0].text;
+    if (data.output && Array.isArray(data.output)) {
+        const texts: string[] = [];
+        for (const item of data.output) {
+            if (item.content && Array.isArray(item.content)) {
+                for (const block of item.content) {
+                    if ((block.type === "output_text" || block.type === "text") && block.text) {
+                        texts.push(String(block.text));
+                    }
+                }
+            }
+            if (item.text) texts.push(String(item.text));
+            if (item.output_text) texts.push(String(item.output_text));
+        }
+        if (texts.length > 0) return texts.join("\n");
+    }
+    if (data.output_text) return String(data.output_text);
     return "";
 }
 
@@ -130,10 +161,14 @@ function parseLinkedInResponse(text: string): LinkedInPost[] {
         if (jsonStart === -1) return [];
         cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
         const parsed = JSON.parse(cleaned);
-        return (parsed.posts || []).map((p: any) => ({
+        const rawPosts = parsed.posts || parsed.tweets || parsed.results || parsed.data || (Array.isArray(parsed) ? parsed : []);
+        return rawPosts.map((p: any, idx: number) => ({
             ...p,
+            id: p.id || `linkedin_${Date.now()}_${idx}`,
+            text: p.text || p.content || "",
             author: p.author || "LinkedIn User",
+            post_url: p.post_url || p.url || "",
             post_type: 'post'
-        }));
+        })).filter((p: LinkedInPost) => p.text.length > 10);
     } catch { return []; }
 }

@@ -18,6 +18,7 @@ import { searchRedditOpportunities } from "@/lib/reddit/client";
 import { searchLinkedInOpportunities } from "@/lib/linkedin/client";
 import { getUserUsageSnapshot, logDraftUsage } from "@/lib/usage-limits";
 import { buildLimitPayload } from "@/lib/limit-utils";
+import { inferSearchIntentProfile } from "@/lib/discovery/search-intent";
 
 async function checkRateLimits(supabase: any, userId: string, platform: string) {
     // 1. Concurrency Check: Is there a scan already RUNNING for this user?
@@ -117,8 +118,12 @@ async function prepareKeywords(product: any) {
             });
         }
         keywords = Array.from(allKeywords).slice(0, 10);
-        painPhrases = Array.from(allPhrases).slice(0, 10);
+        painPhrases = Array.from(allPhrases).slice(0, 12);
     }
+
+    const intentProfile = inferSearchIntentProfile(product, keywords, painPhrases);
+    painPhrases = Array.from(new Set([...painPhrases, ...intentProfile.platformCues])).slice(0, 12);
+
     return { keywords, painPhrases };
 }
 
@@ -160,11 +165,31 @@ async function scoreAndVerifyCandidates(product: any, candidates: any[]) {
 
     const scoredMap = new Map<string, LeadSignalBreakdown>(scoredSignals.map(signal => [signal.id, signal]));
     const verifiedMap = new Map<string, any>(verified.map(signal => [signal.id, signal]));
-    const relevant = candidates
-        .filter(candidate => verifiedMap.get(candidate.id)?.isRelevant)
-        .sort((a, b) => (verifiedMap.get(b.id)?.score || 0) - (verifiedMap.get(a.id)?.score || 0));
+    const rankedCandidates = [...candidates].sort((a, b) => {
+        const verifiedDelta = (verifiedMap.get(b.id)?.score || 0) - (verifiedMap.get(a.id)?.score || 0);
+        if (verifiedDelta !== 0) return verifiedDelta;
+        return (scoredMap.get(b.id)?.blendedScore || 0) - (scoredMap.get(a.id)?.blendedScore || 0);
+    });
 
-    return { scoredMap, verifiedMap, relevant };
+    let relevant = rankedCandidates.filter(candidate => verifiedMap.get(candidate.id)?.isRelevant);
+
+    // Rank more and reject less: if the verifier is too strict, keep the strongest scored candidates.
+    if (relevant.length === 0) {
+        relevant = rankedCandidates.filter(candidate => {
+            const heuristicScore = scoredMap.get(candidate.id)?.blendedScore || 0;
+            const verifiedScore = verifiedMap.get(candidate.id)?.score || 0;
+            return Math.max(heuristicScore, verifiedScore) >= 54;
+        }).slice(0, 8);
+    }
+
+    const highIntent = rankedCandidates.filter(candidate => (verifiedMap.get(candidate.id)?.intent || scoredMap.get(candidate.id)?.suggestedIntent) === "high");
+
+    return { scoredMap, verifiedMap, relevant, rankedCandidates, highIntent };
+}
+
+async function updateRunStats(supabase: any, runId: string | undefined, stats: Record<string, any>) {
+    if (!runId) return;
+    await supabase.from("discovery_runs").update(stats).eq("id", runId);
 }
 
 export async function discoverOpportunitiesAction(scanWindow?: string, userIdOverride?: string, productIdOverride?: string) {
@@ -202,23 +227,24 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
 
         const searchResult = await searchXOpportunities(keywords, painPhrases, window.days, 'loose', product);
         if (searchResult.error) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'failed' }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'failed' });
             return { error: searchResult.error };
         }
 
         const tweets = searchResult.tweets || [];
         if (tweets.length === 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0, total_scanned: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0, total_scanned: 0, relevant_count: 0, high_intent_count: 0 });
             return { success: true, addedCount: 0 };
         }
 
-        if (run) await supabase.from("discovery_runs").update({ total_scanned: tweets.length }).eq("id", run.id);
+        await updateRunStats(supabase, run?.id, { total_scanned: tweets.length });
 
 
-        const { scoredMap: initialScoreMap, verifiedMap, relevant } = await scoreAndVerifyCandidates(product, tweets);
+        const { scoredMap: initialScoreMap, verifiedMap, relevant, highIntent } = await scoreAndVerifyCandidates(product, tweets);
+        await updateRunStats(supabase, run?.id, { relevant_count: relevant.length, high_intent_count: highIntent.length });
 
         if (relevant.length === 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0 });
             return { success: true, addedCount: 0 };
         }
 
@@ -232,13 +258,14 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
         const newTweets = relevant.filter(t => !existingUrls.has(`https://x.com/${t.author_username}/status/${t.id}`.toLowerCase()));
 
         if (newTweets.length === 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0 });
             return { success: true, addedCount: 0 };
         }
 
-        const { scoredMap, verifiedMap: finalVerifiedMap, relevant: finalRelevant } = await scoreAndVerifyCandidates(product, newTweets);
+        const { scoredMap, verifiedMap: finalVerifiedMap, relevant: finalRelevant, highIntent: finalHighIntent } = await scoreAndVerifyCandidates(product, newTweets);
+        await updateRunStats(supabase, run?.id, { relevant_count: finalRelevant.length, high_intent_count: finalHighIntent.length });
         if (finalRelevant.length === 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0 });
             return { success: true, addedCount: 0 };
         }
 
@@ -265,7 +292,7 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
         const remainingSignals = Math.max(plan.signalLimit - usage.signals, 0);
 
         if (remainingSignals <= 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0, completed_at: new Date().toISOString() }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0, completed_at: new Date().toISOString() });
             const limit = buildLimitPayload("signals", tier, usage.signals, plan.signalLimit);
             return { error: limit.message, code: limit.code, limit };
         }
@@ -296,13 +323,11 @@ export async function discoverOpportunitiesAction(scanWindow?: string, userIdOve
         });
 
         const { error: insertError } = await supabase.from("opportunities").insert(insertions);
-        if (run) {
-            await supabase.from("discovery_runs").update({
-                status: insertError ? 'failed' : 'completed',
-                leads_found: insertions.length,
-                completed_at: new Date().toISOString()
-            }).eq("id", run.id);
-        }
+        await updateRunStats(supabase, run?.id, {
+            status: insertError ? 'failed' : 'completed',
+            leads_found: insertions.length,
+            completed_at: new Date().toISOString()
+        });
 
         revalidatePath("/founder/opportunities");
         const signalLimitReached = finalRelevant.length > insertions.length;
@@ -352,23 +377,25 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
         const searchResult = await searchRedditOpportunities(keywords, painPhrases, window.days, product);
 
         if (searchResult.error || !searchResult.tweets?.length) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0, total_scanned: 0, relevant_count: 0, high_intent_count: 0 });
             return { success: true, addedCount: 0 };
         }
 
         const posts = searchResult.tweets;
+        await updateRunStats(supabase, run?.id, { total_scanned: posts.length });
         const { data: existing } = await supabase.from("opportunities").select("tweet_url").eq("user_id", targetUserId);
         const existingUrls = new Set(existing?.map(e => e.tweet_url) || []);
         const newPosts = posts.filter(p => !existingUrls.has(p.post_url));
 
         if (newPosts.length === 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0, relevant_count: 0, high_intent_count: 0 });
             return { success: true, addedCount: 0 };
         }
 
-        const { scoredMap, verifiedMap, relevant } = await scoreAndVerifyCandidates(product, newPosts);
+        const { scoredMap, verifiedMap, relevant, highIntent } = await scoreAndVerifyCandidates(product, newPosts);
+        await updateRunStats(supabase, run?.id, { relevant_count: relevant.length, high_intent_count: highIntent.length });
         if (relevant.length === 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0 });
             return { success: true, addedCount: 0 };
         }
 
@@ -392,7 +419,7 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
         const remainingSignals = Math.max(plan.signalLimit - usage.signals, 0);
 
         if (remainingSignals <= 0) {
-            if (currentRunId) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0, completed_at: new Date().toISOString() }).eq("id", currentRunId);
+            await updateRunStats(supabase, currentRunId, { status: 'completed', leads_found: 0, completed_at: new Date().toISOString() });
             const limit = buildLimitPayload("signals", tier, usage.signals, plan.signalLimit);
             return { error: limit.message, code: limit.code, limit };
         }
@@ -425,14 +452,12 @@ export async function discoverRedditAction(scanWindow?: string, userIdOverride?:
 
         const { error: insertError } = await supabase.from("opportunities").insert(insertions);
         
-        if (currentRunId) {
-            await supabase.from("discovery_runs").update({
-                status: insertError ? 'failed' : 'completed',
-                leads_found: insertions.length,
-                total_scanned: posts.length, // Added this field like X
-                completed_at: new Date().toISOString()
-            }).eq("id", currentRunId);
-        }
+        await updateRunStats(supabase, currentRunId, {
+            status: insertError ? 'failed' : 'completed',
+            leads_found: insertions.length,
+            total_scanned: posts.length,
+            completed_at: new Date().toISOString()
+        });
 
         revalidatePath("/founder/opportunities");
         return {
@@ -482,23 +507,25 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
         const searchResult = await searchLinkedInOpportunities(keywords, painPhrases, window.days, product);
 
         if (searchResult.error || !searchResult.tweets?.length) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0, total_scanned: 0, relevant_count: 0, high_intent_count: 0 });
             return { success: true, addedCount: 0 };
         }
 
         const posts = searchResult.tweets;
+        await updateRunStats(supabase, run?.id, { total_scanned: posts.length });
         const { data: existing } = await supabase.from("opportunities").select("tweet_url").eq("user_id", targetUserId);
         const existingUrls = new Set(existing?.map(e => e.tweet_url) || []);
         const newPosts = posts.filter(p => !existingUrls.has(p.post_url));
 
         if (newPosts.length === 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0, relevant_count: 0, high_intent_count: 0 });
             return { success: true, addedCount: 0 };
         }
 
-        const { scoredMap, verifiedMap, relevant } = await scoreAndVerifyCandidates(product, newPosts);
+        const { scoredMap, verifiedMap, relevant, highIntent } = await scoreAndVerifyCandidates(product, newPosts);
+        await updateRunStats(supabase, run?.id, { relevant_count: relevant.length, high_intent_count: highIntent.length });
         if (relevant.length === 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0 }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0 });
             return { success: true, addedCount: 0 };
         }
 
@@ -520,7 +547,7 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
         const remainingSignals = Math.max(plan.signalLimit - usage.signals, 0);
 
         if (remainingSignals <= 0) {
-            if (run) await supabase.from("discovery_runs").update({ status: 'completed', leads_found: 0, completed_at: new Date().toISOString() }).eq("id", run.id);
+            await updateRunStats(supabase, run?.id, { status: 'completed', leads_found: 0, completed_at: new Date().toISOString() });
             const limit = buildLimitPayload("signals", tier, usage.signals, plan.signalLimit);
             return { error: limit.message, code: limit.code, limit };
         }
@@ -546,13 +573,11 @@ export async function discoverLinkedInAction(scanWindow?: string, userIdOverride
         });
 
         const { error: insertError } = await supabase.from("opportunities").insert(insertions);
-        if (run) {
-            await supabase.from("discovery_runs").update({
-                status: insertError ? 'failed' : 'completed',
-                leads_found: insertions.length,
-                completed_at: new Date().toISOString()
-            }).eq("id", run.id);
-        }
+        await updateRunStats(supabase, run?.id, {
+            status: insertError ? 'failed' : 'completed',
+            leads_found: insertions.length,
+            completed_at: new Date().toISOString()
+        });
 
         revalidatePath("/founder/opportunities");
         return {

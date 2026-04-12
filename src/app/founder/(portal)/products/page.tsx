@@ -570,7 +570,7 @@ function ProductsPageContent() {
         updateField(field, formData[field].filter(t => t !== value));
     };
     const addStrategicTag = (
-        field: 'competitors' | 'alternatives' | 'proof_results' | 'prioritize_communities' | 'avoid_communities',
+        field: 'competitors' | 'alternatives' | 'proof_results' | 'prioritize_communities' | 'avoid_communities' | 'writing_samples',
         value: string,
         clear: () => void
     ) => {
@@ -581,7 +581,7 @@ function ProductsPageContent() {
         }
     };
     const removeStrategicTag = (
-        field: 'competitors' | 'alternatives' | 'proof_results' | 'prioritize_communities' | 'avoid_communities',
+        field: 'competitors' | 'alternatives' | 'proof_results' | 'prioritize_communities' | 'avoid_communities' | 'writing_samples',
         value: string
     ) => {
         updateField(field, formData[field].filter(t => t !== value));

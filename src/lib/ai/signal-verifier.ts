@@ -4,6 +4,7 @@ import {
     fallbackVerifiedSignal,
     type LeadSignalBreakdown
 } from "@/lib/lead/blended-scorer";
+import { inferSearchIntentProfile } from "@/lib/discovery/search-intent";
 
 export interface VerifiedSignal {
     id: string;
@@ -33,6 +34,7 @@ export async function verifySignalsWithAI(
 ) {
     const apiKey = process.env.XAI_API_KEY;
     const precomputedMap = new Map(precomputedSignals.map(signal => [signal.id, signal]));
+    const intentProfile = inferSearchIntentProfile(product as any, [], []);
 
     if (!apiKey || tweets.length === 0) {
         return tweets.map(tweet => fallbackVerifiedSignal(tweet.id, precomputedMap.get(tweet.id)));
@@ -40,7 +42,7 @@ export async function verifySignalsWithAI(
 
     const prompt = `
     You are a forensic demand signal auditor for "${product.name}". 
-    Your job is to identify only the absolute HIGHEST intent leads from social media noise.
+    Your job is to identify real leads from social media noise, including people clearly describing the product's pain family even if they are not explicitly asking for a tool yet.
 
     PRODUCT CONTEXT:
     - Name: ${product.name}
@@ -52,11 +54,13 @@ export async function verifySignalsWithAI(
     - Strongest objection: ${product.strongest_objection || "None specified"}
     - Prioritized communities: ${product.prioritize_communities?.length ? product.prioritize_communities.join(", ") : "None specified"}
     - Avoid communities: ${product.avoid_communities?.length ? product.avoid_communities.join(", ") : "None specified"}
+    - Pain family: ${intentProfile.familyLabel}
+    - Strong user cues: ${intentProfile.platformCues.join(", ") || "None specified"}
 
     STRICT FILTERING CRITERIA (0-100 Score):
     - 0-30: NOISE. General chatter, memes, news shares, self-promotion, or broad topics with no specific pain.
-    - 31-64: WEAK SIGNAL. Adjacent interest but no clear urgency or problem match.
-    - 65-84: VALID LEAD. Clear problem match or specific question about the niche.
+    - 31-57: WEAK SIGNAL. Adjacent interest but no clear urgency or problem match.
+    - 58-84: VALID LEAD. Clear problem match, traction pain, or specific question about the niche.
     - 85-100: HIGH INTENT. Explicitly asking for a tool, complaining about a competitor, or switching behavior.
 
     DETECTION CATEGORIES:
@@ -73,6 +77,7 @@ export async function verifySignalsWithAI(
     5. If it mentions current alternatives (${product.alternatives?.join(", ")}), treat that as stronger intent when paired with friction, dissatisfaction, or switching language.
     6. If the post reflects the strongest objection, include that in the reason because it helps the founder tailor the reply.
     7. Community preferences are ranking hints, not hard filters. Favor prioritized communities and be more skeptical in avoid communities.
+    8. Treat strong user-language cues from the pain family as meaningful lead signals when they match the product pain, even if the user never names a tool.
 
     RETURN FORMAT:
     {
@@ -137,8 +142,7 @@ Semantic Match: ${pre ? Math.round(pre.semanticPainScore * 100) : "n/a"}%`;
             const score = combineVerifierScore(Number(value.score) || 0, precomputed);
             const matchScore = combineMatchScore(Number(value.match_score) || 0, precomputed);
             
-            // INCREASED THRESHOLD: 65 is the new bar for "Relevance"
-            const isRelevant = score >= 65;
+            const isRelevant = score >= 58;
 
             return {
                 id: value.id,
@@ -147,7 +151,7 @@ Semantic Match: ${pre ? Math.round(pre.semanticPainScore * 100) : "n/a"}%`;
                 isRelevant,
                 reason: [value.reason, ...(precomputed?.reasons || [])].filter(Boolean).join(" | "),
                 category: (value.category || precomputed?.suggestedCategory || "Generic") as VerifiedSignal["category"],
-                intent: (score >= 82 ? "high" : score >= 65 ? "medium" : "low") as VerifiedSignal["intent"],
+                intent: (score >= 82 ? "high" : score >= 58 ? "medium" : "low") as VerifiedSignal["intent"],
                 competitor_name: value.competitor_name || precomputed?.matchedCompetitor || undefined
             };
         }) as VerifiedSignal[];

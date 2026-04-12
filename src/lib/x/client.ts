@@ -1,5 +1,6 @@
 "use server";
 import { semanticReRank } from "../semantic/re-ranker";
+import { inferSearchIntentProfile } from "../discovery/search-intent";
 
 export interface XTweet {
     id: string;
@@ -42,7 +43,10 @@ export async function searchXOpportunities(
         return { error: "xAI API configuration missing. Please add XAI_API_KEY to .env.local." };
     }
 
-    const allTerms = [...keywords, ...phrases].filter(Boolean);
+    const intentProfile = product
+        ? inferSearchIntentProfile(product, keywords, phrases)
+        : { familyLabel: "general customer pain", searchTerms: [...keywords, ...phrases].filter(Boolean), platformCues: phrases.filter(Boolean) };
+    const allTerms = intentProfile.searchTerms;
     if (allTerms.length === 0) return { error: "No search terms provided" };
 
     // Date range
@@ -111,11 +115,17 @@ IMPORTANT RULES:
 
                 input: `${productBrief}
 
+Pain family to prioritize: ${intentProfile.familyLabel}
+Strong cues from real users:
+${intentProfile.platformCues.map(term => `- ${term}`).join("\n")}
+
 Search X for posts from ${fromDate} to ${toDate} where REAL people are:
 1. Complaining about "${product?.pain_solved || allTerms[0]}"
 2. Asking "is there any app" or "recommend an app" for this problem
 3. Frustrated with managing things manually
 4. Looking for a tool/app that does what this product does
+5. Describing pain that matches the product's family: ${intentProfile.familyLabel}
+6. Using casual phrases similar to the strong cues listed above
 
 Search for these terms and natural variations:
 ${allTerms.map(t => `- "${t}"`).join("\n")}
@@ -128,6 +138,10 @@ Also search for casual expressions like:
 - "how do I track"
 - "looking for an app"
 - "recommend me"
+- "this is a mess"
+- "any better way"
+- "how are people handling this"
+- "need a better workflow"
 
 RETURN FORMAT (raw JSON only, no markdown):
 {
@@ -198,7 +212,7 @@ If no relevant posts found, return: { "tweets": [] }`,
         const rankingRequest = {
             targetConcept: targetConcept,
             items: parsedResult.tweets.map(t => ({ id: t.id, text: t.text, raw: t })),
-            threshold: 0.35 // Slightly lower threshold for Twitter given its casual nature
+            threshold: 0.22 // Lower threshold so early-stage founder pain is not filtered out
         };
 
         const rankingResult = await semanticReRank<any>(rankingRequest);
@@ -207,10 +221,17 @@ If no relevant posts found, return: { "tweets": [] }`,
         console.log("-----------------------------------------");
 
         // Map back to original XTweet format, injecting the similarity score
-        const finalTweets = rankingResult.items.map(item => ({
+        const rankedTweets = rankingResult.items.map(item => ({
             ...item.raw,
             similarity_score: item.similarityScore
         }));
+
+        const finalTweets = rankedTweets.length > 0
+            ? rankedTweets
+            : parsedResult.tweets.map(tweet => ({
+                ...tweet,
+                similarity_score: typeof (tweet as any).similarity_score === "number" ? (tweet as any).similarity_score : 0.5
+            }));
 
         return { tweets: finalTweets as XTweet[], error: undefined };
 
@@ -231,6 +252,8 @@ If no relevant posts found, return: { "tweets": [] }`,
  * }
  */
 function extractResponseText(data: any): string | null {
+    if (typeof data === "string") return data;
+
     // Primary: Responses API format
     if (data.output && Array.isArray(data.output)) {
         const texts: string[] = [];
@@ -247,6 +270,9 @@ function extractResponseText(data: any): string | null {
             // Some responses have text directly on the item
             if (item.text) {
                 texts.push(String(item.text));
+            }
+            if (item.output_text) {
+                texts.push(String(item.output_text));
             }
         }
         if (texts.length > 0) return texts.join("\n");
@@ -286,11 +312,16 @@ function parseTweetResponse(content: any): { tweets?: XTweet[], error?: string }
             const jsonMatch = cleaned.match(/\{[\s\S]*"tweets"[\s\S]*\}/);
             if (jsonMatch) {
                 cleaned = jsonMatch[0];
+            } else {
+                const jsonPostsMatch = cleaned.match(/\{[\s\S]*"posts"[\s\S]*\}/);
+                if (jsonPostsMatch) {
+                    cleaned = jsonPostsMatch[0];
+                }
             }
         }
 
         const parsed = JSON.parse(cleaned);
-        const rawTweets = parsed.tweets || parsed.data || parsed.results || [];
+        const rawTweets = parsed.tweets || parsed.posts || parsed.data || parsed.results || (Array.isArray(parsed) ? parsed : []);
 
         const tweets: XTweet[] = rawTweets.map((t: any, idx: number) => ({
             id: t.id || t.url || t.tweet_id || `grok-${Date.now()}-${idx}`,

@@ -9,6 +9,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/components/providers/UserProvider";
 import { AnalyticsCharts } from "@/components/dashboard/AnalyticsCharts";
+import { AttributionInsights } from "@/components/dashboard/AttributionInsights";
 
 export default function DashboardPage() {
     const { user, product, loading: userLoading } = useUser();
@@ -282,8 +283,13 @@ export default function DashboardPage() {
                                 <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Real-time Stream</span>
                             </div>
                         </div>
-                        <div className="glass-panel p-2">
-                            <AnalyticsCharts data={analytics} />
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-2 p-2">
+                                <AnalyticsCharts data={analytics} />
+                            </div>
+                            <div className="p-2">
+                                <AttributionInsights data={[]} />
+                            </div>
                         </div>
                     </motion.div>
 

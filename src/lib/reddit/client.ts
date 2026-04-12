@@ -1,4 +1,5 @@
 import { semanticReRank } from "../semantic/re-ranker";
+import { inferSearchIntentProfile } from "../discovery/search-intent";
 
 export interface RedditPost {
     id: string;
@@ -36,7 +37,10 @@ export async function searchRedditOpportunities(
         return { error: "xAI API configuration missing. Please add XAI_API_KEY to .env.local." };
     }
 
-    const allTerms = [...keywords, ...phrases].filter(Boolean);
+    const intentProfile = product
+        ? inferSearchIntentProfile(product, keywords, phrases)
+        : { familyLabel: "general customer pain", searchTerms: [...keywords, ...phrases].filter(Boolean), platformCues: phrases.filter(Boolean) };
+    const allTerms = intentProfile.searchTerms;
     if (allTerms.length === 0) return { error: "No search terms provided" };
 
     // Build product brief for Grok
@@ -131,8 +135,11 @@ Search Reddit (site:reddit.com) for posts and comments where REAL people are:
 2. Asking "is there any tool/app for..." related to this exact problem
 3. Frustrated and actively looking for solutions in this space
 4. Discussing alternatives or recommending tools that compete with "${product?.name || 'this product'}"
+5. Describing pain in the family "${intentProfile.familyLabel}"
 
 Target audience to look for: ${product?.target_audience || 'general users'}
+Strong cues from real users:
+${intentProfile.platformCues.map(term => `- ${term}`).join("\n")}
 
 Search for these terms on Reddit:
 ${allTerms.map(t => `- site:reddit.com "${t}"`).join("\n")}
@@ -145,6 +152,10 @@ Also try these high-intent searches:
 - site:reddit.com "is there an app" ${allTerms[0]}
 - site:reddit.com "need help with" ${allTerms[0]}
 - site:reddit.com "best tool for" ${allTerms[0]}
+- site:reddit.com "this is a mess" ${allTerms[0]}
+- site:reddit.com "manual" ${allTerms[0]}
+- site:reddit.com "better way" ${allTerms[0]}
+- site:reddit.com "how are you handling" ${allTerms[0]}
 
  Find diverse results from different subreddits. Prioritize posts from the last ${maxDays} days. Include both posts and comments.`
             }),
@@ -188,17 +199,24 @@ Also try these high-intent searches:
         const rankingRequest = {
             targetConcept: targetConcept,
             items: posts.map(p => ({ id: p.id, text: p.text, raw: p })),
-            threshold: 0.40 // slightly higher threshold for Reddit since posts are longer
+            threshold: 0.28 // Lower threshold so founder pain and messy wording still survive
         };
 
         const rankingResult = await semanticReRank<any>(rankingRequest);
         console.log(`📉 Filtered out ${rankingResult.originalCount - rankingResult.filteredCount} low-signal Reddit posts.`);
         console.log("-----------------------------------------");
 
-        const finalPosts = rankingResult.items.map(item => ({
+        const rankedPosts = rankingResult.items.map(item => ({
             ...item.raw,
             similarity_score: item.similarityScore
         }));
+
+        const finalPosts = rankedPosts.length > 0
+            ? rankedPosts
+            : posts.map(post => ({
+                ...post,
+                similarity_score: typeof (post as any).similarity_score === "number" ? (post as any).similarity_score : 0.5
+            }));
 
         return { tweets: finalPosts as RedditPost[], error: undefined };
 
@@ -212,23 +230,30 @@ Also try these high-intent searches:
  * Extract text content from the Grok Responses API output.
  */
 function extractResponseText(data: any): string {
+    if (typeof data === "string") return data.trim();
+
     const texts: string[] = [];
 
     if (data.output && Array.isArray(data.output)) {
         for (const item of data.output) {
-            if (item.type === "message" && item.content && Array.isArray(item.content)) {
+            if (item.content && Array.isArray(item.content)) {
                 for (const block of item.content) {
                     if ((block.type === "output_text" || block.type === "text") && block.text) {
                         texts.push(String(block.text));
                     }
                 }
             }
+            if (item.text) texts.push(String(item.text));
+            if (item.output_text) texts.push(String(item.output_text));
         }
     }
 
     // Fallback: check top-level text
     if (texts.length === 0 && data.text) {
         texts.push(String(data.text));
+    }
+    if (texts.length === 0 && data.output_text) {
+        texts.push(String(data.output_text));
     }
 
     // Fallback: choices format
@@ -264,7 +289,7 @@ function parseRedditResponse(text: string): RedditPost[] {
         cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
 
         const parsed = JSON.parse(cleaned);
-        const rawPosts = parsed.posts || parsed.results || parsed.data || [];
+        const rawPosts = parsed.posts || parsed.tweets || parsed.results || parsed.data || (Array.isArray(parsed) ? parsed : []);
 
         if (!Array.isArray(rawPosts)) {
             console.error("[Reddit Parser] posts field is not an array");

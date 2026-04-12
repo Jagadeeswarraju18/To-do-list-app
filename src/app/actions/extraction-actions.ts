@@ -141,6 +141,8 @@ export async function extractProductDetailsAction(url: string): Promise<Extracti
 
         RULES:
         1. If a field is not explicitly on the page, use your high-level intelligence to suggest sensible values, but keep confidence below 0.5.
+        1a. For keywords and pain_phrases, prefer user-language over marketing-language. Include messy, emotional phrasing if the product targets founders, marketers, sales teams, or growth problems.
+        1b. For startup or SaaS growth products, prioritize pains like "need users", "0 revenue", "no traction", "can't market", "finding customers", and "distribution".
         2. "source_quote" must be an EXACT snippet of text from the content.
         3. No conversational text. Only valid JSON.
         `;

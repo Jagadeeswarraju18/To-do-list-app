@@ -44,8 +44,35 @@ function tooManyRequestsResponse(message: string, headers: Record<string, string
 }
 
 export async function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
+    const { pathname, searchParams } = request.nextUrl;
     const host = request.headers.get("host") || "";
+
+    // --- START: LEAD ATTRIBUTION ENGINE ---
+    const utmSource = searchParams.get("utm_source");
+    let response = NextResponse.next({
+        request: {
+            headers: request.headers,
+        },
+    });
+
+    if (utmSource) {
+        const attributionData = {
+            utm_source: utmSource,
+            utm_medium: searchParams.get("utm_medium") || "",
+            utm_campaign: searchParams.get("utm_campaign") || "",
+            utm_term: searchParams.get("utm_term") || "",
+            utm_content: searchParams.get("utm_content") || "",
+            timestamp: new Date().toISOString()
+        };
+
+        response.cookies.set("mardis_attribution", JSON.stringify(attributionData), {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 30, // 30 days
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production"
+        });
+    }
+    // --- END: LEAD ATTRIBUTION ENGINE ---
 
     if (host.startsWith("www.")) {
         const redirectUrl = request.nextUrl.clone();
@@ -75,11 +102,8 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    let response = NextResponse.next({
-        request: {
-            headers: request.headers,
-        },
-    });
+    // Note: We use the existing 'response' object if it was modified by attribution or host redirect
+    // Ensure we don't overwrite it with a fresh NextResponse.next()
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -31,6 +31,9 @@ interface DiscoveryRun {
     platform: string;
     leads_found: number;
     status: string;
+    total_scanned: number;
+    relevant_count: number;
+    high_intent_count: number;
 }
 
 const SCAN_WINDOW_OPTIONS: Array<{ value: ScanWindow; label: string; hint: string }> = [
@@ -73,8 +76,17 @@ export default function OpportunitiesPage() {
 
     const supabase = createClient();
     const selectedProduct = allProducts.find(product => product.id === activeProductId);
+    const activeRun = discoveryRuns.find(run => run.id === activeRunId) || null;
     const isAllProductsView = activeProductId === null;
     const uniqueProductCount = new Set(opportunities.map(opp => opp.product_id).filter(Boolean)).size;
+    const stageCounts = activeRun
+        ? {
+            fetched: activeRun.total_scanned || 0,
+            matched: Math.max(activeRun.relevant_count || 0, activeRun.leads_found || 0),
+            strong: Math.min(Math.max(activeRun.high_intent_count || 0, 0), Math.max(activeRun.relevant_count || 0, activeRun.leads_found || 0)),
+            saved: activeRun.leads_found || 0
+        }
+        : null;
 
     useEffect(() => {
         if (user) {
@@ -411,6 +423,15 @@ export default function OpportunitiesPage() {
                         disabled={isAllProductsView}
                     />
                 </div>
+
+                {activeRun && stageCounts && (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <StageMetric label="Scanned" value={stageCounts.fetched} hint="Raw candidates returned" />
+                        <StageMetric label="Matched" value={stageCounts.matched} hint="Related to this product" />
+                        <StageMetric label="Strong" value={stageCounts.strong} hint="Clear buying or pain signals" />
+                        <StageMetric label="Saved" value={stageCounts.saved} hint="Added to pipeline" />
+                    </div>
+                )}
             </div>
 
             {/* Filter Bar */}
@@ -444,7 +465,7 @@ export default function OpportunitiesPage() {
                                 {activeRunId ? (
                                     <span className="flex items-center gap-2">
                                         <span className="text-primary w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
-                                        {new Date(discoveryRuns.find(r => r.id === activeRunId)?.started_at || "").toLocaleDateString()}
+                                        {new Date(activeRun?.started_at || "").toLocaleDateString()}
                                     </span>
                                 ) : "All Time"}
                                 <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform ${showSessionMenu ? 'rotate-180' : ''}`} />
@@ -474,14 +495,16 @@ export default function OpportunitiesPage() {
                                                             setActiveRunId(run.id);
                                                             setShowSessionMenu(false);
                                                         }}
-                                                        className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 flex items-center justify-between group ${activeRunId === run.id ? 'bg-white text-black' : 'text-gray-500 hover:text-white hover:bg-white/10'}`}
-                                                    >
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[10px]">{new Date(run.started_at).toLocaleDateString()}</span>
-                                                            <span className="text-[8px] opacity-50">{run.platform.toUpperCase()}</span>
-                                                        </div>
-                                                        <span className="text-[10px] font-black">{run.leads_found || 0}</span>
-                                                    </button>
+                                                         className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase transition-all mb-1 flex items-center justify-between group ${activeRunId === run.id ? 'bg-white text-black' : 'text-gray-500 hover:text-white hover:bg-white/10'}`}
+                                                     >
+                                                         <div className="flex flex-col">
+                                                             <span className="text-[10px]">{new Date(run.started_at).toLocaleDateString()}</span>
+                                                             <span className="text-[8px] opacity-50">
+                                                                 {run.platform.toUpperCase()} · {run.total_scanned || 0}/{Math.max(run.relevant_count || 0, run.leads_found || 0)}/{Math.min(Math.max(run.high_intent_count || 0, 0), Math.max(run.relevant_count || 0, run.leads_found || 0))}/{run.leads_found || 0}
+                                                             </span>
+                                                         </div>
+                                                         <span className="text-[10px] font-black">{run.leads_found || 0}</span>
+                                                     </button>
                                                 ))}
                                         </div>
                                     </div>
@@ -562,13 +585,18 @@ export default function OpportunitiesPage() {
                             <div className="bg-white/5 p-8 rounded-full mb-8 border border-white/5">
                                 <Target className="w-12 h-12 text-zinc-700" />
                             </div>
-                            <h3 className="text-2xl font-bold text-white/90 mb-3 tracking-tight uppercase">No Opportunities Found</h3>
-                            <p className="max-w-md text-zinc-400 text-base leading-relaxed font-normal">
-                                {isAllProductsView
-                                    ? "No opportunities found across your products yet. Select a product and run a scan to start populating this view."
-                                    : "No opportunities found for this product yet. Run a scan to find matching conversations."}
-                            </p>
-                        </motion.div>
+                             <h3 className="text-2xl font-bold text-white/90 mb-3 tracking-tight uppercase">No Opportunities Found</h3>
+                             <p className="max-w-md text-zinc-400 text-base leading-relaxed font-normal">
+                                 {isAllProductsView
+                                     ? "No opportunities found across your products yet. Select a product and run a scan to start populating this view."
+                                     : "No opportunities found for this product yet. Run a scan to find matching conversations."}
+                             </p>
+                             {activeRun && stageCounts && (
+                                 <p className="mt-4 max-w-lg text-xs text-zinc-500 uppercase tracking-wider">
+                                     Last scan: scanned {stageCounts.fetched}, matched {stageCounts.matched}, strong {stageCounts.strong}, saved {stageCounts.saved}.
+                                 </p>
+                             )}
+                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
@@ -702,5 +730,15 @@ function DiscoveryButton({ platform, icon, loading, onClick, label, sublabel, di
                 {sublabel && <div className="text-[8px] sm:text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-0.5 opacity-80 group-hover:opacity-100 transition-opacity leading-tight">{sublabel}</div>}
             </div>
         </button>
+    );
+}
+
+function StageMetric({ label, value, hint }: { label: string; value: number; hint: string }) {
+    return (
+        <div className="rounded-2xl border border-white/5 bg-black/30 px-4 py-3">
+            <div className="text-[9px] font-black uppercase tracking-widest text-zinc-500">{label}</div>
+            <div className="mt-1 text-2xl font-black text-white">{value}</div>
+            <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-zinc-600">{hint}</div>
+        </div>
     );
 }

@@ -23,6 +23,20 @@ export default function SignupPage() {
     const router = useRouter();
     const supabase = createClient();
 
+    const getAttributionData = () => {
+        try {
+            const cookies = typeof document !== 'undefined' ? document.cookie.split('; ') : [];
+            const attributionCookie = cookies.find(row => row.startsWith('mardis_attribution='));
+            if (attributionCookie) {
+                const decodedValue = decodeURIComponent(attributionCookie.split('=')[1]);
+                return JSON.parse(decodedValue);
+            }
+        } catch (e) {
+            console.error("Failed to parse attribution cookie", e);
+        }
+        return null;
+    };
+
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         
@@ -35,6 +49,7 @@ export default function SignupPage() {
         setError(null);
 
         try {
+            const attribution = getAttributionData();
             const { error, data } = await supabase.auth.signUp({
                 email,
                 password,
@@ -42,7 +57,13 @@ export default function SignupPage() {
                     data: {
                         full_name: name,
                         role: role,
-                        onboarding_complete: false
+                        onboarding_complete: false,
+                        lead_source: attribution?.utm_source || "direct",
+                        utm_source: attribution?.utm_source || "",
+                        utm_medium: attribution?.utm_medium || "",
+                        utm_campaign: attribution?.utm_campaign || "",
+                        utm_term: attribution?.utm_term || "",
+                        utm_content: attribution?.utm_content || ""
                     }
                 }
             });
@@ -69,11 +90,24 @@ export default function SignupPage() {
 
     const handleGoogleLogin = async () => {
         try {
+            const attribution = getAttributionData();
             const nextPath = role === "founder" ? "/founder/products?setup=1" : "/creator/onboarding";
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+                    redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'select_account',
+                    },
+                    data: {
+                        lead_source: attribution?.utm_source || "direct",
+                        utm_source: attribution?.utm_source || "",
+                        utm_medium: attribution?.utm_medium || "",
+                        utm_campaign: attribution?.utm_campaign || "",
+                        utm_term: attribution?.utm_term || "",
+                        utm_content: attribution?.utm_content || ""
+                    }
                 }
             });
             if (error) throw error;
