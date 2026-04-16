@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { PostHogProvider } from "@/providers/posthog-provider";
 
 const siteUrl = "https://mardishub.com";
 
@@ -41,14 +42,16 @@ export default function RootLayout({
     return (
         <html lang="en" className="dark">
             <body className="min-h-screen bg-[#050505] antialiased">
-                <div className="stealth-grid-bg">
-                    <div className="stealth-grid" />
-                </div>
+                <PostHogProvider>
+                    <div className="stealth-grid-bg">
+                        <div className="stealth-grid" />
+                    </div>
 
-                <div className="relative z-10">
-                    {children}
-                </div>
-                <Toaster position="bottom-right" theme="dark" richColors closeButton />
+                    <div className="relative z-10">
+                        {children}
+                    </div>
+                    <Toaster position="bottom-right" theme="dark" richColors closeButton />
+                </PostHogProvider>
             </body>
         </html>
     );

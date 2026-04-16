@@ -7,15 +7,15 @@ import { Plus, Minus, HelpCircle } from "lucide-react";
 const faqs = [
     {
         question: "What is Mardis?",
-        answer: "Mardis is an autonomous GTM (Go-To-Market) engine designed for elite founders. It monitors social nodes and the deep web for high-intent signals, allowing you to execute outreach with clinical precision."
+        answer: "Mardis is a demand capture tool for founders. It monitors Reddit, X, and LinkedIn for high-intent signals so you can reply to buyers instantly."
     },
     {
-        question: "How does the AI discover signals?",
-        answer: "Our engine uses contextual reasoning to scan millions of data points across social platforms, news cycles, and proprietary data streams. It filters noise to find the exact moment a prospect needs your solution."
+        question: "How does it find buyers?",
+        answer: "Our engine scans social platforms for specific keywords and intent-based conversations. It filters out the noise and ranks people who are actively looking for your solution."
     },
     {
-        question: "What is 'Founder Privilege'?",
-        answer: "Founder Privilege is a recognition of early adopters. It provides exclusive access to alpha features, priority support, and locked-in pricing as we scale the platform's capabilities."
+        question: "What is the Founder Offer?",
+        answer: "The Founder Offer gives early adopters exclusive access to alpha features and locked-in $15/mo lifetime pricing."
     }
 ];
 

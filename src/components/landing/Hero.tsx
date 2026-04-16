@@ -89,11 +89,13 @@ export function Hero() {
         <section className="relative flex flex-col items-center overflow-hidden px-6 pb-12 pt-[120px]" onMouseMove={handleMouseMove}>
             <div className="relative z-20 mx-auto flex w-full max-w-[1400px] flex-col items-center text-center">
                 <div className="relative mb-4">
-                    <h1 className="heading-serif mx-auto mb-3 max-w-5xl text-center text-4xl leading-[1.05] tracking-tighter text-white italic md:text-[72px]">
-                        Find buyers already asking for your product.
+                    <h1 className="heading-serif mx-auto mb-6 max-w-5xl text-center text-4xl leading-[1.05] tracking-tighter text-white italic md:text-[84px]">
+                        Your customers are already asking.
+                        <br className="hidden md:block" />
+                        You're just not seeing it.
                     </h1>
-                    <p className="mx-auto mb-6 max-w-xl px-4 text-center text-sm font-medium leading-relaxed text-zinc-500 md:text-lg">
-                        Mardis finds people on Reddit, X, and LinkedIn who need what you sell, then tells you exactly how to reach and market to them.
+                    <p className="mx-auto mb-8 max-w-2xl px-4 text-center text-sm font-medium leading-relaxed text-zinc-500 md:text-xl">
+                        Stop wasting hours on manual prospecting. Mardis captures the exact moment high-intent buyers need your product.
                     </p>
                 </div>
 
@@ -297,7 +299,7 @@ export function Hero() {
                                             </div>
 
                                             <p className="mb-10 max-w-[230px] text-[15px] font-light italic leading-relaxed text-white opacity-70">
-                                                \"r/SaaS thread detected. Buyer is stuck doing manual prospecting. Lead with a concrete expert reply, not a pitch.\"
+                                                "r/SaaS thread detected. High-intent buyer looking for GTM tools. Expert reply drafted."
                                             </p>
 
                                             <div className="grid w-full grid-cols-2 gap-4">

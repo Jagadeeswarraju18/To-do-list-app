@@ -93,10 +93,10 @@ export function MarketTension() {
                         {/* Body copy */}
                         <div className="border-t border-white/5 pt-6">
                             <p className="text-base text-zinc-100 leading-relaxed">
-                                You scroll Reddit, X, and LinkedIn for hours looking for potential customers.
+                                Your customers <span className="italic opacity-50">are</span> already asking.
                             </p>
                             <p className="text-base italic text-zinc-400 mt-2">
-                                By the time you find one, it's already too late.
+                                You're just not seeing them in the noise of manual prospecting.
                             </p>
                         </div>
                     </motion.div>
@@ -116,17 +116,17 @@ export function MarketTension() {
                                 <span className="text-[9px] font-black uppercase tracking-[0.35em] text-white/50">With Mardis</span>
                             </div>
                             <div className="text-right">
-                                <p className="text-3xl font-black text-white/20 tabular-nums leading-none">20S</p>
-                                <p className="text-[8px] uppercase tracking-widest text-zinc-600 mt-0.5">to next lead</p>
+                                <p className="text-3xl font-black text-white/20 tabular-nums leading-none">0H</p>
+                                <p className="text-[8px] uppercase tracking-widest text-zinc-600 mt-0.5">wasted hours</p>
                             </div>
                         </div>
 
                         {/* Headline */}
                         <h3 className="heading-serif text-2xl text-white mb-2 leading-none">
-                            Mardis finds.
+                            Stop wasting hours.
                         </h3>
                         <h3 className="heading-serif text-2xl italic text-white/40 mb-8 leading-none">
-                            You close.
+                            Find buyers already looking.
                         </h3>
 
                         {/* Lead Card */}
@@ -175,10 +175,10 @@ export function MarketTension() {
                         {/* Body copy */}
                         <div className="border-t border-white/5 pt-6">
                             <p className="text-base text-zinc-300 leading-relaxed">
-                                Mardis scans Reddit, X, and LinkedIn and surfaces people actively looking for what you sell.
+                                Mardis captures live buyer intent across social nodes automatically.
                             </p>
                             <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mt-3">
-                                No manual work. Ever.
+                                No manual prospecting. Ever.
                             </p>
                         </div>
                     </motion.div>

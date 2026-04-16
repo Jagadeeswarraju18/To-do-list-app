@@ -10,6 +10,7 @@ import { LiveDemo } from "@/components/landing/LiveDemo";
 import { Footer } from "@/components/landing/Footer";
 import { FAQ } from "@/components/landing/FAQ";
 import { ValueCalculator } from "@/components/landing/ValueCalculator";
+import { Testimonials } from "@/components/landing/Testimonials";
 
 const siteUrl = "https://mardishub.com";
 
@@ -114,6 +115,7 @@ export default function LandingPage() {
                 <HowItWorks />
                 <Features />
                 <ValueCalculator />
+                <Testimonials />
                 <LiveDemo />
                 <Pricing />
                 <FAQ />

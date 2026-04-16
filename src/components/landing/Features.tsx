@@ -7,27 +7,27 @@ const features = [
     {
         number: "01",
         title: "Find Warm Leads",
-        desc: "We scan Reddit, X, and LinkedIn for people who need exactly what you sell right now.",
+        desc: "We scan Reddit, X, and LinkedIn for buyers who need your product right now.",
     },
     {
         number: "02",
-        title: "No Spam. No Bots.",
-        desc: "Every reply we draft sounds human and fits the conversation naturally.",
+        title: "Human Replies Only",
+        desc: "Every reply we draft is context-aware and sounds human—never like a bot.",
     },
     {
         number: "03",
-        title: "Works While You Sleep",
-        desc: "Mardis runs 24/7. New leads land in your inbox. You just show up and reply.",
+        title: "24/7 Monitoring",
+        desc: "Mardis monitors social feeds while you sleep. You just show up and close.",
     },
     {
         number: "04",
         title: "Instant Alerts",
-        desc: "The moment a new lead appears, you know. First to reply usually wins the deal.",
+        desc: "Get notified the second a lead appears. First to reply usually wins the deal.",
     },
     {
         number: "05",
-        title: "Safe for Every Platform",
-        desc: "We follow community rules on every platform. No bans, no shadowbans, ever.",
+        title: "Platform Safe",
+        desc: "We follow community rules on every platform—no bans, no shadowbans.",
     },
 ];
 
